@@ -67,7 +67,18 @@ export default function () {
             makeDefault={true}
           />
           <OrbitControls enableDamping={true} makeDefault={true} />
-          <Cubo color={material} />
+          <mesh>
+            <planeBufferGeometry args={[1, 1]} />
+            <meshBasicMaterial />
+          </mesh>
+          <mesh position-x={-1.5}>
+            <sphereBufferGeometry args={[0.5, 16, 16]} />
+            <meshBasicMaterial />
+          </mesh>
+          <mesh position-x={1.5}>
+            <torusBufferGeometry args={[0.3, 0.2, 16, 32]} />
+            <meshBasicMaterial />
+          </mesh>
           <axesHelper args={[4]} />
           {/* <Leva /> */}
         </Canvas>
