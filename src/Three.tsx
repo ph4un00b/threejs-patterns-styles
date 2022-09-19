@@ -1,4 +1,3 @@
-/** @jsxFrag React.Fragment */
 import * as T from 'three';
 import * as React from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
@@ -8,6 +7,7 @@ import {
   OrthographicCamera,
 } from '@react-three/drei/core';
 import { proxy, useSnapshot } from 'valtio';
+import { useControls } from 'leva';
 // import { useControls } from 'leva';
 
 var PointersProxy = proxy({
@@ -32,9 +32,22 @@ function useCanvas() {
 
 var dpr = { min: 1, max: 2 };
 
+var params = {
+  bg: '#00102a',
+  mat: '#e83abf',
+};
+
 export default function () {
   const { cw, ch } = useCanvas();
   const cam_ = React.useRef(null);
+  const { fondo, material } = useControls({
+    fondo: {
+      value: params.bg,
+    },
+    material: {
+      value: params.mat,
+    },
+  });
   return (
     <>
       <section>
@@ -43,7 +56,7 @@ export default function () {
           style={{
             width: cw + 'px',
             height: ch + 'px',
-            backgroundColor: 'royalblue',
+            backgroundColor: fondo,
           }}
         >
           <PerspectiveCamera
@@ -56,7 +69,7 @@ export default function () {
           />
           <OrbitControls enableDamping={true} makeDefault={true} />
           <group>
-            <Cubo />
+            <Cubo color={material} />
           </group>
           <axesHelper args={[4]} />
           {/* <Leva /> */}
@@ -66,11 +79,7 @@ export default function () {
   );
 }
 
-var params = {
-  color: '#c1467d',
-};
-
-function Cubo() {
+function Cubo({ color }) {
   // const { position, wireframe, boxColor } = useControls({
   //   boxColor: params.color,
   //   wireframe: false,
@@ -81,7 +90,7 @@ function Cubo() {
   return (
     <mesh position-x={0} position-y={0} position-z={0} ref={mesh_}>
       <boxBufferGeometry args={[1, 1, 1]} />
-      <meshBasicMaterial wireframe={false} color={params.color} />
+      <meshBasicMaterial wireframe={false} color={color} />
     </mesh>
   );
 }
