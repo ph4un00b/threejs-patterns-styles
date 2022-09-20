@@ -288,6 +288,7 @@ function MyMaterials() {
       <mesh ref={plane} position-y={5}>
         <planeBufferGeometry args={[1, 1]} />
         <meshStandardMaterial
+          map={t1}
           metalness={metalness}
           roughness={roughness}
           side={T.DoubleSide}
