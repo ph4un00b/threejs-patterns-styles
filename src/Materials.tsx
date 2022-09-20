@@ -1,6 +1,6 @@
 import * as T from 'three';
 import * as React from 'react';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { Canvas, useFrame, useLoader, useThree } from '@react-three/fiber';
 import {
   OrbitControls,
   PerspectiveCamera,
@@ -36,6 +36,7 @@ var params = {
   mat: '#e83abf',
 };
 
+var globalMaterial = new T.MeshBasicMaterial();
 export default function () {
   const { cw, ch } = useCanvas();
   const cam_ = React.useRef(null);
@@ -67,22 +68,53 @@ export default function () {
             makeDefault={true}
           />
           <OrbitControls enableDamping={true} makeDefault={true} />
-          <mesh>
-            <planeBufferGeometry args={[1, 1]} />
-            <meshBasicMaterial />
-          </mesh>
-          <mesh position-x={-1.5}>
-            <sphereBufferGeometry args={[0.5, 16, 16]} />
-            <meshBasicMaterial />
-          </mesh>
-          <mesh position-x={1.5}>
-            <torusBufferGeometry args={[0.3, 0.2, 16, 32]} />
-            <meshBasicMaterial />
-          </mesh>
+          <React.Suspense fallback={<p>cargando...</p>}>
+            <MyMaterials />
+          </React.Suspense>
           <axesHelper args={[4]} />
-          {/* <Leva /> */}
         </Canvas>
       </section>
+    </>
+  );
+}
+
+var baseUrl = 'https://ph4un00b.github.io/data';
+function MyMaterials() {
+  const [plane, sphere, torus] = [
+    React.useRef<T.Mesh>(null!),
+    React.useRef<T.Mesh>(null!),
+    React.useRef<T.Mesh>(null!),
+  ];
+
+  const [color] = useLoader(T.TextureLoader, [
+    `${baseUrl}/gradients/3.jpg`,
+    `${baseUrl}/matcaps/3.png`,
+  ]);
+
+  useFrame(({ clock }) => {
+    const elap = clock.getElapsedTime();
+    plane.current.rotation.y = 0.1 * elap;
+    sphere.current.rotation.y = 0.1 * elap;
+    torus.current.rotation.y = 0.1 * elap;
+
+    plane.current.rotation.y = 0.15 * elap;
+    sphere.current.rotation.y = 0.15 * elap;
+    torus.current.rotation.y = 0.15 * elap;
+  });
+  return (
+    <>
+      <mesh ref={plane} material={globalMaterial}>
+        <planeBufferGeometry args={[1, 1]} />
+      </mesh>
+
+      <mesh ref={sphere} position-x={-1.5}>
+        <sphereBufferGeometry args={[0.5, 16, 16]} />
+        <meshBasicMaterial />
+      </mesh>
+
+      <mesh ref={torus} material={globalMaterial} position-x={1.5}>
+        <torusBufferGeometry args={[0.3, 0.2, 16, 32]} />
+      </mesh>
     </>
   );
 }
