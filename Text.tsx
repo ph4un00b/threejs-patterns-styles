@@ -63,7 +63,7 @@ export default function () {
         >
           <PerspectiveCamera
             ref={cam_}
-            position={[0, 0, 3]}
+            position={[0, 0, 10]}
             fov={75}
             // auto updates the viewport
             manual={false}
@@ -73,11 +73,10 @@ export default function () {
 
           {/* <React.Suspense> */}
           {/* <Cubo color={material} /> */}
-
-          <Text3D font={`${baseUrl}/typeface/press-start-2p.json`}>
-            Hello world!
-            <meshNormalMaterial />
-          </Text3D>
+          <MyText />
+          <group position={[0, -1, 0]}>
+            <MyTextCentered>centered?</MyTextCentered>
+          </group>
           {/* </React.Suspense> */}
           <axesHelper args={[4]} />
           <ambientLight args={[0xffffff, 0.5]} />
@@ -88,6 +87,94 @@ export default function () {
   );
 }
 
+function MyTextCentered({ children }) {
+  console.log('r txt');
+  const bevelThickness = 0.03;
+  const bevelSize = 0.02;
+  const text = React.useRef<T.Mesh>(null!);
+
+  React.useLayoutEffect(() => {
+    const geo = text.current.geometry as T.BufferGeometry;
+    geo.center();
+  });
+
+  return (
+    <Text3D
+      ref={text}
+      size={0.5}
+      height={0.2}
+      bevelThickness={bevelThickness}
+      bevelSize={bevelSize}
+      bevelEnabled={true}
+      bevelOffset={0}
+      // todo: controls do not seem to work!
+      bevelSegments={3}
+      curveSegments={4}
+      font={`${baseUrl}/typeface/press-start-2p.json`}
+    >
+      {children}
+      <meshNormalMaterial wireframe={false} />
+    </Text3D>
+  );
+}
+
+function MyText() {
+  console.log('r txt');
+  const bevelThickness = 0.03;
+  const bevelSize = 0.02;
+  const { curveSegments, wireframe, bevelSegments } = useControls({
+    curveSegments: {
+      value: 8,
+      step: 1,
+    },
+    bevelSegments: {
+      value: 3,
+      step: 1,
+    },
+    wireframe: {
+      value: true,
+    },
+  });
+
+  const text = React.useRef<T.Mesh>(null!);
+
+  React.useLayoutEffect(() => {
+    const geo = text.current.geometry as T.BufferGeometry;
+    /** imperative way
+     * still needs a refresh
+     */
+    geo.bevelSegments = bevelSegments;
+
+    geo.computeBoundingBox();
+    console.log(text.current.geometry.boundingBox);
+
+    /** bevelThickness & bevelSize affects the center */
+    geo.translate(
+      -(geo.boundingBox.max.x - bevelSize) * 0.5,
+      -(geo.boundingBox.max.y - bevelSize) * 0.5,
+      -(geo.boundingBox.max.z - bevelThickness) * 0.5
+    );
+  });
+
+  return (
+    <Text3D
+      ref={text}
+      size={0.5}
+      height={0.2}
+      bevelThickness={bevelThickness}
+      bevelSize={bevelSize}
+      bevelEnabled={true}
+      bevelOffset={0}
+      // todo: controls do not seem to work!
+      bevelSegments={bevelSegments}
+      curveSegments={curveSegments}
+      font={`${baseUrl}/typeface/press-start-2p.json`}
+    >
+      Hello Funker!!
+      <meshNormalMaterial wireframe={wireframe} />
+    </Text3D>
+  );
+}
 function Cubo({ color }: { color: string }) {
   const { position, wireframe } = useControls({
     wireframe: false,
