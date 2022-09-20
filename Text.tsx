@@ -91,7 +91,9 @@ export default function () {
               </Text3D>
             </Center>
           </group>
+
           <MyText />
+
           <group position={[0, -1, 0]}>
             <MyTextCentered>centered?</MyTextCentered>
           </group>
