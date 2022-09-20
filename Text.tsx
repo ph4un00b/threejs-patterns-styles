@@ -5,6 +5,7 @@ import {
   OrbitControls,
   PerspectiveCamera,
   OrthographicCamera,
+  Text3D,
 } from '@react-three/drei/core';
 import { proxy, useSnapshot } from 'valtio';
 import { useControls } from 'leva';
@@ -35,6 +36,8 @@ var params = {
   bg: '#00102a',
   mat: '#e83abf',
 };
+
+var baseUrl = 'https://ph4un00b.github.io/data';
 
 export default function () {
   const { cw, ch } = useCanvas();
@@ -69,9 +72,13 @@ export default function () {
           <OrbitControls enableDamping={true} makeDefault={true} />
 
           {/* <React.Suspense> */}
-          <Cubo color={material} />
-          {/* </React.Suspense> */}
+          {/* <Cubo color={material} /> */}
 
+          <Text3D font={`${baseUrl}/typeface/press-start-2p.json`}>
+            Hello world!
+            <meshNormalMaterial />
+          </Text3D>
+          {/* </React.Suspense> */}
           <axesHelper args={[4]} />
           <ambientLight args={[0xffffff, 0.5]} />
           <pointLight args={[0xffffff, 0.5]} />
