@@ -48,6 +48,11 @@ export default function () {
       value: params.mat,
     },
   });
+
+  const { position, wireframe } = useControls({
+    wireframe: false,
+    position: { min: -3, max: 3, value: { x: 0, y: -4, z: -2 }, step: 0.1 },
+  });
   return (
     <>
       <section>
@@ -68,10 +73,18 @@ export default function () {
             makeDefault={true}
           />
           <OrbitControls enableDamping={true} makeDefault={true} />
-          <React.Suspense fallback={<p>cargando...</p>}>
+          {/* <React.Suspense fallback={<p>cargando...</p>}> */}
+          <group
+            position-x={position.x}
+            position-y={position.y}
+            position-z={position.z}
+          >
             <MyMaterials />
-          </React.Suspense>
-          <axesHelper args={[4]} />
+          </group>
+          {/* </React.Suspense> */}
+          <axesHelper args={[5]} />
+          <ambientLight args={[0xffffff, 0.5]} />
+          <pointLight args={[0xffffff, 2.5]} />
         </Canvas>
       </section>
     </>
@@ -79,17 +92,37 @@ export default function () {
 }
 
 var baseUrl = 'https://ph4un00b.github.io/data';
+
+var textureAssets = [
+  `${baseUrl}/door/color.jpg`,
+  `${baseUrl}/door/alpha.jpg`,
+  `${baseUrl}/door/height.jpg`,
+  `${baseUrl}/door/normal.jpg`,
+  `${baseUrl}/door/ambientOcclusion.jpg`,
+  `${baseUrl}/door/metalness.jpg`,
+  `${baseUrl}/door/roughness.jpg`,
+];
+
 function MyMaterials() {
-  const [plane, sphere, torus] = [
+  const [plane, sphere, torus, torusPhong] = [
+    React.useRef<T.Mesh>(null!),
     React.useRef<T.Mesh>(null!),
     React.useRef<T.Mesh>(null!),
     React.useRef<T.Mesh>(null!),
   ];
 
-  const [color] = useLoader(T.TextureLoader, [
+  const [grad, cap, t1, t2] = useLoader(T.TextureLoader, [
     `${baseUrl}/gradients/3.jpg`,
     `${baseUrl}/matcaps/3.png`,
+    ...textureAssets,
   ]);
+
+  toon: {
+    /** for ToonMaterial s */
+    grad.minFilter = T.NearestFilter;
+    grad.magFilter = T.NearestFilter;
+    grad.generateMipmaps = false; /** since we manually set above */
+  }
 
   useFrame(({ clock }) => {
     const elap = clock.getElapsedTime();
@@ -101,19 +134,174 @@ function MyMaterials() {
     sphere.current.rotation.y = 0.15 * elap;
     torus.current.rotation.y = 0.15 * elap;
   });
+
+  React.useLayoutEffect(() => {
+    /** imperative */
+    globalMaterial.map = t2;
+    globalMaterial.color.set(0x00ff00);
+    globalMaterial.color = new T.Color('green');
+
+    alpha: {
+      globalMaterial.transparent = true; /** always needed! */
+      globalMaterial.opacity = 0.5;
+      globalMaterial.alphaMap = t2;
+    }
+    globalMaterial.side = T.DoubleSide; /** more compute! */
+
+    // torusPhong.current.material.specular = new T.Color(0xff0000);
+  }, []);
+
+  const { metalness, roughness } = useControls({
+    metalness: {
+      value: 0,
+      min: 0,
+      max: 1,
+      step: 0.001,
+    },
+    roughness: {
+      value: 0,
+      min: 0,
+      max: 1,
+      step: 0.001,
+    },
+  });
   return (
     <>
+      <mesh ref={sphere} position-x={-1.5}>
+        <sphereBufferGeometry args={[0.5, 16, 16]} />
+        <meshBasicMaterial transparent={true} map={t1} alphaMap={t2} />
+      </mesh>
+
       <mesh ref={plane} material={globalMaterial}>
         <planeBufferGeometry args={[1, 1]} />
       </mesh>
 
-      <mesh ref={sphere} position-x={-1.5}>
-        <sphereBufferGeometry args={[0.5, 16, 16]} />
-        <meshBasicMaterial />
-      </mesh>
-
       <mesh ref={torus} material={globalMaterial} position-x={1.5}>
         <torusBufferGeometry args={[0.3, 0.2, 16, 32]} />
+      </mesh>
+
+      <mesh ref={sphere} position-x={-1.5} position-y={1}>
+        <sphereBufferGeometry args={[0.5, 16, 16]} />
+        {/* Normal used to debug normally */}
+        <meshNormalMaterial flatShading transparent={true} />
+      </mesh>
+
+      <mesh ref={plane} position-y={1}>
+        <planeBufferGeometry args={[1, 1]} />
+        <meshNormalMaterial side={T.DoubleSide} />
+      </mesh>
+
+      <mesh ref={torus} position-x={1.5} position-y={1}>
+        <torusBufferGeometry args={[0.3, 0.2, 16, 32]} />
+        <meshNormalMaterial side={T.DoubleSide} />
+      </mesh>
+
+      <mesh ref={sphere} position-x={-1.5} position-y={-1}>
+        <sphereBufferGeometry args={[0.5, 16, 16]} />
+        {/* matcap are ilusion of light */}
+        <meshMatcapMaterial matcap={cap} />
+      </mesh>
+
+      <mesh ref={plane} position-y={-1}>
+        <planeBufferGeometry args={[1, 1]} />
+        <meshMatcapMaterial matcap={cap} side={T.DoubleSide} />
+      </mesh>
+
+      <mesh ref={torus} position-x={1.5} position-y={-1}>
+        <torusBufferGeometry args={[0.3, 0.2, 16, 32]} />
+        <meshMatcapMaterial matcap={cap} />
+      </mesh>
+
+      <mesh ref={sphere} position-x={-1.5} position-y={-2}>
+        <sphereBufferGeometry args={[0.5, 16, 16]} />
+        {/* if it is close to NEAR it lights */}
+        <meshDepthMaterial />
+      </mesh>
+
+      <mesh ref={plane} position-y={-2}>
+        <planeBufferGeometry args={[1, 1]} />
+        {/* if it is close to FAr it darks */}
+        <meshDepthMaterial side={T.DoubleSide} />
+      </mesh>
+
+      <mesh ref={torus} position-x={1.5} position-y={-2}>
+        <torusBufferGeometry args={[0.3, 0.2, 16, 32]} />
+        <meshDepthMaterial />
+      </mesh>
+
+      <mesh ref={sphere} position-x={-1.5} position-y={2}>
+        <sphereBufferGeometry args={[0.5, 16, 16]} />
+        {/* lamber reaact to light */}
+        <meshLambertMaterial />
+      </mesh>
+
+      <mesh ref={plane} position-y={2}>
+        <planeBufferGeometry args={[1, 1]} />
+        <meshLambertMaterial side={T.DoubleSide} />
+      </mesh>
+
+      <mesh ref={torus} position-x={1.5} position-y={2}>
+        <torusBufferGeometry args={[0.3, 0.2, 16, 32]} />
+        <meshLambertMaterial />
+      </mesh>
+
+      <mesh ref={sphere} position-x={-1.5} position-y={3}>
+        <sphereBufferGeometry args={[0.5, 16, 16]} />
+        {/* lamber reaact to light */}
+        <meshPhongMaterial shininess={100} />
+      </mesh>
+
+      <mesh ref={plane} position-y={3}>
+        <planeBufferGeometry args={[1, 1]} />
+        <meshPhongMaterial side={T.DoubleSide} />
+      </mesh>
+
+      <mesh ref={torusPhong} position-x={1.5} position-y={3}>
+        <torusBufferGeometry args={[0.3, 0.2, 16, 32]} />
+        {/* todo: why specular is not working? */}
+        <meshPhongMaterial shininess={100} specular={new T.Color(0xff0000)} />
+      </mesh>
+
+      <mesh ref={sphere} position-x={-1.5} position-y={4}>
+        <sphereBufferGeometry args={[0.5, 16, 16]} />
+        {/* lamber reaact to light */}
+        <meshToonMaterial gradientMap={grad} />
+      </mesh>
+
+      <mesh ref={plane} position-y={4}>
+        <planeBufferGeometry args={[1, 1]} />
+        <meshToonMaterial gradientMap={grad} side={T.DoubleSide} />
+      </mesh>
+
+      <mesh ref={torus} position-x={1.5} position-y={4}>
+        <torusBufferGeometry args={[0.3, 0.2, 16, 32]} />
+        {/* todo: why specular is not working? */}
+        <meshToonMaterial attach={'material'} gradientMap={grad} />
+      </mesh>
+
+      <mesh ref={sphere} position-x={-1.5} position-y={5}>
+        <sphereBufferGeometry args={[0.5, 16, 16]} />
+        {/* it uses PBR principles algos */}
+        <meshStandardMaterial metalness={metalness} roughness={roughness} />
+      </mesh>
+
+      <mesh ref={plane} position-y={5}>
+        <planeBufferGeometry args={[1, 1]} />
+        <meshStandardMaterial
+          metalness={metalness}
+          roughness={roughness}
+          side={T.DoubleSide}
+        />
+      </mesh>
+
+      <mesh ref={torus} position-x={1.5} position-y={5}>
+        <torusBufferGeometry args={[0.3, 0.2, 16, 32]} />
+        {/* todo: why specular is not working? */}
+        <meshStandardMaterial
+          attach={'material'}
+          metalness={metalness}
+          roughness={roughness}
+        />
       </mesh>
     </>
   );
