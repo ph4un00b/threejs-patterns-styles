@@ -5,6 +5,7 @@ import {
   OrbitControls,
   PerspectiveCamera,
   OrthographicCamera,
+  Text3D,
 } from '@react-three/drei/core';
 import { proxy, useSnapshot } from 'valtio';
 import { useControls } from 'leva';
@@ -31,12 +32,9 @@ function useCanvas() {
 
 var dpr = { min: 1, max: 2 };
 
-var baseUrl = 'https://ph4un00b.github.io/data';
-
-var global = {
+var params = {
   bg: '#00102a',
   mat: '#e83abf',
-  font1: `${baseUrl}/typeface/press-start-2p.json`,
 };
 
 export default function () {
@@ -44,10 +42,10 @@ export default function () {
   const cam_ = React.useRef(null);
   const { fondo, material } = useControls({
     fondo: {
-      value: global.bg,
+      value: params.bg,
     },
     material: {
-      value: global.mat,
+      value: params.mat,
     },
   });
   return (
@@ -72,7 +70,7 @@ export default function () {
           <OrbitControls enableDamping={true} makeDefault={true} />
 
           {/* <React.Suspense> */}
-          <Cubo color={material} />
+          <Text3D font={''}>phau!</Text3D>
           {/* </React.Suspense> */}
 
           <axesHelper args={[4]} />
