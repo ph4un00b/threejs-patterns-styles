@@ -1,11 +1,12 @@
 import * as T from 'three';
 import * as React from 'react';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { Canvas, useFrame, useLoader, useThree } from '@react-three/fiber';
 import {
   OrbitControls,
   PerspectiveCamera,
   OrthographicCamera,
   Text3D,
+  Center,
 } from '@react-three/drei/core';
 import { proxy, useSnapshot } from 'valtio';
 import { useControls } from 'leva';
@@ -50,6 +51,12 @@ export default function () {
       value: params.mat,
     },
   });
+
+  const [m1, m2] = useLoader(T.TextureLoader, [
+    `${baseUrl}/matcaps/1.png`,
+    `${baseUrl}/matcaps/2.png`,
+  ]);
+
   return (
     <>
       <section>
@@ -73,6 +80,17 @@ export default function () {
 
           {/* <React.Suspense> */}
           {/* <Cubo color={material} /> */}
+          <group position={[0, 1, 0]}>
+            <Center>
+              <Text3D
+                material-matcap={m1}
+                font={`${baseUrl}/typeface/press-start-2p.json`}
+              >
+                drei
+                <meshMatcapMaterial matcap={m1} />
+              </Text3D>
+            </Center>
+          </group>
           <MyText />
           <group position={[0, -1, 0]}>
             <MyTextCentered>centered?</MyTextCentered>
