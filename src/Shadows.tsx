@@ -116,10 +116,7 @@ export default function () {
     () => new T.TorusBufferGeometry(0.3, 0.2, 20, 45),
     []
   );
-  var mat = React.useMemo(
-    () => new T.MeshMatcapMaterial({ matcap: matcaps[7] }),
-    []
-  );
+  var mat = React.useMemo(() => new T.MeshStandardMaterial(), []);
 
   return (
     <>
@@ -140,7 +137,10 @@ export default function () {
             <Center>
               <Text3D font={global.font1}>
                 phau!
-                <meshMatcapMaterial matcap={matcaps[7]} />
+                <meshStandardMaterial
+                  metalness={metalness}
+                  roughness={roughness}
+                />
               </Text3D>
             </Center>
           </group>
@@ -162,7 +162,7 @@ export default function () {
             );
           })}
 
-          <mesh position-x={-2} position-y={0}>
+          <mesh castShadow={true} position-x={-2} position-y={0}>
             <sphereBufferGeometry args={[0.5, 16, 16]} />
             {/* it uses PBR principles algos */}
             <meshStandardMaterial metalness={metalness} roughness={roughness} />
@@ -214,12 +214,14 @@ export default function () {
   );
 }
 
+/** suports shadows! */
 function DirectionalLight() {
   const light = React.useRef(null!);
   useHelper(light, T.DirectionalLightHelper, 0.5);
   return (
     <directionalLight
       ref={light}
+      castShadow={true}
       // position={[directional.x, directional.y, directional.z]}
       position={[2, 2, -1]}
       args={[0xffffff, 0.5 /** intensity */]}
@@ -227,6 +229,7 @@ function DirectionalLight() {
   );
 }
 
+/** suports shadows! */
 function SpotLight({ ambient, intensity, fadeDistance }) {
   const light = React.useRef(null!);
   const mesh = React.useRef(null!);
@@ -253,6 +256,7 @@ function SpotLight({ ambient, intensity, fadeDistance }) {
   );
 }
 
+/** suports shadows! */
 function PointLight({ ambient, intensity, fadeDistance, decayDistance }) {
   const point = React.useRef(null!);
 
@@ -282,7 +286,7 @@ function Floor({ metalness, roughness }) {
   }, []);
 
   return (
-    <mesh ref={mesh} position-y={-1}>
+    <mesh ref={mesh} receiveShadow={true} position-y={-1}>
       <planeBufferGeometry args={[10, 10]} />
       <meshStandardMaterial
         metalness={metalness}

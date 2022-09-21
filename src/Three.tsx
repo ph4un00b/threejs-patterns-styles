@@ -54,6 +54,7 @@ export default function () {
     <>
       <section>
         <Canvas
+          shadows={false} /** enable shadowMap? */
           dpr={[dpr.min, dpr.max]}
           style={{
             width: cw + 'px',
