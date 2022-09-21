@@ -44,6 +44,7 @@ var global = {
   font1: `${baseUrl}/typeface/press-start-2p.json`,
 };
 
+/** @link https://threejs.org/examples/?q=shadow#webgl_shadowmap_viewer */
 export default function () {
   const { cw, ch } = useCanvas();
   const cam_ = React.useRef(null);
