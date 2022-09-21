@@ -61,6 +61,14 @@ export default function () {
     `${baseUrl}/matcaps/5.png`,
   ]);
 
+  var geo = React.useMemo(
+    () => new T.TorusBufferGeometry(0.3, 0.2, 20, 45),
+    []
+  );
+  var mat = React.useMemo(
+    () => new T.MeshMatcapMaterial({ matcap: matcaps[3] }),
+    []
+  );
   return (
     <>
       <section>
@@ -86,6 +94,7 @@ export default function () {
             return (
               <React.Fragment key={i}>
                 <mesh
+                  args={[geo, mat]}
                   rotation-x={Math.random() * Math.PI}
                   rotation-y={Math.random() * Math.PI}
                   position={[
@@ -93,10 +102,7 @@ export default function () {
                     (Math.random() - 0.5) * 10,
                     (Math.random() - 0.5) * 10,
                   ]}
-                >
-                  <torusBufferGeometry args={[0.3, 0.2, 20, 45]} />
-                  <meshMatcapMaterial matcap={matcaps[3]} />
-                </mesh>
+                ></mesh>
               </React.Fragment>
             );
           })}
