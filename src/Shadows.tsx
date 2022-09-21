@@ -230,9 +230,9 @@ function DirectionalLight() {
   useHelper(light, T.DirectionalLightHelper, 0.5);
   useHelper(camera, T.CameraHelper);
 
-  const { far, near } = useControls({
+  const { far, near, top, bottom, left, right } = useControls({
     far: {
-      value: 15,
+      value: 11,
       max: 30,
       min: -30,
       step: 1,
@@ -243,7 +243,32 @@ function DirectionalLight() {
       min: -30,
       step: 1,
     },
+    top: {
+      value: 2,
+      max: 30,
+      min: -30,
+      step: 1,
+    },
+    bottom: {
+      value: -2,
+      max: 30,
+      min: -30,
+      step: 1,
+    },
+    right: {
+      value: 2,
+      max: 30,
+      min: -30,
+      step: 1,
+    },
+    left: {
+      value: -2,
+      max: 30,
+      min: -30,
+      step: 1,
+    },
   });
+
   React.useLayoutEffect(() => {
     camera.current = light.current.shadow.camera;
     // alert(JSON.stringify(light.current.shadow.mapSize, null, 2));
@@ -262,6 +287,10 @@ function DirectionalLight() {
       shadow-mapSize-height={1024}
       shadow-camera-near={near}
       shadow-camera-far={far}
+      shadow-camera-top={top}
+      shadow-camera-bottom={bottom}
+      shadow-camera-left={left}
+      shadow-camera-right={right}
       // position={[directional.x, directional.y, directional.z]}
       position={[2, 2, -1]}
       args={[0xffffff, 0.5 /** intensity */]}
