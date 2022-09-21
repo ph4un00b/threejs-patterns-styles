@@ -44,36 +44,58 @@ var global = {
 export default function () {
   const { cw, ch } = useCanvas();
   const cam_ = React.useRef(null);
-  const { fondo, material, metalness, roughness, ambient, intensity } =
-    useControls({
-      fondo: {
-        value: global.bg,
-      },
-      material: {
-        value: global.mat,
-      },
-      ambient: {
-        value: '#ffffff',
-      },
-      intensity: {
-        value: 0.1,
-        max: 1,
-        min: 0,
-        step: 0.001,
-      },
-      metalness: {
-        value: 0,
-        max: 1,
-        min: 0,
-        step: 0.001,
-      },
-      roughness: {
-        value: 0,
-        max: 1,
-        min: 0,
-        step: 0.001,
-      },
-    });
+  const {
+    fondo,
+    material,
+    metalness,
+    roughness,
+    ambient,
+    intensity,
+    directional,
+    fadeDistance,
+    decayDistance,
+  } = useControls({
+    directional: { min: -30, max: 30, step: 0.1, value: { x: 2, y: 0, z: 0 } },
+    fondo: {
+      value: global.bg,
+    },
+    material: {
+      value: global.mat,
+    },
+    ambient: {
+      value: '#ffffff',
+    },
+    intensity: {
+      value: 0.1,
+      max: 1,
+      min: 0,
+      step: 0.001,
+    },
+    metalness: {
+      value: 0,
+      max: 1,
+      min: 0,
+      step: 0.001,
+    },
+    roughness: {
+      value: 0,
+      max: 1,
+      min: 0,
+      step: 0.001,
+    },
+    fadeDistance: {
+      value: 5,
+      max: 10,
+      min: 0,
+      step: 1,
+    },
+    decayDistance: {
+      value: 5,
+      max: 10,
+      min: 0,
+      step: 1,
+    },
+  });
 
   const matcaps = useLoader(T.TextureLoader, [
     `${baseUrl}/matcaps/1.png`,
@@ -138,7 +160,7 @@ export default function () {
           </mesh>
 
           <mesh position-y={0}>
-            <planeBufferGeometry args={[1, 1]} />
+            <boxBufferGeometry args={[1, 1]} />
             <meshStandardMaterial
               metalness={metalness}
               roughness={roughness}
@@ -167,10 +189,24 @@ export default function () {
             makeDefault={true}
           />
           <axesHelper args={[4]} />
+          {/* omni-directional */}
           <ambientLight args={[ambient, intensity /** intensity */]} />
+          <directionalLight
+            position={[directional.x, directional.y, directional.z]}
+            args={['red', 0.3 /** intensity */]}
+          />
+          {/* cheap performance */}
+          <hemisphereLight
+            args={['royalblue' /** top */, 'green' /**bottom */, 0.8]}
+          />
           <pointLight
-            position={[2, 3, 4]}
-            args={[ambient, intensity /** intensity */]}
+            position={[2, 0.5, 0]}
+            args={[
+              ambient,
+              intensity /** intensity */,
+              fadeDistance,
+              decayDistance,
+            ]}
           />
         </Canvas>
       </section>
