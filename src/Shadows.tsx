@@ -58,7 +58,11 @@ export default function () {
     directional,
     fadeDistance,
     decayDistance,
+    shadows,
   } = useControls({
+    shadows: {
+      value: true,
+    },
     directional: { min: -30, max: 30, step: 0.1, value: { x: 2, y: 0, z: 0 } },
     fondo: {
       value: global.bg,
@@ -112,6 +116,11 @@ export default function () {
     `${baseUrl}/matcaps/8.png`,
   ]);
 
+  const textures = useLoader(T.TextureLoader, [
+    `${baseUrl}/textures/bakedShadow.jpg`,
+    `${baseUrl}/textures/simpleShadow.jpg`,
+  ]);
+
   var geo = React.useMemo(
     () => new T.TorusBufferGeometry(0.3, 0.2, 20, 45),
     []
@@ -122,7 +131,8 @@ export default function () {
     <>
       <section>
         <Canvas
-          shadows={true} /** enable shadowMap */
+          // control shadow does not work!
+          shadows={false} /** enable shadowMap */
           dpr={[dpr.min, dpr.max]}
           style={{
             width: cw + 'px',
@@ -178,7 +188,11 @@ export default function () {
             />
           </mesh>
 
-          <Floor metalness={metalness} roughness={roughness} />
+          <Floor
+            textures={textures}
+            metalness={metalness}
+            roughness={roughness}
+          />
 
           <mesh castShadow={true} position-x={2} position-y={0}>
             <torusBufferGeometry args={[0.3, 0.2, 16, 32]} />
@@ -437,7 +451,7 @@ function PointLight({ ambient, intensity, fadeDistance, decayDistance }) {
   );
 }
 
-function Floor({ metalness, roughness }) {
+function Floor({ textures, metalness, roughness }) {
   const mesh = React.useRef<T.Mesh>(null!);
 
   React.useLayoutEffect(() => {
@@ -445,13 +459,15 @@ function Floor({ metalness, roughness }) {
   }, []);
 
   return (
-    <mesh ref={mesh} receiveShadow={true} position-y={-1}>
+    <mesh ref={mesh} receiveShadow={false} position-y={-1}>
       <planeBufferGeometry args={[20, 20]} />
-      <meshStandardMaterial
+      {/* <meshStandardMaterial
         metalness={metalness}
         roughness={roughness}
         side={T.DoubleSide}
-      />
+      /> */}
+      {/* baked shadow! */}
+      <meshBasicMaterial side={T.DoubleSide} map={textures[0]} />
     </mesh>
   );
 }
