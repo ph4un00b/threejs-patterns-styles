@@ -32,29 +32,32 @@ function useCanvas() {
 }
 
 var dpr = { min: 1, max: 2 };
+var baseUrl = 'https://ph4un00b.github.io/data';
 
-var params = {
+var global = {
   bg: '#00102a',
   mat: '#e83abf',
+  font1: `${baseUrl}/typeface/press-start-2p.json`,
 };
-
-var baseUrl = 'https://ph4un00b.github.io/data';
 
 export default function () {
   const { cw, ch } = useCanvas();
   const cam_ = React.useRef(null);
   const { fondo, material } = useControls({
     fondo: {
-      value: params.bg,
+      value: globals.bg,
     },
     material: {
-      value: params.mat,
+      value: globals.mat,
     },
   });
 
   const [m1, m2] = useLoader(T.TextureLoader, [
     `${baseUrl}/matcaps/1.png`,
     `${baseUrl}/matcaps/2.png`,
+    `${baseUrl}/matcaps/3.png`,
+    `${baseUrl}/matcaps/4.png`,
+    `${baseUrl}/matcaps/5.png`,
   ]);
 
   return (

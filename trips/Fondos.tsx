@@ -1,11 +1,12 @@
 import * as T from 'three';
 import * as React from 'react';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { Canvas, useFrame, useLoader, useThree } from '@react-three/fiber';
 import {
   OrbitControls,
   PerspectiveCamera,
   OrthographicCamera,
   Text3D,
+  Center,
 } from '@react-three/drei/core';
 import { proxy, useSnapshot } from 'valtio';
 import { useControls } from 'leva';
@@ -32,9 +33,12 @@ function useCanvas() {
 
 var dpr = { min: 1, max: 2 };
 
-var params = {
+var baseUrl = 'https://ph4un00b.github.io/data';
+
+var global = {
   bg: '#00102a',
   mat: '#e83abf',
+  font1: `${baseUrl}/typeface/press-start-2p.json`,
 };
 
 export default function () {
@@ -42,12 +46,21 @@ export default function () {
   const cam_ = React.useRef(null);
   const { fondo, material } = useControls({
     fondo: {
-      value: params.bg,
+      value: global.bg,
     },
     material: {
-      value: params.mat,
+      value: global.mat,
     },
   });
+
+  const matcaps = useLoader(T.TextureLoader, [
+    `${baseUrl}/matcaps/1.png`,
+    `${baseUrl}/matcaps/2.png`,
+    `${baseUrl}/matcaps/3.png`,
+    `${baseUrl}/matcaps/4.png`,
+    `${baseUrl}/matcaps/5.png`,
+  ]);
+
   return (
     <>
       <section>
@@ -59,23 +72,46 @@ export default function () {
             backgroundColor: fondo,
           }}
         >
+          <OrbitControls enableDamping={true} makeDefault={true} />
+
+          {/* <React.Suspense> */}
+          <Center>
+            <Text3D font={global.font1}>
+              phau!
+              <meshMatcapMaterial matcap={matcaps[3]} />
+            </Text3D>
+          </Center>
+
+          {Array.from({ length: 100 }).map((_, i) => {
+            return (
+              <React.Fragment key={i}>
+                <mesh
+                  rotation-x={Math.random() * Math.PI}
+                  rotation-y={Math.random() * Math.PI}
+                  position={[
+                    (Math.random() - 0.5) * 10,
+                    (Math.random() - 0.5) * 10,
+                    (Math.random() - 0.5) * 10,
+                  ]}
+                >
+                  <torusBufferGeometry args={[0.3, 0.2, 20, 45]} />
+                  <meshMatcapMaterial matcap={matcaps[3]} />
+                </mesh>
+              </React.Fragment>
+            );
+          })}
+          {/* </React.Suspense> */}
           <PerspectiveCamera
             ref={cam_}
-            position={[0, 0, 3]}
+            position={[0, 0, 15]}
             fov={75}
             // auto updates the viewport
             manual={false}
             makeDefault={true}
           />
-          <OrbitControls enableDamping={true} makeDefault={true} />
-
-          {/* <React.Suspense> */}
-          <Text3D font={''}>phau!</Text3D>
-          {/* </React.Suspense> */}
-
           <axesHelper args={[4]} />
-          <ambientLight args={[0xffffff, 0.5]} />
-          <pointLight args={[0xffffff, 0.5]} />
+          <ambientLight args={[0xffffff, 1.5]} />
+          <pointLight args={[0xffffff, 1.5]} />
         </Canvas>
       </section>
     </>
