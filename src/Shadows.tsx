@@ -169,7 +169,7 @@ export default function () {
             <meshStandardMaterial metalness={metalness} roughness={roughness} />
           </mesh>
 
-          <mesh position-y={0}>
+          <mesh castShadow={true} position-y={0}>
             <boxBufferGeometry args={[1, 1]} />
             <meshStandardMaterial
               metalness={metalness}
@@ -180,7 +180,7 @@ export default function () {
 
           <Floor metalness={metalness} roughness={roughness} />
 
-          <mesh position-x={2} position-y={0}>
+          <mesh castShadow={true} position-x={2} position-y={0}>
             <torusBufferGeometry args={[0.3, 0.2, 16, 32]} />
             {/* todo: why specular is not working? */}
             <meshStandardMaterial
@@ -199,16 +199,22 @@ export default function () {
             />
           </mesh>
 
-          <DirectionalLight />
-          {/* 
+          {/* <DirectionalLight /> */}
+
+          {/* <SpotLight
+            ambient={ambient}
+            intensity={intensity}
+            fadeDistance={fadeDistance}
+          /> */}
+
           <PointLight
             ambient={ambient}
             intensity={intensity}
             fadeDistance={fadeDistance}
             decayDistance={decayDistance}
-          /> */}
+          />
           <axesHelper args={[4]} />
-          <ambientLight args={[0xffffff, intensity]} />
+          <ambientLight args={[0xffffff, 0.2]} />
           <PerspectiveCamera
             ref={cam_}
             position={[0, 7, 2]}
@@ -292,7 +298,17 @@ function DirectionalLight() {
       shadow-camera-bottom={bottom}
       shadow-camera-left={left}
       shadow-camera-right={right}
-      shadow-radius={10} /** todo: do not seems to work blur */
+      /** @link https://github.com/pmndrs/react-three-fiber/blob/master/packages/fiber/tests/core/renderer.test.tsx#L571
+       *
+       * types:
+       *
+       * T.BasicShadowMap
+       * T.PCFShadowMap
+       * T.VSMShadowMap
+       *
+       * 3RF set PCFSoftShadowMap as the default shadow map
+       */
+      shadow-radius={10}
       // position={[directional.x, directional.y, directional.z]}
       position={[2, 2, -1]}
       args={[0xffffff, 0.5 /** intensity */]}
@@ -303,22 +319,77 @@ function DirectionalLight() {
 /** suports shadows! */
 function SpotLight({ ambient, intensity, fadeDistance }) {
   const light = React.useRef(null!);
-  const mesh = React.useRef(null!);
+  const camera = React.useRef(null!);
+  useHelper(light, T.SpotLightHelper, 'pink');
+  useHelper(camera, T.CameraHelper);
 
-  const { scene } = useThree();
-  // React.useEffect(() => void (light.current.target = mesh.current), [scene]);
-  useHelper(light, T.SpotLightHelper, 'red');
+  React.useLayoutEffect(() => {
+    camera.current = light.current.shadow.camera;
+
+    // alert(JSON.stringify(light.current.shadow.mapSize, null, 2));
+  }, []);
+
+  const { far, near, top, bottom, left, right } = useControls({
+    far: {
+      value: 1,
+      max: 30,
+      min: -30,
+      step: 1,
+    },
+    near: {
+      value: 1,
+      max: 30,
+      min: -30,
+      step: 1,
+    },
+    top: {
+      value: 2,
+      max: 30,
+      min: -30,
+      step: 1,
+    },
+    bottom: {
+      value: -2,
+      max: 30,
+      min: -30,
+      step: 1,
+    },
+    right: {
+      value: 2,
+      max: 30,
+      min: -30,
+      step: 1,
+    },
+    left: {
+      value: -2,
+      max: 30,
+      min: -30,
+      step: 1,
+    },
+  });
+
+  useFrame(() => {
+    camera.current.updateProjectionMatrix();
+  });
+
   return (
     <>
       <spotLight
+        castShadow={true}
+        shadow-mapSize-width={1024}
+        shadow-mapSize-height={1024}
+        shadow-camera-fov={30}
+        shadow-camera-near={near}
+        // todo: far is not working!
+        shadow-camera-far={1}
         ref={light}
         // spotlight.target needs to be added to scene
-        position={[2, 0.5, -3]}
+        position={[-5, 3.5, 1]}
         args={[
           ambient,
-          intensity /** intensity */,
-          fadeDistance,
-          Math.PI * 0.5 /**angle */,
+          0.4 /** intensity */,
+          10,
+          Math.PI * 0.2 /**angle */,
           0.25 /** penumbra */,
           1 /**decay */,
         ]}
@@ -329,14 +400,31 @@ function SpotLight({ ambient, intensity, fadeDistance }) {
 
 /** suports shadows! */
 function PointLight({ ambient, intensity, fadeDistance, decayDistance }) {
-  const point = React.useRef(null!);
+  const light = React.useRef(null!);
+  const camera = React.useRef(null!);
 
-  useHelper(point, T.PointLightHelper, 0.2);
+  useHelper(light, T.PointLightHelper, 0.2);
+  useHelper(camera, T.CameraHelper);
 
+  React.useLayoutEffect(() => {
+    camera.current = light.current.shadow.camera;
+
+    // alert(JSON.stringify(light.current.shadow.mapSize, null, 2));
+  }, []);
+
+  useFrame(() => {
+    camera.current.updateProjectionMatrix();
+  });
   return (
     <>
       <pointLight
-        ref={point}
+        castShadow={true}
+        shadow-mapSize-width={1024}
+        shadow-mapSize-height={1024}
+        shadow-camera-near={1}
+        // todo: far is not working!
+        shadow-camera-far={0.2}
+        ref={light}
         position={[2, 2, 1]}
         args={[
           ambient,
