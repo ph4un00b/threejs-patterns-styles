@@ -218,10 +218,18 @@ export default function () {
 function DirectionalLight() {
   const light = React.useRef(null!);
   useHelper(light, T.DirectionalLightHelper, 0.5);
+
+  React.useLayoutEffect(() => {
+    // alert(JSON.stringify(light.current.shadow.mapSize, null, 2));
+  }, []);
+
   return (
     <directionalLight
       ref={light}
       castShadow={true}
+      // power of 2 due to bitmapping
+      shadow-mapSize-width={1024}
+      shadow-mapSize-height={1024}
       // position={[directional.x, directional.y, directional.z]}
       position={[2, 2, -1]}
       args={[0xffffff, 0.5 /** intensity */]}
