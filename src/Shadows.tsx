@@ -211,7 +211,7 @@ export default function () {
           <ambientLight args={[0xffffff, intensity]} />
           <PerspectiveCamera
             ref={cam_}
-            position={[0, 0, 20]}
+            position={[0, 10, 20]}
             fov={75}
             // auto updates the viewport
             manual={false}
@@ -232,24 +232,26 @@ function DirectionalLight() {
 
   const { far, near } = useControls({
     far: {
-      value: 6,
+      value: 15,
       max: 30,
-      min: 0,
+      min: -30,
       step: 1,
     },
     near: {
       value: 1,
       max: 30,
-      min: 0,
+      min: -30,
       step: 1,
     },
   });
   React.useLayoutEffect(() => {
     camera.current = light.current.shadow.camera;
-    // camera.current.near = 1;
-    // camera.current.far = 8;
     // alert(JSON.stringify(light.current.shadow.mapSize, null, 2));
   }, []);
+
+  useFrame(() => {
+    camera.current.updateProjectionMatrix();
+  });
 
   return (
     <directionalLight
@@ -258,8 +260,8 @@ function DirectionalLight() {
       // power of 2 due to bitmapping
       shadow-mapSize-width={1024}
       shadow-mapSize-height={1024}
-      shadow-camera-near={-2}
-      shadow-camera-far={8}
+      shadow-camera-near={near}
+      shadow-camera-far={far}
       // position={[directional.x, directional.y, directional.z]}
       position={[2, 2, -1]}
       args={[0xffffff, 0.5 /** intensity */]}
