@@ -135,7 +135,7 @@ export default function () {
           {/* <React.Suspense> */}
           <group position={[0, 2, 0]}>
             <Center>
-              <Text3D font={global.font1}>
+              <Text3D castShadow={true} font={global.font1}>
                 phau!
                 <meshStandardMaterial
                   metalness={metalness}
@@ -149,6 +149,7 @@ export default function () {
             return (
               <React.Fragment key={i}>
                 <mesh
+                  castShadow={true}
                   args={[geo, mat]}
                   rotation-x={Math.random() * Math.PI}
                   rotation-y={Math.random() * Math.PI}
@@ -208,6 +209,14 @@ export default function () {
           /> */}
           <axesHelper args={[4]} />
           <ambientLight args={[0xffffff, intensity]} />
+          <PerspectiveCamera
+            ref={cam_}
+            position={[0, 0, 20]}
+            fov={75}
+            // auto updates the viewport
+            manual={false}
+            makeDefault={true}
+          />
         </Canvas>
       </section>
     </>
@@ -217,9 +226,28 @@ export default function () {
 /** suports shadows! */
 function DirectionalLight() {
   const light = React.useRef(null!);
+  const camera = React.useRef(null!);
   useHelper(light, T.DirectionalLightHelper, 0.5);
+  useHelper(camera, T.CameraHelper);
 
+  const { far, near } = useControls({
+    far: {
+      value: 6,
+      max: 30,
+      min: 0,
+      step: 1,
+    },
+    near: {
+      value: 1,
+      max: 30,
+      min: 0,
+      step: 1,
+    },
+  });
   React.useLayoutEffect(() => {
+    camera.current = light.current.shadow.camera;
+    // camera.current.near = 1;
+    // camera.current.far = 8;
     // alert(JSON.stringify(light.current.shadow.mapSize, null, 2));
   }, []);
 
@@ -230,6 +258,8 @@ function DirectionalLight() {
       // power of 2 due to bitmapping
       shadow-mapSize-width={1024}
       shadow-mapSize-height={1024}
+      shadow-camera-near={-2}
+      shadow-camera-far={8}
       // position={[directional.x, directional.y, directional.z]}
       position={[2, 2, -1]}
       args={[0xffffff, 0.5 /** intensity */]}
@@ -295,7 +325,7 @@ function Floor({ metalness, roughness }) {
 
   return (
     <mesh ref={mesh} receiveShadow={true} position-y={-1}>
-      <planeBufferGeometry args={[10, 10]} />
+      <planeBufferGeometry args={[20, 20]} />
       <meshStandardMaterial
         metalness={metalness}
         roughness={roughness}
