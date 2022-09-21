@@ -103,6 +103,9 @@ export default function () {
     `${baseUrl}/matcaps/3.png`,
     `${baseUrl}/matcaps/4.png`,
     `${baseUrl}/matcaps/5.png`,
+    `${baseUrl}/matcaps/6.png`,
+    `${baseUrl}/matcaps/7.png`,
+    `${baseUrl}/matcaps/8.png`,
   ]);
 
   var geo = React.useMemo(
@@ -110,7 +113,7 @@ export default function () {
     []
   );
   var mat = React.useMemo(
-    () => new T.MeshMatcapMaterial({ matcap: matcaps[3] }),
+    () => new T.MeshMatcapMaterial({ matcap: matcaps[7] }),
     []
   );
   return (
@@ -131,7 +134,7 @@ export default function () {
             <Center>
               <Text3D font={global.font1}>
                 phau!
-                <meshMatcapMaterial matcap={matcaps[3]} />
+                <meshMatcapMaterial matcap={matcaps[7]} />
               </Text3D>
             </Center>
           </group>
@@ -207,6 +210,24 @@ export default function () {
               fadeDistance,
               decayDistance,
             ]}
+          />
+          <spotLight
+            position={[2, 0.5, 2]}
+            args={[
+              ambient,
+              intensity /** intensity */,
+              fadeDistance,
+              Math.PI * 0.5 /**angle */,
+              0.25 /** penumbra */,
+              1 /**decay */,
+            ]}
+          />
+          <rectAreaLight
+            // this just works for standard material
+            // and physical material
+            lookAt={[0, 0, 0]}
+            position={[-1.5, 0, 1.5]}
+            args={[0x4c00ff, 4, 1, 1]}
           />
         </Canvas>
       </section>
