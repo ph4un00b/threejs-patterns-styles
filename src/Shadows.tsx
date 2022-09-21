@@ -211,7 +211,7 @@ export default function () {
           <ambientLight args={[0xffffff, intensity]} />
           <PerspectiveCamera
             ref={cam_}
-            position={[0, 10, 20]}
+            position={[0, 7, 2]}
             fov={75}
             // auto updates the viewport
             manual={false}
@@ -271,6 +271,7 @@ function DirectionalLight() {
 
   React.useLayoutEffect(() => {
     camera.current = light.current.shadow.camera;
+    // light.current.shadow.radius = 10;
     // alert(JSON.stringify(light.current.shadow.mapSize, null, 2));
   }, []);
 
@@ -291,6 +292,7 @@ function DirectionalLight() {
       shadow-camera-bottom={bottom}
       shadow-camera-left={left}
       shadow-camera-right={right}
+      shadow-radius={10} /** todo: do not seems to work blur */
       // position={[directional.x, directional.y, directional.z]}
       position={[2, 2, -1]}
       args={[0xffffff, 0.5 /** intensity */]}
