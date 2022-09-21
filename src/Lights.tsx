@@ -7,9 +7,12 @@ import {
   OrthographicCamera,
   Text3D,
   Center,
+  useHelper,
+  // useHelper,
 } from '@react-three/drei/core';
 import { proxy, useSnapshot } from 'valtio';
 import { useControls } from 'leva';
+import { RectAreaLightHelper, RectAreaLightUniformsLib } from 'three-stdlib';
 
 var PointersProxy = proxy({
   x: 0,
@@ -116,6 +119,7 @@ export default function () {
     () => new T.MeshMatcapMaterial({ matcap: matcaps[7] }),
     []
   );
+
   return (
     <>
       <section>
@@ -191,7 +195,6 @@ export default function () {
             manual={false}
             makeDefault={true}
           />
-          <axesHelper args={[4]} />
           {/* omni-directional */}
           <ambientLight args={[ambient, intensity /** intensity */]} />
           <directionalLight
@@ -202,35 +205,108 @@ export default function () {
           <hemisphereLight
             args={['royalblue' /** top */, 'green' /**bottom */, 0.8]}
           />
-          <pointLight
-            position={[2, 0.5, 0]}
-            args={[
-              ambient,
-              intensity /** intensity */,
-              fadeDistance,
-              decayDistance,
-            ]}
+
+          <PointLight
+            ambient={ambient}
+            intensity={intensity}
+            fadeDistance={fadeDistance}
+            decayDistance={decayDistance}
           />
-          <spotLight
-            position={[2, 0.5, 2]}
-            args={[
-              ambient,
-              intensity /** intensity */,
-              fadeDistance,
-              Math.PI * 0.5 /**angle */,
-              0.25 /** penumbra */,
-              1 /**decay */,
-            ]}
+
+          <SpotLight
+            ambient={ambient}
+            intensity={intensity}
+            fadeDistance={fadeDistance}
           />
-          <rectAreaLight
-            // this just works for standard material
-            // and physical material
-            lookAt={[0, 0, 0]}
-            position={[-1.5, 0, 1.5]}
-            args={[0x4c00ff, 4, 1, 1]}
-          />
+
+          <mesh position-y={0}>
+            <boxBufferGeometry args={[1, 1]} />
+            <meshStandardMaterial
+              metalness={0.0}
+              roughness={0.0}
+              side={T.DoubleSide}
+            />
+          </mesh>
+          {/* <RectangleLight /> */}
+          {/* <axesHelper args={[4]} /> */}
         </Canvas>
       </section>
+    </>
+  );
+}
+
+/**@todo make  it work! */
+/** @link https://github.com/standard-ai/standard-view/blob/16063626a8ce990f857b59d15d871ed2220e274b/src/lights/RectAreaLight.tsx */
+function RectangleLight() {
+  // RectAreaLightUniformsLib.init();
+  const light = React.useRef(null!);
+
+  // useHelper(light, RectAreaLightHelper, 0xf9d71c);
+  const { scene } = useThree();
+  React.useEffect(() => {
+    const rectAreaLightHelper = new RectAreaLightHelper(light);
+    scene.add(rectAreaLightHelper);
+  }, [scene]);
+
+  // useFrame(() => {});
+
+  return (
+    <rectAreaLight
+      ref={light}
+      onUpdate={(self) => {
+        self.lookAt(0, 0, 0);
+      }}
+      // this just works for standard material
+      // and physical material
+      // lookAt={[0, 0, 0]}
+      position={[1, 0, 0]}
+      args={[0xf9d71c]}
+    />
+  );
+}
+function SpotLight({ ambient, intensity, fadeDistance }) {
+  const light = React.useRef(null!);
+  const mesh = React.useRef(null!);
+
+  const { scene } = useThree();
+  // React.useEffect(() => void (light.current.target = mesh.current), [scene]);
+  useHelper(light, T.SpotLightHelper, 'red');
+  return (
+    <>
+      <spotLight
+        ref={light}
+        // spotlight.target needs to be added to scene
+        position={[2, 0.5, -3]}
+        args={[
+          ambient,
+          intensity /** intensity */,
+          fadeDistance,
+          Math.PI * 0.5 /**angle */,
+          0.25 /** penumbra */,
+          1 /**decay */,
+        ]}
+      />
+    </>
+  );
+}
+
+function PointLight({ ambient, intensity, fadeDistance, decayDistance }) {
+  const point = React.useRef(null!);
+
+  useHelper(point, T.PointLightHelper, 0.2);
+
+  return (
+    <>
+      <pointLight
+        ref={point}
+        position={[2, 1, 0]}
+        args={[
+          ambient,
+          intensity /** intensity */,
+          fadeDistance,
+          decayDistance,
+        ]}
+      />
     </>
   );
 }
