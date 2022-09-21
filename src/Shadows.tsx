@@ -70,7 +70,7 @@ export default function () {
       value: '#ffffff',
     },
     intensity: {
-      value: 1,
+      value: 0.4,
       max: 1,
       min: 0,
       step: 0.001,
@@ -197,16 +197,32 @@ export default function () {
             />
           </mesh>
 
+          <DirectionalLight />
+          {/* 
           <PointLight
             ambient={ambient}
             intensity={intensity}
             fadeDistance={fadeDistance}
             decayDistance={decayDistance}
-          />
+          /> */}
           <axesHelper args={[4]} />
+          <ambientLight args={[0xffffff, intensity]} />
         </Canvas>
       </section>
     </>
+  );
+}
+
+function DirectionalLight() {
+  const light = React.useRef(null!);
+  useHelper(light, T.DirectionalLightHelper, 0.5);
+  return (
+    <directionalLight
+      ref={light}
+      // position={[directional.x, directional.y, directional.z]}
+      position={[2, 2, -1]}
+      args={[0xffffff, 0.5 /** intensity */]}
+    />
   );
 }
 

@@ -197,10 +197,8 @@ export default function () {
           />
           {/* omni-directional */}
           <ambientLight args={[ambient, intensity /** intensity */]} />
-          <directionalLight
-            position={[directional.x, directional.y, directional.z]}
-            args={['red', 0.3 /** intensity */]}
-          />
+          
+          <DirectionalLight />
           {/* cheap performance */}
           <hemisphereLight
             args={['royalblue' /** top */, 'green' /**bottom */, 0.8]}
@@ -232,6 +230,19 @@ export default function () {
         </Canvas>
       </section>
     </>
+  );
+}
+
+function DirectionalLight() {
+  const light = React.useRef(null!);
+  useHelper(light, T.DirectionalLightHelper, 0.5);
+  return (
+    <directionalLight
+      ref={light}
+      // position={[directional.x, directional.y, directional.z]}
+      position={[2, 2, -1]}
+      args={[0xffffff, 0.5 /** intensity */]}
+    />
   );
 }
 
