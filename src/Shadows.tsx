@@ -11,7 +11,7 @@ import {
   // useHelper,
 } from '@react-three/drei/core';
 import { proxy, useSnapshot } from 'valtio';
-import { useControls } from 'leva';
+import { Leva, useControls } from 'leva';
 import { RectAreaLightHelper, RectAreaLightUniformsLib } from 'three-stdlib';
 
 var PointersProxy = proxy({
@@ -179,14 +179,7 @@ export default function () {
             <meshStandardMaterial metalness={metalness} roughness={roughness} />
           </mesh>
 
-          <mesh castShadow={true} position-y={0}>
-            <boxBufferGeometry args={[1, 1]} />
-            <meshStandardMaterial
-              metalness={metalness}
-              roughness={roughness}
-              side={T.DoubleSide}
-            />
-          </mesh>
+          <Cubo metalness={metalness} roughness={roughness} />
 
           <Floor
             textures={textures}
@@ -238,11 +231,32 @@ export default function () {
             makeDefault={true}
           />
         </Canvas>
+        <Leva />
       </section>
     </>
   );
 }
 
+function Cubo({ metalness, roughness }) {
+  const cubo = React.useRef(null!);
+  const delta = 1.5;
+  useFrame(({ clock }) => {
+    const t = clock.getElapsedTime();
+    cubo.current.position.x = Math.cos(t) * delta;
+    cubo.current.position.z = Math.sin(t) * delta;
+  });
+
+  return (
+    <mesh ref={cubo} castShadow={true} position-y={0}>
+      <boxBufferGeometry args={[1, 1]} />
+      <meshStandardMaterial
+        metalness={metalness}
+        roughness={roughness}
+        side={T.DoubleSide}
+      />
+    </mesh>
+  );
+}
 /** suports shadows! */
 function DirectionalLight() {
   const light = React.useRef(null!);
@@ -452,23 +466,41 @@ function PointLight({ ambient, intensity, fadeDistance, decayDistance }) {
 }
 
 function Floor({ textures, metalness, roughness }) {
-  const mesh = React.useRef<T.Mesh>(null!);
+  const floor = React.useRef<T.Mesh>(null!);
+  const shadow = React.useRef<T.Mesh>(null!);
 
   React.useLayoutEffect(() => {
-    mesh.current.rotation.x = Math.PI * 0.5;
+    shadow.current.position.y = floor.current.position.y + 0.01;
   }, []);
 
   return (
-    <mesh ref={mesh} receiveShadow={false} position-y={-1}>
-      <planeBufferGeometry args={[20, 20]} />
-      {/* <meshStandardMaterial
-        metalness={metalness}
-        roughness={roughness}
-        side={T.DoubleSide}
-      /> */}
-      {/* baked shadow! */}
-      <meshBasicMaterial side={T.DoubleSide} map={textures[0]} />
-    </mesh>
+    <>
+      <mesh
+        ref={floor}
+        rotation-x={Math.PI * 0.5}
+        receiveShadow={false}
+        position-y={-1}
+      >
+        <planeBufferGeometry args={[20, 20]} />
+        <meshStandardMaterial
+          metalness={metalness}
+          roughness={roughness}
+          side={T.DoubleSide}
+        />
+        {/* baked shadow! */}
+        {/* <meshBasicMaterial side={T.DoubleSide} map={textures[0]} /> */}
+      </mesh>
+
+      {/* dynamic baked shadow */}
+      <mesh ref={shadow} rotation-x={-Math.PI * 0.5}>
+        <planeBufferGeometry args={[1.5, 1.5]} />
+        <meshBasicMaterial
+          transparent={true}
+          alphaMap={textures[1]}
+          args={[{ color: 0x000000 }]}
+        />
+      </mesh>
+    </>
   );
 }
 
