@@ -47,7 +47,9 @@ var global = {
 /** @link https://threejs.org/examples/?q=shadow#webgl_shadowmap_viewer */
 export default function () {
   const { cw, ch } = useCanvas();
-  const cam_ = React.useRef(null);
+  const camera = React.useRef(null!);
+  const cubo = React.useRef<T.Mesh>(null!);
+
   const {
     fondo,
     material,
@@ -179,9 +181,10 @@ export default function () {
             <meshStandardMaterial metalness={metalness} roughness={roughness} />
           </mesh>
 
-          <Cubo metalness={metalness} roughness={roughness} />
+          <Cubo ref={cubo} metalness={metalness} roughness={roughness} />
 
           <Floor
+            cubo={cubo}
             textures={textures}
             metalness={metalness}
             roughness={roughness}
@@ -223,7 +226,7 @@ export default function () {
           <axesHelper args={[4]} />
           <ambientLight args={[0xffffff, 0.2]} />
           <PerspectiveCamera
-            ref={cam_}
+            ref={camera}
             position={[0, 7, 2]}
             fov={75}
             // auto updates the viewport
@@ -237,17 +240,17 @@ export default function () {
   );
 }
 
-function Cubo({ metalness, roughness }) {
-  const cubo = React.useRef(null!);
+var Cubo = React.forwardRef(function Cubo({ metalness, roughness }, ref) {
   const delta = 1.5;
   useFrame(({ clock }) => {
     const t = clock.getElapsedTime();
-    cubo.current.position.x = Math.cos(t) * delta;
-    cubo.current.position.z = Math.sin(t) * delta;
+    ref.current.position.x = Math.cos(t) * delta;
+    ref.current.position.z = Math.sin(t) * delta;
+    ref.current.position.y = Math.abs(Math.sin(t * delta * 2));
   });
 
   return (
-    <mesh ref={cubo} castShadow={true} position-y={0}>
+    <mesh ref={ref} castShadow={true} position-y={0}>
       <boxBufferGeometry args={[1, 1]} />
       <meshStandardMaterial
         metalness={metalness}
@@ -256,7 +259,8 @@ function Cubo({ metalness, roughness }) {
       />
     </mesh>
   );
-}
+});
+
 /** suports shadows! */
 function DirectionalLight() {
   const light = React.useRef(null!);
@@ -465,13 +469,22 @@ function PointLight({ ambient, intensity, fadeDistance, decayDistance }) {
   );
 }
 
-function Floor({ textures, metalness, roughness }) {
+function Floor({ cubo, textures, metalness, roughness }) {
   const floor = React.useRef<T.Mesh>(null!);
   const shadow = React.useRef<T.Mesh>(null!);
 
   React.useLayoutEffect(() => {
+    /** avoid overlapping (glicht effect) with delta */
     shadow.current.position.y = floor.current.position.y + 0.01;
   }, []);
+
+  useFrame(() => {
+    dynamic_baked_shadow: {
+      shadow.current.position.x = cubo.current.position.x;
+      shadow.current.position.z = cubo.current.position.z;
+      shadow.current.material.opacity = (1 - cubo.current.position.y) * 0.3;
+    }
+  });
 
   return (
     <>
