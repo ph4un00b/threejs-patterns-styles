@@ -71,6 +71,12 @@ export default function () {
     position: { min: -30, max: 30, step: 0.1, value: { x: 0, y: 0, z: 9 } },
   });
 
+  var geo = React.useMemo(() => new T.SphereBufferGeometry(1, 16, 16), []);
+  var mat = React.useMemo(
+    () => new T.MeshStandardMaterial({ color: 'green' }),
+    []
+  );
+
   return (
     <>
       <section>
@@ -125,6 +131,31 @@ export default function () {
                 roughness={0}
               />
             </mesh>
+
+            <mesh
+              scale={[0.5, 0.5, 0.5]}
+              position={[0.8, 0.2, 2.2]}
+              geometry={geo}
+              material={mat}
+            />
+            <mesh
+              scale={[0.25, 0.25, 0.25]}
+              position={[1.4, 0.1, 2]}
+              geometry={geo}
+              material={mat}
+            />
+            <mesh
+              scale={[0.4, 0.4, 0.4]}
+              position={[-0.8, 0.1, 2.2]}
+              geometry={geo}
+              material={mat}
+            />
+            <mesh
+              scale={[0.15, 0.15, 0.15]}
+              position={[-1, 0.05, 2.6]}
+              geometry={geo}
+              material={mat}
+            />
           </group>
 
           <Floor textures={textures} />
