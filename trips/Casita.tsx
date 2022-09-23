@@ -41,6 +41,7 @@ var baseUrl = 'https://ph4un00b.github.io/data';
 
 var global = {
   bg: 'red',
+  fog: '#262837',
   mat: '#e83abf',
   font1: `${baseUrl}/typeface/press-start-2p.json`,
 };
@@ -68,7 +69,7 @@ export default function () {
   ]);
 
   const { ambientIntensity, position } = useControls({
-    ambientIntensity: { value: 0.01, min: 0, max: 1, step: 0.001 },
+    ambientIntensity: { value: 0.3, min: 0, max: 1, step: 0.001 },
     position: { min: -30, max: 30, step: 0.1, value: { x: 0, y: 5, z: 10 } },
   });
 
@@ -97,7 +98,7 @@ export default function () {
           style={{
             width: cw + 'px',
             height: ch + 'px',
-            backgroundColor: global.bg,
+            backgroundColor: global.fog,
           }}
         >
           <OrbitControls enableDamping={true} makeDefault={true} />
@@ -198,8 +199,8 @@ export default function () {
             makeDefault={true}
           />
 
-          <DirectionalLight color={'PowderBlue'} />
-          <PointLight colour={'Coral'} />
+          <DirectionalLight color={'#b9d5ff'} />
+          <PointLight colour={'Coral'} intensity={1} fadeDistance={7} />
           <ambientLight args={['PowderBlue', ambientIntensity]} />
 
           <axesHelper args={[4]} />
@@ -245,9 +246,9 @@ function Ghosts() {
 
   return (
     <>
-      <PointLight ref={g1} colour={'#ff00ff'} intensity={2} fadeDistance={3} />
-      <PointLight ref={g2} colour={'#00ffff'} intensity={2} fadeDistance={3} />
-      <PointLight ref={g3} colour={'#ffff00'} intensity={2} fadeDistance={3} />
+      <PointLight ref={g1} colour={'#ff00ff'} intensity={3} fadeDistance={3} />
+      <PointLight ref={g2} colour={'#00ffff'} intensity={3} fadeDistance={3} />
+      <PointLight ref={g3} colour={'#ffff00'} intensity={3} fadeDistance={3} />
     </>
   );
 }
@@ -304,7 +305,7 @@ function Door() {
         alphaMap={doorT[1]}
         // ?? todo: working?
         aoMap={doorT[2]}
-        aoMapIntensity={1}
+        // aoMapIntensity={1}
         //
         displacementMap={doorT[3]}
         displacementScale={0.1}
@@ -324,11 +325,11 @@ function Door() {
 
 function Fog() {
   useFrame(({ gl }) => {
-    gl.setClearColor('#262838');
+    gl.setClearColor(global.fog);
   });
   return (
     <>
-      <fog attach="fog" args={['#262838', 1 /**near */, 15 /**far */]} />
+      <fog attach="fog" args={[global.fog, 1 /**near */, 15 /**far */]} />
     </>
   );
 }
@@ -393,9 +394,19 @@ function Floor({ textures, metalness = 0, roughness = 0 }) {
 }
 
 /** suports shadows! */
-var PointLight = React.forwardRef(function (
-  { colour, intensity = 1, fadeDistance = 7, decayDistance = 0 },
-  ref
+var PointLight = React.forwardRef(function PointLight(
+  {
+    colour,
+    intensity,
+    fadeDistance,
+    decayDistance = 0,
+  }: {
+    colour: string;
+    intensity: number;
+    fadeDistance: number;
+    decayDistance: number;
+  },
+  ref: React.MutableRefObject<never>
 ) {
   const light = React.useRef(null!);
   const camera = React.useRef(null!);
@@ -416,14 +427,16 @@ var PointLight = React.forwardRef(function (
     <>
       <pointLight
         ref={mergeRefs([ref, light])}
+        intensity={intensity}
+        distance={fadeDistance}
+        color={colour}
         castShadow={true}
         shadow-mapSize-width={256}
         shadow-mapSize-height={256}
-        shadow-camera-near={1}
+        // shadow-camera-near={1}
         // todo: far is not working!
         shadow-camera-far={7}
         position={[0, 2.2, 2.7]}
-        args={[colour, intensity /** intensity */, fadeDistance, decayDistance]}
       />
     </>
   );
