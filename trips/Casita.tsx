@@ -67,7 +67,7 @@ export default function () {
   ]);
 
   const { ambientIntensity, position } = useControls({
-    ambientIntensity: { value: 0.11, min: 0, max: 1, step: 0.001 },
+    ambientIntensity: { value: 0.01, min: 0, max: 1, step: 0.001 },
     position: { min: -30, max: 30, step: 0.1, value: { x: 0, y: 5, z: 10 } },
   });
 
@@ -202,6 +202,7 @@ export default function () {
           />
 
           <DirectionalLight color={'PowderBlue'} />
+          <PointLight color={'Coral'} />
           <ambientLight args={['PowderBlue', ambientIntensity]} />
 
           <axesHelper args={[4]} />
@@ -246,6 +247,45 @@ function Floor({ textures, metalness = 0, roughness = 0 }) {
           args={[{ color: 0x000000 }]}
         />
       </mesh>
+    </>
+  );
+}
+
+/** suports shadows! */
+function PointLight({
+  color,
+  intensity = 1,
+  fadeDistance = 7,
+  decayDistance = 1,
+}) {
+  const light = React.useRef(null!);
+  const camera = React.useRef(null!);
+
+  useHelper(light, T.PointLightHelper, 0.2);
+  useHelper(camera, T.CameraHelper);
+
+  React.useLayoutEffect(() => {
+    camera.current = light.current.shadow.camera;
+
+    // alert(JSON.stringify(light.current.shadow.mapSize, null, 2));
+  }, []);
+
+  useFrame(() => {
+    camera.current.updateProjectionMatrix();
+  });
+  return (
+    <>
+      <pointLight
+        castShadow={true}
+        shadow-mapSize-width={1024}
+        shadow-mapSize-height={1024}
+        shadow-camera-near={1}
+        // todo: far is not working!
+        shadow-camera-far={0.2}
+        ref={light}
+        position={[0, 2.2, 2.7]}
+        args={[color, intensity /** intensity */, fadeDistance, decayDistance]}
+      />
     </>
   );
 }
