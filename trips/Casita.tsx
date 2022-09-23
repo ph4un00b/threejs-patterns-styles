@@ -39,7 +39,7 @@ var dpr = { min: 1, max: 2 };
 var baseUrl = 'https://ph4un00b.github.io/data';
 
 var global = {
-  bg: '#00102a',
+  bg: 'red',
   mat: '#e83abf',
   font1: `${baseUrl}/typeface/press-start-2p.json`,
 };
@@ -89,6 +89,7 @@ export default function () {
     <>
       <section>
         <Canvas
+          // color={'#262838'}
           // control shadow does not work!
           shadows={false} /** enable shadowMap */
           dpr={[dpr.min, dpr.max]}
@@ -190,6 +191,8 @@ export default function () {
             })}
           </group>
 
+          <fog attach="fog" args={['#262838', 1 /**near */, 15 /**far */]} />
+
           <Floor textures={textures} />
 
           <PerspectiveCamera
@@ -221,6 +224,9 @@ function Floor({ textures, metalness = 0, roughness = 0 }) {
     shadow.current.position.y = floor.current.position.y + 0.01;
   }, []);
 
+  useFrame(({ gl }) => {
+    gl.setClearColor('#262838');
+  });
   return (
     <>
       <mesh
