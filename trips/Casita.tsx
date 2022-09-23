@@ -87,13 +87,44 @@ export default function () {
           <OrbitControls enableDamping={true} makeDefault={true} />
 
           {/* <React.Suspense> */}
-          <group position={[0, 2, 0]}>
+          <group position={[0, 4, 0]}>
             <Center>
               <Text3D castShadow={true} font={global.font1}>
                 phau!
                 <meshStandardMaterial metalness={0} roughness={0} />
               </Text3D>
             </Center>
+          </group>
+
+          <group>
+            <mesh>{/* haus */}</mesh>
+
+            <mesh position-y={2.5 / 2}>
+              <boxBufferGeometry args={[4, 2.5, 4]} />
+              <meshStandardMaterial
+                color={'#ac8e82'}
+                metalness={0}
+                roughness={0}
+              />
+            </mesh>
+
+            <mesh rotation-y={Math.PI * 0.25} position-y={2.5 + 0.5}>
+              <coneBufferGeometry args={[3.5, 1, 4]} />
+              <meshStandardMaterial
+                color={'#ac8eaff'}
+                metalness={0}
+                roughness={0}
+              />
+            </mesh>
+
+            <mesh position-z={2 + 0.01} position-y={1}>
+              <planeBufferGeometry args={[2, 2]} />
+              <meshStandardMaterial
+                color={'#ac8eaff'}
+                metalness={0}
+                roughness={0}
+              />
+            </mesh>
           </group>
 
           <Floor textures={textures} />
@@ -131,7 +162,7 @@ function Floor({ textures, metalness = 0, roughness = 0 }) {
         ref={floor}
         rotation-x={Math.PI * 0.5}
         receiveShadow={false}
-        position-y={-1}
+        position-y={0}
       >
         <planeBufferGeometry args={[20, 20]} />
         <meshStandardMaterial
