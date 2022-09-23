@@ -1,4 +1,5 @@
 import Text from '../Text';
+import Casita from '../trips/Casita';
 import Fondos from '../trips/Fondos';
 import './App.css';
 import Lights from './Lights';
@@ -8,7 +9,7 @@ import Textures from './Textures';
 import Three from './Three';
 
 function App() {
-  return <Shadows />;
+  return <Casita />;
 }
 
 export default App;
