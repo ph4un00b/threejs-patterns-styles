@@ -1,6 +1,6 @@
 import * as T from 'three';
 import * as React from 'react';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { Canvas, useFrame, useLoader, useThree } from '@react-three/fiber';
 import {
   OrbitControls,
   PerspectiveCamera,
@@ -8,6 +8,7 @@ import {
   Center,
   Text3D,
   useHelper,
+  PointMaterial,
 } from '@react-three/drei/core';
 import { proxy, useSnapshot } from 'valtio';
 import { useControls } from 'leva';
@@ -46,21 +47,13 @@ var global = {
 export default function () {
   const { cw, ch } = useCanvas();
   const cam_ = React.useRef(null);
-  const {
-    fondo,
-    material,
-    ambientIntensity,
-    ambient,
-    pointsSize,
-    pointsAtenuation,
-  } = useControls({
+  const { fondo, material, ambientIntensity, ambient } = useControls({
     ambientIntensity: { value: 0.3, min: 0, max: 1, step: 0.001 },
-    pointsSize: { value: 0.02, min: 0, max: 1, step: 0.001 },
-    pointsAtenuation: { value: true },
     ambient: { value: '#ffffff' },
     fondo: { value: global.fog },
     material: { value: global.mat },
   });
+
   return (
     <>
       <section>
@@ -93,13 +86,9 @@ export default function () {
             </Center>
           </group>
 
-          <points>
-            <sphereBufferGeometry args={[1, 32, 32]} />
-            <pointsMaterial
-              size={pointsSize}
-              sizeAttenuation={pointsAtenuation}
-            />
-          </points>
+          <Particles color={'green'} />
+          <MyParticles color={material} />
+          <Cubo />
 
           <axesHelper args={[4]} />
           <ambientLight color={ambient} intensity={ambientIntensity} />
@@ -111,6 +100,109 @@ export default function () {
   );
 }
 
+function MyParticles({ quantity = 20_000, color = 'red' }) {
+  const { pointsSize, pointsAtenuation } = useControls({
+    pointsSize: { value: 0.4, min: 0, max: 1, step: 0.01 },
+    pointsAtenuation: { value: true },
+  });
+  const p = useLoader(T.TextureLoader, [
+    `${baseUrl}/particles/1.png`,
+    `${baseUrl}/particles/2.png`,
+    `${baseUrl}/particles/3.png`,
+    `${baseUrl}/particles/4.png`,
+    `${baseUrl}/particles/5.png`,
+    `${baseUrl}/particles/6.png`,
+    `${baseUrl}/particles/7.png`,
+    `${baseUrl}/particles/8.png`,
+    `${baseUrl}/particles/9.png`,
+    `${baseUrl}/particles/10.png`,
+    `${baseUrl}/particles/11.png`,
+    `${baseUrl}/particles/12.png`,
+    `${baseUrl}/particles/13.png`,
+  ]);
+
+  const arrays = React.useMemo(() => {
+    const positions = new Float32Array(quantity * 3);
+    const colors = new Float32Array(quantity * 3);
+    for (let i = 0; i < quantity * 3; i++) {
+      positions[i] = (Math.random() - 0.5) * 9;
+      colors[i] = Math.random();
+    }
+    return [positions, colors] as const;
+  }, [quantity]);
+
+  const mat = React.useMemo(
+    () =>
+      new T.PointsMaterial({
+        color: color,
+        size: pointsSize,
+        sizeAttenuation: pointsAtenuation,
+        transparent: true,
+        alphaMap: p[Math.floor(Math.random() * 12)],
+        /** testing ways of eliminate border
+         * we can mix and match
+         */
+        // alphaTest: 0.001,
+        // depthTest: false,
+        depthWrite: false,
+        //
+        /** watch out for perf! */
+        blending: T.AdditiveBlending,
+      }),
+    [pointsSize, pointsAtenuation, color]
+  );
+
+  return (
+    <points
+      // castShadow={true}
+      material={mat}
+    >
+      <bufferGeometry>
+        <bufferAttribute
+          attach="attributes-position"
+          array={arrays[0]}
+          count={arrays[0].length / 3}
+          itemSize={3}
+        />
+        <bufferAttribute
+          attach="attributes-color"
+          array={arrays[1]}
+          count={arrays[1].length / 3}
+          itemSize={3}
+        />
+      </bufferGeometry>
+      {/* from drei */}
+      {/* <PointMaterial
+        // transparent
+        // vertexColors
+        size={pointsSize}
+        sizeAttenuation={pointsAtenuation}
+        // depthWrite={false}
+      /> */}
+
+      {/* atenuation is not working on toggle controls */}
+      {/* <pointsMaterial size={pointsSize} sizeAttenuation={pointsAtenuation} /> */}
+    </points>
+  );
+}
+
+function Particles({ color = 'red' }) {
+  return (
+    <points>
+      <sphereBufferGeometry args={[1, 32, 32]} />
+      {/* from drei */}
+      <PointMaterial
+        color={color}
+        // transparent
+        // vertexColors
+        size={1}
+        sizeAttenuation={false}
+        // depthWrite={false}
+      />
+      {/* <pointsMaterial size={pointsSize} sizeAttenuation={pointsAtenuation} /> */}
+    </points>
+  );
+}
 /** suports shadows! */
 function DirectionalLight({ color }: { color: string }) {
   const light = React.useRef<T.DirectionalLight>(null!);
@@ -159,7 +251,7 @@ function DirectionalLight({ color }: { color: string }) {
   );
 }
 
-function Cubo({ color }: { color: string }) {
+function Cubo({ color = 'white' }: { color?: string }) {
   const { position, wireframe } = useControls({
     wireframe: false,
     position: { min: -3, max: 3, value: { x: 0, y: 0, z: 0 }, step: 0.1 },

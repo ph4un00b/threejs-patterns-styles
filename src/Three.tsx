@@ -43,6 +43,7 @@ var global = {
   font1: `${baseUrl}/typeface/press-start-2p.json`,
 };
 
+/** FREE! @link https://kenney.nl/assets */
 export default function () {
   const { cw, ch } = useCanvas();
   const cam_ = React.useRef(null);
