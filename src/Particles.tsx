@@ -88,7 +88,7 @@ export default function () {
 
           <Particles color={'green'} />
           <MyParticles color={material} />
-          <Cubo />
+          {/* <Cubo /> */}
 
           <axesHelper args={[4]} />
           <ambientLight color={ambient} intensity={ambientIntensity} />
@@ -102,7 +102,7 @@ export default function () {
 
 function MyParticles({ quantity = 20_000, color = 'red' }) {
   const { pointsSize, pointsAtenuation } = useControls({
-    pointsSize: { value: 0.4, min: 0, max: 1, step: 0.01 },
+    pointsSize: { value: 0.1, min: 0, max: 1, step: 0.01 },
     pointsAtenuation: { value: true },
   });
   const p = useLoader(T.TextureLoader, [
@@ -134,7 +134,7 @@ function MyParticles({ quantity = 20_000, color = 'red' }) {
   const mat = React.useMemo(
     () =>
       new T.PointsMaterial({
-        color: color,
+        // color: color,
         size: pointsSize,
         sizeAttenuation: pointsAtenuation,
         transparent: true,
@@ -148,6 +148,7 @@ function MyParticles({ quantity = 20_000, color = 'red' }) {
         //
         /** watch out for perf! */
         blending: T.AdditiveBlending,
+        vertexColors: true,
       }),
     [pointsSize, pointsAtenuation, color]
   );
