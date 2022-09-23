@@ -96,9 +96,9 @@ export default function () {
 }
 
 /** suports shadows! */
-function DirectionalLight({ color }) {
-  const light = React.useRef(null!);
-  const camera = React.useRef(null!);
+function DirectionalLight({ color }: { color: string }) {
+  const light = React.useRef<T.DirectionalLight>(null!);
+  const camera = React.useRef<T.OrthographicCamera>(null!);
   useHelper(light, T.DirectionalLightHelper, 0.5);
   useHelper(camera, T.CameraHelper);
 
