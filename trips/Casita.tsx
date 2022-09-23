@@ -212,40 +212,46 @@ function Door() {
   var door = [
     `${baseUrl}/door/color.jpg`,
     `${baseUrl}/door/alpha.jpg`,
+    `${baseUrl}/door/ambientOcclusion.jpg`,
     `${baseUrl}/door/height.jpg`,
     `${baseUrl}/door/normal.jpg`,
-    `${baseUrl}/door/ambientOcclusion.jpg`,
     `${baseUrl}/door/metalness.jpg`,
     `${baseUrl}/door/roughness.jpg`,
   ];
 
   const doorT = useLoader(T.TextureLoader, door);
-
   const geo = React.useRef(null!);
+
+  React.useLayoutEffect(() => {
+    geo.current.setAttribute(
+      'uv2',
+      new T.Float32BufferAttribute(geo.current.attributes.uv.array, 2)
+    );
+  }, []);
+
   return (
     <mesh position-z={2 + 0.01} position-y={1}>
-      <planeBufferGeometry ref={geo} args={[2, 2]}>
-        {/* <bufferAttribute attach="attributes-uv2" args={[geo.current, 2]} /> */}
-        <bufferAttribute
-          attach={(parent, self) =>
-            parent.setAttribute(
-              'uv2',
-              new T.Float32BufferAttribute(
-                parent.geometry.attributes.uv.array,
-                2
-              )
-            )
-          }
-        />
-      </planeBufferGeometry>
+      <planeBufferGeometry ref={geo} args={[2.2, 2.2, 100, 100]} />
 
       <meshStandardMaterial
         map={doorT[0]}
+        //
         transparent={true}
         alphaMap={doorT[1]}
+        // ?? todo: working?
         aoMap={doorT[2]}
-        metalness={0}
-        roughness={0}
+        //
+        displacementMap={doorT[3]}
+        displacementScale={0.1}
+        //
+        normalMap={doorT[4]}
+        //
+        metalnessMap={doorT[5]}
+        //
+        roughnessMap={doorT[6]}
+        // wireframe={!true}
+        // metalness={0}
+        // roughness={10}
       />
     </mesh>
   );
@@ -274,7 +280,7 @@ function Floor({ textures, metalness = 0, roughness = 0 }) {
     <>
       <mesh
         ref={floor}
-        rotation-x={Math.PI * 0.5}
+        rotation-x={-Math.PI * 0.5}
         receiveShadow={false}
         position-y={0}
       >
@@ -283,7 +289,7 @@ function Floor({ textures, metalness = 0, roughness = 0 }) {
           color={'#a9c388'}
           metalness={metalness}
           roughness={roughness}
-          side={T.DoubleSide}
+          // side={T.DoubleSide}
         />
       </mesh>
 
@@ -305,7 +311,7 @@ function PointLight({
   color,
   intensity = 1,
   fadeDistance = 7,
-  decayDistance = 1,
+  decayDistance = 0,
 }) {
   const light = React.useRef(null!);
   const camera = React.useRef(null!);
@@ -325,7 +331,7 @@ function PointLight({
   return (
     <>
       <pointLight
-        castShadow={true}
+        // castShadow={true}
         shadow-mapSize-width={1024}
         shadow-mapSize-height={1024}
         shadow-camera-near={1}
