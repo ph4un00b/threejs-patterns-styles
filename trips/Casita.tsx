@@ -92,7 +92,7 @@ export default function () {
         <Canvas
           // color={'#262838'}
           // control shadow does not work!
-          shadows={false} /** enable shadowMap */
+          shadows={true} /** enable shadowMap */
           dpr={[dpr.min, dpr.max]}
           style={{
             width: cw + 'px',
@@ -129,24 +129,28 @@ export default function () {
             <Door />
 
             <mesh
+              castShadow={true}
               scale={[0.5, 0.5, 0.5]}
               position={[0.8, 0.2, 2.2]}
               geometry={geo}
               material={mat}
             />
             <mesh
+              castShadow={true}
               scale={[0.25, 0.25, 0.25]}
               position={[1.4, 0.1, 2]}
               geometry={geo}
               material={mat}
             />
             <mesh
+              castShadow={true}
               scale={[0.4, 0.4, 0.4]}
               position={[-0.8, 0.1, 2.2]}
               geometry={geo}
               material={mat}
             />
             <mesh
+              castShadow={true}
               scale={[0.15, 0.15, 0.15]}
               position={[-1, 0.05, 2.6]}
               geometry={geo}
@@ -167,6 +171,7 @@ export default function () {
               return (
                 <React.Fragment key={x + z}>
                   <mesh
+                    castShadow={true}
                     position={[x, Math.random() * 0.3, z]}
                     rotation-y={(Math.random() - 0.5) * 0.7}
                     rotation-z={(Math.random() - 0.5) * 0.7}
@@ -260,7 +265,7 @@ function Walls() {
   ]);
 
   return (
-    <mesh position-y={2.5 / 2}>
+    <mesh castShadow={true} position-y={2.5 / 2}>
       <boxBufferGeometry ref={geo} args={[4, 2.5, 4]} />
       <meshStandardMaterial
         map={bricks[0]}
@@ -358,7 +363,7 @@ function Floor({ textures, metalness = 0, roughness = 0 }) {
       <mesh
         ref={floor}
         rotation-x={-Math.PI * 0.5}
-        receiveShadow={false}
+        receiveShadow={true}
         position-y={0}
       >
         <planeBufferGeometry ref={geo} args={[20, 20]} />
@@ -411,12 +416,12 @@ var PointLight = React.forwardRef(function (
     <>
       <pointLight
         ref={mergeRefs([ref, light])}
-        // castShadow={true}
-        // shadow-mapSize-width={1024}
-        // shadow-mapSize-height={1024}
-        // shadow-camera-near={1}
+        castShadow={true}
+        shadow-mapSize-width={256}
+        shadow-mapSize-height={256}
+        shadow-camera-near={1}
         // todo: far is not working!
-        // shadow-camera-far={0.2}
+        shadow-camera-far={7}
         position={[0, 2.2, 2.7]}
         args={[colour, intensity /** intensity */, fadeDistance, decayDistance]}
       />
@@ -485,10 +490,10 @@ function DirectionalLight({ color }) {
       ref={light}
       castShadow={true}
       // power of 2 due to bitmapping
-      shadow-mapSize-width={1024}
-      shadow-mapSize-height={1024}
-      shadow-camera-near={near}
-      shadow-camera-far={far}
+      shadow-mapSize-width={256}
+      shadow-mapSize-height={256}
+      shadow-camera-near={1}
+      shadow-camera-far={15}
       shadow-camera-top={top}
       shadow-camera-bottom={bottom}
       shadow-camera-left={left}
