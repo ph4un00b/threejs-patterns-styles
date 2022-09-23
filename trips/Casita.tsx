@@ -91,8 +91,6 @@ export default function () {
     <>
       <section>
         <Canvas
-          // color={'#262838'}
-          // control shadow does not work!
           shadows={true} /** enable shadowMap */
           dpr={[dpr.min, dpr.max]}
           style={{

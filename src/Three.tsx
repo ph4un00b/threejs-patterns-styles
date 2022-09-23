@@ -5,6 +5,8 @@ import {
   OrbitControls,
   PerspectiveCamera,
   OrthographicCamera,
+  Center,
+  Text3D,
 } from '@react-three/drei/core';
 import { proxy, useSnapshot } from 'valtio';
 import { useControls } from 'leva';
@@ -34,7 +36,8 @@ var dpr = { min: 1, max: 2 };
 var baseUrl = 'https://ph4un00b.github.io/data';
 
 var global = {
-  bg: '#00102a',
+  bg: 'red',
+  fog: '#262837',
   mat: '#e83abf',
   font1: `${baseUrl}/typeface/press-start-2p.json`,
 };
@@ -54,12 +57,12 @@ export default function () {
     <>
       <section>
         <Canvas
-          shadows={false} /** enable shadowMap? */
+          shadows={true} /** enable shadowMap */
           dpr={[dpr.min, dpr.max]}
           style={{
             width: cw + 'px',
             height: ch + 'px',
-            backgroundColor: fondo,
+            backgroundColor: global.fog,
           }}
         >
           <PerspectiveCamera
@@ -72,6 +75,14 @@ export default function () {
           />
           <OrbitControls enableDamping={true} makeDefault={true} />
 
+          <group position={[0, 4, 0]}>
+            <Center>
+              <Text3D castShadow={true} font={global.font1}>
+                phau!
+                <meshStandardMaterial metalness={0} roughness={0} />
+              </Text3D>
+            </Center>
+          </group>
           {/* <React.Suspense> */}
           <Cubo color={material} />
           {/* </React.Suspense> */}
