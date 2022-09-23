@@ -225,7 +225,12 @@ function Walls() {
   return (
     <mesh position-y={2.5 / 2}>
       <boxBufferGeometry ref={geo} args={[4, 2.5, 4]} />
-      <meshStandardMaterial map={bricks[0]} aoMap={bricks[1]} />
+      <meshStandardMaterial
+        map={bricks[0]}
+        aoMap={bricks[1]}
+        aoMapIntensity={5}
+        roughnessMap={bricks[3]}
+      />
     </mesh>
   );
 }
@@ -257,6 +262,7 @@ function Door() {
         alphaMap={doorT[1]}
         // ?? todo: working?
         aoMap={doorT[2]}
+        aoMapIntensity={1}
         //
         displacementMap={doorT[3]}
         displacementScale={0.1}
