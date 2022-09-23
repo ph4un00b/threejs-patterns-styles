@@ -1,4 +1,4 @@
-export default nice_colors = [
+const nice_colors = [
   ['#69d2e7', '#a7dbd8', '#e0e4cc', '#f38630', '#fa6900'],
   ['#fe4365', '#fc9d9a', '#f9cdad', '#c8c8a9', '#83af9b'],
   ['#ecd078', '#d95b43', '#c02942', '#542437', '#53777a'],
@@ -992,3 +992,5 @@ export default nice_colors = [
   ['#bf9f88', '#e8c8a1', '#fce4be', '#f6a68d', '#f96153'],
   ['#a8ab9b', '#172a38', '#ec4b5d', '#f48773', '#e0c590'],
 ];
+
+export default nice_colors;

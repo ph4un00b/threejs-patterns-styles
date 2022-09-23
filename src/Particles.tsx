@@ -12,6 +12,7 @@ import {
 } from '@react-three/drei/core';
 import { proxy, useSnapshot } from 'valtio';
 import { useControls } from 'leva';
+import nice_colors from '../utils/colors';
 
 var PointersProxy = proxy({
   x: 0,
@@ -101,10 +102,28 @@ export default function () {
 }
 
 function MyParticles({ quantity = 20_000, color = 'red' }) {
+  const [colorArray] = React.useState(() => {
+    const c = new T.Color();
+    const colors = Array.from(
+      { length: quantity },
+      () =>
+        nice_colors[Math.floor(Math.random() * 900)][
+          Math.floor(Math.random() * 5)
+        ]
+    );
+
+    return Float32Array.from(
+      Array.from({ length: quantity }, (_, i) =>
+        c.set(colors[i]).convertSRGBToLinear().toArray()
+      ).flat()
+    );
+  });
+
   const { pointsSize, pointsAtenuation } = useControls({
     pointsSize: { value: 0.1, min: 0, max: 1, step: 0.01 },
     pointsAtenuation: { value: true },
   });
+
   const p = useLoader(T.TextureLoader, [
     `${baseUrl}/particles/1.png`,
     `${baseUrl}/particles/2.png`,
@@ -123,12 +142,10 @@ function MyParticles({ quantity = 20_000, color = 'red' }) {
 
   const arrays = React.useMemo(() => {
     const positions = new Float32Array(quantity * 3);
-    const colors = new Float32Array(quantity * 3);
     for (let i = 0; i < quantity * 3; i++) {
       positions[i] = (Math.random() - 0.5) * 9;
-      colors[i] = colors Math.random();
     }
-    return [positions, colors] as const;
+    return [positions] as const;
   }, [quantity]);
 
   const mat = React.useMemo(
@@ -167,8 +184,8 @@ function MyParticles({ quantity = 20_000, color = 'red' }) {
         />
         <bufferAttribute
           attach="attributes-color"
-          array={arrays[1]}
-          count={arrays[1].length / 3}
+          array={colorArray}
+          count={colorArray.length / 3}
           itemSize={3}
         />
       </bufferGeometry>
