@@ -132,14 +132,7 @@ export default function () {
               />
             </mesh>
 
-            <mesh position-z={2 + 0.01} position-y={1}>
-              <planeBufferGeometry args={[2, 2]} />
-              <meshStandardMaterial
-                color={'#ac8eaff'}
-                metalness={0}
-                roughness={0}
-              />
-            </mesh>
+            <Door />
 
             <mesh
               scale={[0.5, 0.5, 0.5]}
@@ -212,6 +205,49 @@ export default function () {
         </Canvas>
       </section>
     </>
+  );
+}
+
+function Door() {
+  var door = [
+    `${baseUrl}/door/color.jpg`,
+    `${baseUrl}/door/alpha.jpg`,
+    `${baseUrl}/door/height.jpg`,
+    `${baseUrl}/door/normal.jpg`,
+    `${baseUrl}/door/ambientOcclusion.jpg`,
+    `${baseUrl}/door/metalness.jpg`,
+    `${baseUrl}/door/roughness.jpg`,
+  ];
+
+  const doorT = useLoader(T.TextureLoader, door);
+
+  const geo = React.useRef(null!);
+  return (
+    <mesh position-z={2 + 0.01} position-y={1}>
+      <planeBufferGeometry ref={geo} args={[2, 2]}>
+        {/* <bufferAttribute attach="attributes-uv2" args={[geo.current, 2]} /> */}
+        <bufferAttribute
+          attach={(parent, self) =>
+            parent.setAttribute(
+              'uv2',
+              new T.Float32BufferAttribute(
+                parent.geometry.attributes.uv.array,
+                2
+              )
+            )
+          }
+        />
+      </planeBufferGeometry>
+
+      <meshStandardMaterial
+        map={doorT[0]}
+        transparent={true}
+        alphaMap={doorT[1]}
+        aoMap={doorT[2]}
+        metalness={0}
+        roughness={0}
+      />
+    </mesh>
   );
 }
 function Fog() {
