@@ -191,7 +191,7 @@ export default function () {
             })}
           </group>
 
-          <fog attach="fog" args={['#262838', 1 /**near */, 15 /**far */]} />
+          <Fog />
 
           <Floor textures={textures} />
 
@@ -214,6 +214,16 @@ export default function () {
     </>
   );
 }
+function Fog() {
+  useFrame(({ gl }) => {
+    gl.setClearColor('#262838');
+  });
+  return (
+    <>
+      <fog attach="fog" args={['#262838', 1 /**near */, 15 /**far */]} />
+    </>
+  );
+}
 
 function Floor({ textures, metalness = 0, roughness = 0 }) {
   const floor = React.useRef<T.Mesh>(null!);
@@ -224,9 +234,6 @@ function Floor({ textures, metalness = 0, roughness = 0 }) {
     shadow.current.position.y = floor.current.position.y + 0.01;
   }, []);
 
-  useFrame(({ gl }) => {
-    gl.setClearColor('#262838');
-  });
   return (
     <>
       <mesh
