@@ -181,6 +181,8 @@ export default function () {
 
           <Floor textures={textures} />
 
+          <Ghosts />
+
           <PerspectiveCamera
             ref={camera}
             position={[position.x, position.y, position.z]}
@@ -210,6 +212,29 @@ function useUV2(geometry: React.MutableRefObject<T.BufferGeometry>) {
   }, []);
 }
 
+function Ghosts() {
+  const [g1, g2, g3] = [
+    React.useRef(null!),
+    React.useRef(null!),
+    React.useRef(null!),
+  ];
+
+  useFrame(({ clock }) => {
+    if (!g1.current) return;
+    const t = clock.getElapsedTime();
+    const angle = t;
+    g1.current.position.x = Math.cos(angle);
+    g1.current.position.z = Math.sin(angle);
+    console.log(g1.current);
+  });
+  return (
+    <>
+      <PointLight ref={g1} colour={'#ff00ff'} intensity={2} fadeDistance={3} />
+      <PointLight ref={g2} colour={'#00ffff'} intensity={2} fadeDistance={3} />
+      <PointLight ref={g3} colour={'#ffff00'} intensity={2} fadeDistance={3} />
+    </>
+  );
+}
 function Walls() {
   const geo = React.useRef(null!);
 
@@ -293,11 +318,27 @@ function Fog() {
 function Floor({ textures, metalness = 0, roughness = 0 }) {
   const floor = React.useRef<T.Mesh>(null!);
   const shadow = React.useRef<T.Mesh>(null!);
+  const geo = React.useRef(null!);
+
+  const grass = useLoader(T.TextureLoader, [
+    `${baseUrl}/grass/color.jpg`,
+    `${baseUrl}/grass/ambientOcclusion.jpg`,
+    `${baseUrl}/grass/normal.jpg`,
+    `${baseUrl}/grass/roughness.jpg`,
+  ]);
 
   React.useLayoutEffect(() => {
     /** avoid overlapping (glicht effect) with delta */
     shadow.current.position.y = floor.current.position.y + 0.01;
+
+    grass.forEach((t) => {
+      t.repeat.set(8, 8); /** vector2 */
+      t.wrapS = T.RepeatWrapping;
+      t.wrapT = T.RepeatWrapping;
+    });
   }, []);
+
+  useUV2(geo);
 
   return (
     <>
@@ -307,9 +348,13 @@ function Floor({ textures, metalness = 0, roughness = 0 }) {
         receiveShadow={false}
         position-y={0}
       >
-        <planeBufferGeometry args={[20, 20]} />
+        <planeBufferGeometry ref={geo} args={[20, 20]} />
         <meshStandardMaterial
-          color={'#a9c388'}
+          // color={'#a9c388'}
+          map={grass[0]}
+          aoMap={grass[1]}
+          normalMap={grass[2]}
+          roughnessMap={grass[3]}
           metalness={metalness}
           roughness={roughness}
           // side={T.DoubleSide}
@@ -330,12 +375,10 @@ function Floor({ textures, metalness = 0, roughness = 0 }) {
 }
 
 /** suports shadows! */
-function PointLight({
-  color,
-  intensity = 1,
-  fadeDistance = 7,
-  decayDistance = 0,
-}) {
+var PointLight = React.forwardRef(function (
+  { colour, intensity = 1, fadeDistance = 7, decayDistance = 0 },
+  ref
+) {
   const light = React.useRef(null!);
   const camera = React.useRef(null!);
 
@@ -354,6 +397,7 @@ function PointLight({
   return (
     <>
       <pointLight
+        ref={ref}
         // castShadow={true}
         shadow-mapSize-width={1024}
         shadow-mapSize-height={1024}
@@ -362,11 +406,11 @@ function PointLight({
         shadow-camera-far={0.2}
         ref={light}
         position={[0, 2.2, 2.7]}
-        args={[color, intensity /** intensity */, fadeDistance, decayDistance]}
+        args={[colour, intensity /** intensity */, fadeDistance, decayDistance]}
       />
     </>
   );
-}
+});
 
 /** suports shadows! */
 function DirectionalLight({ color }) {
