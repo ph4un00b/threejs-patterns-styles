@@ -13,6 +13,7 @@ import {
 import { proxy, useSnapshot } from 'valtio';
 import { Leva, useControls } from 'leva';
 import { RectAreaLightHelper, RectAreaLightUniformsLib } from 'three-stdlib';
+import { mergeRefs } from '../utils/merge_refs';
 
 var PointersProxy = proxy({
   x: 0,
@@ -193,7 +194,7 @@ export default function () {
           />
 
           <DirectionalLight color={'PowderBlue'} />
-          <PointLight color={'Coral'} />
+          <PointLight colour={'Coral'} />
           <ambientLight args={['PowderBlue', ambientIntensity]} />
 
           <axesHelper args={[4]} />
@@ -220,13 +221,23 @@ function Ghosts() {
   ];
 
   useFrame(({ clock }) => {
-    if (!g1.current) return;
     const t = clock.getElapsedTime();
-    const angle = t;
-    g1.current.position.x = Math.cos(angle);
-    g1.current.position.z = Math.sin(angle);
-    console.log(g1.current);
+    const angle = t * 0.5;
+    g1.current.position.x = Math.cos(angle) * 4;
+    g1.current.position.z = Math.sin(angle) * 4;
+    g1.current.position.y = Math.sin(t * 3);
+
+    const angle3 = -t * 0.18;
+    g3.current.position.x = Math.cos(angle3) * (7 + Math.sin(t * 0.3));
+    g3.current.position.z = Math.sin(angle3) * (7 + Math.sin(t * 0.5));
+    g3.current.position.y = Math.sin(t * 3);
+
+    const angle2 = -t * 0.32;
+    g2.current.position.x = Math.cos(angle2) * 5;
+    g2.current.position.z = Math.sin(angle2) * 5;
+    g2.current.position.y = Math.sin(t * 3) + Math.sin(t * 2.5);
   });
+
   return (
     <>
       <PointLight ref={g1} colour={'#ff00ff'} intensity={2} fadeDistance={3} />
@@ -235,6 +246,7 @@ function Ghosts() {
     </>
   );
 }
+
 function Walls() {
   const geo = React.useRef(null!);
 
@@ -304,6 +316,7 @@ function Door() {
     </mesh>
   );
 }
+
 function Fog() {
   useFrame(({ gl }) => {
     gl.setClearColor('#262838');
@@ -397,14 +410,13 @@ var PointLight = React.forwardRef(function (
   return (
     <>
       <pointLight
-        ref={ref}
+        ref={mergeRefs([ref, light])}
         // castShadow={true}
-        shadow-mapSize-width={1024}
-        shadow-mapSize-height={1024}
-        shadow-camera-near={1}
+        // shadow-mapSize-width={1024}
+        // shadow-mapSize-height={1024}
+        // shadow-camera-near={1}
         // todo: far is not working!
-        shadow-camera-far={0.2}
-        ref={light}
+        // shadow-camera-far={0.2}
         position={[0, 2.2, 2.7]}
         args={[colour, intensity /** intensity */, fadeDistance, decayDistance]}
       />
