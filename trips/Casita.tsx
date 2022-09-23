@@ -114,14 +114,7 @@ export default function () {
           <group>
             <mesh>{/* haus */}</mesh>
 
-            <mesh position-y={2.5 / 2}>
-              <boxBufferGeometry args={[4, 2.5, 4]} />
-              <meshStandardMaterial
-                color={'#ac8e82'}
-                metalness={0}
-                roughness={0}
-              />
-            </mesh>
+            <Walls />
 
             <mesh rotation-y={Math.PI * 0.25} position-y={2.5 + 0.5}>
               <coneBufferGeometry args={[3.5, 1, 4]} />
@@ -208,6 +201,35 @@ export default function () {
   );
 }
 
+function useUV2(geometry: React.MutableRefObject<T.BufferGeometry>) {
+  React.useLayoutEffect(() => {
+    geometry.current.setAttribute(
+      'uv2',
+      new T.Float32BufferAttribute(geometry.current.attributes.uv.array, 2)
+    );
+  }, []);
+}
+
+function Walls() {
+  const geo = React.useRef(null!);
+
+  useUV2(geo);
+
+  const bricks = useLoader(T.TextureLoader, [
+    `${baseUrl}/bricks/color.jpg`,
+    `${baseUrl}/bricks/ambientOcclusion.jpg`,
+    `${baseUrl}/bricks/normal.jpg`,
+    `${baseUrl}/bricks/roughness.jpg`,
+  ]);
+
+  return (
+    <mesh position-y={2.5 / 2}>
+      <boxBufferGeometry ref={geo} args={[4, 2.5, 4]} />
+      <meshStandardMaterial map={bricks[0]} aoMap={bricks[1]} />
+    </mesh>
+  );
+}
+
 function Door() {
   var door = [
     `${baseUrl}/door/color.jpg`,
@@ -222,12 +244,7 @@ function Door() {
   const doorT = useLoader(T.TextureLoader, door);
   const geo = React.useRef(null!);
 
-  React.useLayoutEffect(() => {
-    geo.current.setAttribute(
-      'uv2',
-      new T.Float32BufferAttribute(geo.current.attributes.uv.array, 2)
-    );
-  }, []);
+  useUV2(geo);
 
   return (
     <mesh position-z={2 + 0.01} position-y={1}>

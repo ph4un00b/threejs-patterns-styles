@@ -113,7 +113,7 @@ function MyMaterials() {
     React.useRef<T.Mesh>(null!),
   ];
 
-  const [grad, cap, t1, t2] = useLoader(T.TextureLoader, [
+  const [grad, cap, t1, t2, tH, tN, tAO] = useLoader(T.TextureLoader, [
     `${baseUrl}/gradients/3.jpg`,
     `${baseUrl}/matcaps/3.png`,
     ...textureAssets,
@@ -306,10 +306,45 @@ function MyMaterials() {
           roughness={roughness}
         />
       </mesh>
+
+      <MeshAmbientOcclusion py={6} />
     </>
   );
 }
 
+function useUV2(geometry: React.MutableRefObject<T.BufferGeometry>) {
+  React.useLayoutEffect(() => {
+    geometry.current.setAttribute(
+      'uv2',
+      new T.Float32BufferAttribute(geometry.current.attributes.uv.array, 2)
+    );
+  }, []);
+}
+
+function MeshAmbientOcclusion({ py }) {
+  const plane = React.useRef(null!);
+  const geo = React.useRef(null!);
+  const [grad, cap, t1, t2, tH, tN, tAO] = useLoader(T.TextureLoader, [
+    `${baseUrl}/gradients/3.jpg`,
+    `${baseUrl}/matcaps/3.png`,
+    ...textureAssets,
+  ]);
+
+  useUV2(geo);
+  return (
+    <mesh ref={plane} position-y={py}>
+      <planeBufferGeometry ref={geo} args={[1, 1]} />
+      <meshStandardMaterial
+        map={t1}
+        aoMap={tAO}
+        aoMapIntensity={10}
+        // metalness={metalness}
+        // roughness={roughness}
+        side={T.DoubleSide}
+      />
+    </mesh>
+  );
+}
 function Cubo({ color }: { color: string }) {
   const { position, wireframe } = useControls({
     wireframe: false,

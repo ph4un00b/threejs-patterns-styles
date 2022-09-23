@@ -9,7 +9,8 @@ import Textures from './Textures';
 import Three from './Three';
 
 function App() {
-  return <Casita />;
+  // return <Casita />;
+  return <Materials />;
 }
 
 export default App;
