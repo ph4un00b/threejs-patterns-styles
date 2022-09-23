@@ -46,8 +46,17 @@ var global = {
 export default function () {
   const { cw, ch } = useCanvas();
   const cam_ = React.useRef(null);
-  const { fondo, material, ambientIntensity, ambient } = useControls({
+  const {
+    fondo,
+    material,
+    ambientIntensity,
+    ambient,
+    pointsSize,
+    pointsAtenuation,
+  } = useControls({
     ambientIntensity: { value: 0.3, min: 0, max: 1, step: 0.001 },
+    pointsSize: { value: 0.02, min: 0, max: 1, step: 0.001 },
+    pointsAtenuation: { value: true },
     ambient: { value: '#ffffff' },
     fondo: { value: global.fog },
     material: { value: global.mat },
@@ -83,7 +92,14 @@ export default function () {
               </Text3D>
             </Center>
           </group>
-          <Cubo color={material} />
+
+          <points>
+            <sphereBufferGeometry args={[1, 32, 32]} />
+            <pointsMaterial
+              size={pointsSize}
+              sizeAttenuation={pointsAtenuation}
+            />
+          </points>
 
           <axesHelper args={[4]} />
           <ambientLight color={ambient} intensity={ambientIntensity} />
