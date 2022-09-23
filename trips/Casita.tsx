@@ -67,13 +67,21 @@ export default function () {
   ]);
 
   const { ambientIntensity, position } = useControls({
-    ambientIntensity: { value: 0.5, min: 0, max: 1, step: 0.001 },
-    position: { min: -30, max: 30, step: 0.1, value: { x: 0, y: 0, z: 9 } },
+    ambientIntensity: { value: 0.11, min: 0, max: 1, step: 0.001 },
+    position: { min: -30, max: 30, step: 0.1, value: { x: 0, y: 5, z: 10 } },
   });
 
   var geo = React.useMemo(() => new T.SphereBufferGeometry(1, 16, 16), []);
   var mat = React.useMemo(
     () => new T.MeshStandardMaterial({ color: 'green' }),
+    []
+  );
+  var geoGrave = React.useMemo(
+    () => new T.BoxBufferGeometry(0.6, 0.8, 0.2),
+    []
+  );
+  var matGrave = React.useMemo(
+    () => new T.MeshStandardMaterial({ color: 'DimGrey' }),
     []
   );
 
@@ -158,6 +166,30 @@ export default function () {
             />
           </group>
 
+          <group>
+            {Array.from({ length: 50 }, () => {
+              const angle = Math.random() * Math.PI * 2;
+              const radius = /** from [3,9]*/ 3 + Math.random() * 6;
+              const positionXZ = [
+                Math.sin(angle) * radius,
+                Math.cos(angle) * radius,
+              ];
+              return positionXZ;
+            }).map(([x, z]) => {
+              return (
+                <React.Fragment key={x + z}>
+                  <mesh
+                    position={[x, Math.random() * 0.3, z]}
+                    rotation-y={(Math.random() - 0.5) * 0.7}
+                    rotation-z={(Math.random() - 0.5) * 0.7}
+                    geometry={geoGrave}
+                    material={matGrave}
+                  />
+                </React.Fragment>
+              );
+            })}
+          </group>
+
           <Floor textures={textures} />
 
           <PerspectiveCamera
@@ -169,7 +201,8 @@ export default function () {
             makeDefault={true}
           />
 
-          <ambientLight args={[0xffffff, ambientIntensity]} />
+          <DirectionalLight color={'PowderBlue'} />
+          <ambientLight args={['PowderBlue', ambientIntensity]} />
 
           <axesHelper args={[4]} />
         </Canvas>
@@ -214,6 +247,93 @@ function Floor({ textures, metalness = 0, roughness = 0 }) {
         />
       </mesh>
     </>
+  );
+}
+
+/** suports shadows! */
+function DirectionalLight({ color }) {
+  const light = React.useRef(null!);
+  const camera = React.useRef(null!);
+  useHelper(light, T.DirectionalLightHelper, 0.5);
+  useHelper(camera, T.CameraHelper);
+
+  const { far, near, top, bottom, left, right } = useControls({
+    far: {
+      value: 11,
+      max: 30,
+      min: -30,
+      step: 1,
+    },
+    near: {
+      value: 1,
+      max: 30,
+      min: -30,
+      step: 1,
+    },
+    top: {
+      value: 2,
+      max: 30,
+      min: -30,
+      step: 1,
+    },
+    bottom: {
+      value: -2,
+      max: 30,
+      min: -30,
+      step: 1,
+    },
+    right: {
+      value: 2,
+      max: 30,
+      min: -30,
+      step: 1,
+    },
+    left: {
+      value: -2,
+      max: 30,
+      min: -30,
+      step: 1,
+    },
+  });
+
+  React.useLayoutEffect(() => {
+    camera.current = light.current.shadow.camera;
+    // light.current.shadow.radius = 10;
+    // alert(JSON.stringify(light.current.shadow.mapSize, null, 2));
+  }, []);
+
+  useFrame(() => {
+    camera.current.updateProjectionMatrix();
+  });
+
+  return (
+    <directionalLight
+      ref={light}
+      castShadow={true}
+      // power of 2 due to bitmapping
+      shadow-mapSize-width={1024}
+      shadow-mapSize-height={1024}
+      shadow-camera-near={near}
+      shadow-camera-far={far}
+      shadow-camera-top={top}
+      shadow-camera-bottom={bottom}
+      shadow-camera-left={left}
+      shadow-camera-right={right}
+      /** @link https://github.com/pmndrs/react-three-fiber/blob/master/packages/fiber/tests/core/renderer.test.tsx#L571
+       *
+       * types:
+       *
+       * T.BasicShadowMap
+       * T.PCFShadowMap
+       * T.VSMShadowMap
+       *
+       * 3RF set PCFSoftShadowMap as the default shadow map
+       */
+      shadow-radius={10}
+      // position={[directional.x, directional.y, directional.z]}
+      position={[4, 5, -21]}
+      args={[color, 0.5 /** intensity */]}
+    />
   );
 }
 
