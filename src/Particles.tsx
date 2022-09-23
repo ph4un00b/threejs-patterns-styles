@@ -126,7 +126,7 @@ function MyParticles({ quantity = 20_000, color = 'red' }) {
     const colors = new Float32Array(quantity * 3);
     for (let i = 0; i < quantity * 3; i++) {
       positions[i] = (Math.random() - 0.5) * 9;
-      colors[i] = Math.random();
+      colors[i] = colors Math.random();
     }
     return [positions, colors] as const;
   }, [quantity]);
