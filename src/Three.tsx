@@ -11,6 +11,7 @@ import {
 } from '@react-three/drei/core';
 import { proxy, useSnapshot } from 'valtio';
 import { useControls } from 'leva';
+import { useSpring, animated, config, a } from '@react-spring/three';
 
 var PointersProxy = proxy({
   x: 0,
@@ -146,22 +147,46 @@ function DirectionalLight({ color }: { color: string }) {
 }
 
 function Cubo({ color }: { color: string }) {
+  const [active, setActive] = React.useState(0);
   const { position, wireframe } = useControls({
     wireframe: false,
     position: { min: -3, max: 3, value: { x: 0, y: 0, z: 0 }, step: 0.1 },
   });
-  const mesh_ = React.useRef<T.Mesh>(null);
+  const cubo = React.useRef<T.Mesh>(null);
+  const { spring } = useSpring({
+    spring: active,
+    config: config.molasses,
+  });
+
+  // const { pos } = useSpring({ pos: active ? -2 : 0 });
+  const { pos } = useSpring({
+    to: {
+      pos: 0,
+    },
+    from: { pos: -20 },
+    config: config.gentle,
+  });
+  const { scale } = useSpring({ scale: active ? 4 : 1 });
+  const { rotation } = useSpring({ rotation: active ? Math.PI : 0 });
+  const { colorA } = useSpring({ colorA: active ? 'royalblue' : color });
+  // interpolate values from common spring
+  // const scale = spring.to([0, 1], [1, 4]);
+  // const rotation = spring.to([0, 1], [0, Math.PI]);
+  // const colorA = spring.to([0, 1], ['#6246ea', 'royalblue']);
 
   return (
-    <mesh
-      position-x={position.x}
+    <a.mesh
+      rotation-x={rotation}
+      scale={scale}
+      onClick={() => setActive(Number(!active))}
+      // position={pos}
+      position-x={pos}
       position-y={position.y}
       position-z={position.z}
-      ref={mesh_}
     >
-      <boxBufferGeometry args={[1, 1, 1]} />
-      <meshStandardMaterial wireframe={wireframe} color={color} />
-    </mesh>
+      <boxGeometry />
+      <a.meshStandardMaterial color={colorA} wireframe={wireframe} />
+    </a.mesh>
   );
 }
 

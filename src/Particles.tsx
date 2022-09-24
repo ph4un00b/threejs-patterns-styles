@@ -76,6 +76,7 @@ export default function () {
             manual={false}
             makeDefault={true}
           />
+
           <OrbitControls enableDamping={true} makeDefault={true} />
 
           <group position={[0, 4, 0]}>
@@ -295,10 +296,12 @@ function Cubo({ color = 'white' }: { color?: string }) {
 
   return (
     <mesh
+      ref={mesh_}
+      scale={4}
+      onClick={() => setActive(!active)}
       position-x={position.x}
       position-y={position.y}
       position-z={position.z}
-      ref={mesh_}
     >
       <boxBufferGeometry args={[1, 1, 1]} />
       <meshStandardMaterial wireframe={wireframe} color={color} />
