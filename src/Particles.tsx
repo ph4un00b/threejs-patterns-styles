@@ -170,8 +170,16 @@ function MyParticles({ quantity = 20_000, color = 'red' }) {
     [pointsSize, pointsAtenuation, color]
   );
 
+  const particles = React.useRef<T.Object3D>(null!);
+  useFrame(({ clock }) => {
+    const t = clock.getElapsedTime();
+    particles.current.rotation.y = t * 0.2;
+    particles.current.position.y = -t * 0.02;
+  });
+
   return (
     <points
+      ref={particles}
       // castShadow={true}
       material={mat}
     >
