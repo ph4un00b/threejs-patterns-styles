@@ -12,6 +12,7 @@ import {
 import { proxy, useSnapshot } from 'valtio';
 import { useControls } from 'leva';
 import { useSpring, animated, config, a } from '@react-spring/three';
+import { useDrag } from '@use-gesture/react';
 
 var PointersProxy = proxy({
   x: 0,
@@ -67,6 +68,7 @@ export default function () {
           }}
         >
           {/* <React.Suspense> */}
+
           <PerspectiveCamera
             ref={cam_}
             position={[0, 0, 10]}
@@ -75,7 +77,8 @@ export default function () {
             manual={false}
             makeDefault={true}
           />
-          <OrbitControls enableDamping={true} makeDefault={true} />
+
+          {/* <OrbitControls enableDamping={true} makeDefault={true} /> */}
 
           <group position={[0, 4, 0]}>
             <Center>
@@ -95,6 +98,62 @@ export default function () {
         </Canvas>
       </section>
     </>
+  );
+}
+
+function Cubo({ color }: { color: string }) {
+  const [active, setActive] = React.useState(0);
+  const { position, wireframe } = useControls({
+    wireframe: false,
+    position: { min: -3, max: 3, value: { x: 0, y: 0, z: 0 }, step: 0.1 },
+  });
+  const cubo = React.useRef<T.Mesh>(null);
+  const { pos } = useSpring({
+    to: {
+      pos: 0,
+    },
+    from: { pos: -20 },
+    config: config.gentle,
+  });
+  const { scale } = useSpring({ scale: active ? 4 : 1 });
+  const { rotation } = useSpring({ rotation: active ? Math.PI : 0 });
+  const { colorA } = useSpring({ colorA: active ? 'royalblue' : color });
+  /** interpolate values from common spring */
+  // const { spring } = useSpring({
+  //   spring: active,
+  //   config: config.molasses,
+  // });
+  // const { pos } = useSpring({ pos: active ? -2 : 0 });
+  // const scale = spring.to([0, 1], [1, 4]);
+  // const rotation = spring.to([0, 1], [0, Math.PI]);
+  // const colorA = spring.to([0, 1], ['#6246ea', 'royalblue']);
+
+  const { viewport } = useThree();
+  const [{ x, y }, api] = useSpring(() => ({ x: 0, y: 0 }));
+
+  const handlers = useDrag(function ({ event, offset: [x, y] }) {
+    event.stopPropagation();
+    const aspect = viewport.getCurrentViewport().factor;
+    console.log(x, y);
+    return api.start({ x: x / aspect, y: -y / aspect });
+  });
+
+  return (
+    <a.mesh
+      {...handlers()}
+      onClick={(e) => {
+        e.stopPropagation();
+        setActive(Number(!active));
+      }}
+      rotation-x={rotation}
+      scale={scale}
+      position-x={x}
+      position-y={y}
+      position-z={pos}
+    >
+      <boxGeometry />
+      <a.meshStandardMaterial color={colorA} wireframe={wireframe} />
+    </a.mesh>
   );
 }
 
@@ -143,50 +202,6 @@ function DirectionalLight({ color }: { color: string }) {
       position={[0, 15, -20]}
       args={[color, 0.5 /** intensity */]}
     />
-  );
-}
-
-function Cubo({ color }: { color: string }) {
-  const [active, setActive] = React.useState(0);
-  const { position, wireframe } = useControls({
-    wireframe: false,
-    position: { min: -3, max: 3, value: { x: 0, y: 0, z: 0 }, step: 0.1 },
-  });
-  const cubo = React.useRef<T.Mesh>(null);
-  const { spring } = useSpring({
-    spring: active,
-    config: config.molasses,
-  });
-
-  // const { pos } = useSpring({ pos: active ? -2 : 0 });
-  const { pos } = useSpring({
-    to: {
-      pos: 0,
-    },
-    from: { pos: -20 },
-    config: config.gentle,
-  });
-  const { scale } = useSpring({ scale: active ? 4 : 1 });
-  const { rotation } = useSpring({ rotation: active ? Math.PI : 0 });
-  const { colorA } = useSpring({ colorA: active ? 'royalblue' : color });
-  // interpolate values from common spring
-  // const scale = spring.to([0, 1], [1, 4]);
-  // const rotation = spring.to([0, 1], [0, Math.PI]);
-  // const colorA = spring.to([0, 1], ['#6246ea', 'royalblue']);
-
-  return (
-    <a.mesh
-      rotation-x={rotation}
-      scale={scale}
-      onClick={() => setActive(Number(!active))}
-      // position={pos}
-      position-x={pos}
-      position-y={position.y}
-      position-z={position.z}
-    >
-      <boxGeometry />
-      <a.meshStandardMaterial color={colorA} wireframe={wireframe} />
-    </a.mesh>
   );
 }
 
