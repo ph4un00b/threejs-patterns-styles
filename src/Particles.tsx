@@ -170,20 +170,29 @@ function MyParticles({ quantity = 20_000, color = 'red' }) {
     [pointsSize, pointsAtenuation, color]
   );
 
-  const particles = React.useRef<T.Object3D>(null!);
+  const particles = React.useRef<T.Light>(null!);
+  const geo = React.useRef<T.BufferGeometry>(null!);
   useFrame(({ clock }) => {
     const t = clock.getElapsedTime();
-    particles.current.rotation.y = t * 0.2;
-    particles.current.position.y = -t * 0.02;
+    // particles.current.rotation.y = t * 0.2;
+    // particles.current.position.y = -t * 0.02;
+    performane_killer: {
+      for (let i = 0; i < quantity; i++) {
+        const ixyz = 3 * i;
+        const x = geo.current.attributes.position.array[ixyz];
+        geo.current.attributes.position.array[ixyz + 1] = Math.sin(t + x);
+      }
+    }
+    geo.current.attributes.position.needsUpdate = true;
   });
 
   return (
     <points
-      ref={particles}
+      // ref={particles}
       // castShadow={true}
       material={mat}
     >
-      <bufferGeometry>
+      <bufferGeometry ref={geo}>
         <bufferAttribute
           attach="attributes-position"
           array={arrays[0]}
