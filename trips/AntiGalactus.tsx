@@ -338,6 +338,7 @@ function MyGalaxy() {
   useFrame(({ clock }) => {
     const t = clock.getElapsedTime();
     geo.current.attributes.position.needsUpdate = true;
+    points.current.rotation.y = t * 0.2;
   });
 
   return (
