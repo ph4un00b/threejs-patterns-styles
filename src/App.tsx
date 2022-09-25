@@ -1,4 +1,5 @@
 import Text from '../Text';
+import AntiGalactus from '../trips/AntiGalactus';
 import Casita from '../trips/Casita';
 import Drag from '../trips/Drag';
 import Fondos from '../trips/Fondos';
@@ -11,7 +12,8 @@ import Textures from './Textures';
 import Three from './Three';
 
 function App() {
-  return <Drag />;
+  return <AntiGalactus />;
+  // return <Drag />;
   // return <Particles />;
   // return <Casita />;
   // return <Materials />;
