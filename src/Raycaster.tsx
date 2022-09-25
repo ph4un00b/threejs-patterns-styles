@@ -13,6 +13,7 @@ import { proxy, useSnapshot } from 'valtio';
 import { useControls } from 'leva';
 import { useSpring, animated, config, a } from '@react-spring/three';
 import { useDrag } from '@use-gesture/react';
+import { mergeRefs } from '../utils/merge_refs';
 
 var PointersProxy = proxy({
   x: 0,
@@ -48,12 +49,14 @@ var global = {
 /** FREE! @link https://kenney.nl/assets */
 export default function () {
   const { cw, ch } = useCanvas();
-  const cam_ = React.useRef(null);
+  const cam_ = React.useRef(null!);
+
   const { fondo, ambientIntensity, ambient } = useControls({
     ambientIntensity: { value: 0.3, min: 0, max: 1, step: 0.001 },
     ambient: { value: '#ffffff' },
     fondo: { value: global.fog },
   });
+
   return (
     <>
       <section>
@@ -88,7 +91,7 @@ export default function () {
             </Center>
           </group>
 
-          <Cubo />
+          <TestObjects />
 
           <axesHelper args={[4]} />
           <ambientLight color={ambient} intensity={ambientIntensity} />
@@ -100,9 +103,66 @@ export default function () {
   );
 }
 
+function TestObjects() {
+  const { scene } = useThree();
+  const object1 = React.useRef<T.Mesh>(null!);
+  const object2 = React.useRef<T.Mesh>(null!);
+
+  React.useLayoutEffect(() => {
+    rayDirection.normalize();
+    raycaster.set(rayOrigin, rayDirection);
+
+    /** casting ray */
+    const intersect = raycaster.intersectObject(object1.current);
+    const intersects = raycaster.intersectObjects([
+      object1.current,
+      object2.current,
+    ]);
+  }, []);
+
+  useFrame(({ clock }) => {
+    const t = clock.getElapsedTime();
+    const tests = [object1.current, object2.current];
+
+    tests.forEach((ref, i) => {
+      ref.position.y = 1.5 * Math.sin(t * (i + 0.5));
+    });
+
+    /** casting ray */
+    const intersects = raycaster.intersectObjects(tests);
+
+    for (let obj of tests) {
+      obj.material.color.set('red');
+    }
+
+    for (let obj of intersects) {
+      obj.object.material.color.set('green');
+    }
+    // obj.object.material.color.set('green');
+  });
+  return (
+    <>
+      <mesh ref={object1} position-x={-2}>
+        <sphereBufferGeometry args={[0.5, 16, 16]} />
+        <meshBasicMaterial color={'red'} />
+      </mesh>
+
+      <Cubo />
+
+      <mesh ref={object2} position-x={2}>
+        <sphereBufferGeometry args={[0.5, 16, 16]} />
+        <meshBasicMaterial color={'red'} />
+      </mesh>
+    </>
+  );
+}
+var raycaster = new T.Raycaster();
+var rayOrigin = new T.Vector3(-3, 0, 0);
+var rayDirection = new T.Vector3(10, 0, 0);
+
 function Cubo({ color = '#e83abf' }: { color?: string }) {
   const [active, setActive] = React.useState(0);
-  const { position, wireframe } = useControls({
+  const { wireframe } = useControls({
     wireframe: false,
   });
   const cubo = React.useRef<T.Mesh>(null);
