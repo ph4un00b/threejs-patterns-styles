@@ -90,7 +90,7 @@ export default function () {
           </group>
 
           <Cubo color={material} />
-          <Cube color={material} />
+          <Cube color={'yellow'} />
 
           <axesHelper args={[4]} />
           <ambientLight color={ambient} intensity={ambientIntensity} />
@@ -104,67 +104,101 @@ export default function () {
 
 function Cube({ color }: { color: string }) {
   const [active, setActive] = React.useState(0);
-  const { position, wireframe } = useControls({
-    wireframe: false,
-    position: { min: -3, max: 3, value: { x: 0, y: 0, z: 0 }, step: 0.1 },
-  });
-  const cubo = React.useRef<T.Mesh>(null);
-  const { pos } = useSpring({
-    to: {
-      pos: 0,
-    },
-    from: { pos: -20 },
-    config: config.gentle,
-  });
   const { scale } = useSpring({ scale: active ? 4 : 1 });
-  const { rotation } = useSpring({ rotation: active ? Math.PI : 0 });
+  // const { rotation } = useSpring({ rotation: active ? Math.PI : 0 });
   const { colorA } = useSpring({ colorA: active ? 'royalblue' : color });
   const { viewport } = useThree();
-  const [{ x, y }, api] = useSpring(() => ({ x: 0, y: 0 }));
+  const { width, height, factor } = viewport;
+  const [{ x, y }, api] = useSpring(() => ({ x: 0, y: -4 }));
 
-  const handlers = useDrag(function ({
-    active: isGestureActive,
-    movement: [mx, my],
-    cancel: cancelDrag,
-    event,
-    offset: [x, y],
-  }) {
-    event.stopPropagation();
-    console.log({ mx });
-    /** only drag and pinch gestures are cancellable  */
-    if (mx > 200) cancelDrag();
-    const aspect = viewport.getCurrentViewport().factor;
-    x = x / aspect;
-    y = -y / aspect;
-    mx = mx / aspect;
-    api.start({ x: isGestureActive ? mx : 0, y, immediate: isGestureActive });
-  });
+  // useScroll(({ xy: [, y] }) => api.start({ width: (y / height) * 100 + '%' }), {
+  //   target: window,
+  // });
+  const dragHandlers = useDrag(
+    function ({
+      active: isGestureActive,
+      movement: [mx, my],
+      cancel: cancelDrag,
+      event,
+      offset: [xOffset, yOffset],
+    }) {
+      event.stopPropagation();
+      /** only drag and pinch gestures are cancellable  */
+      if (mx > 4) cancelDrag();
+      const props = {
+        x: isGestureActive ? mx : 0,
+        y: yOffset,
+        immediate: isGestureActive,
+      };
+      api.start(props);
+    },
+    {
+      // threshold: 10,
+      preventScroll: false, //default
+      preventScrollAxis: 'y', //default
+      preventDefault: false,
+      filterTaps: true,
+      keys: true, // default
+      modifierKey: 'ctrlKey' /** 'ctrlKey' | 'altKey' | 'metaKey' | null */,
+      enabled: true, // default
+      axis: 'lock', // just move on a single axis detected
+      // delay: 1000
+      // filterTaps: true,
+      /**
+       * in some situations you may want
+       * the drag to persist while scrolling
+       * then use touch events.
+       */
+      // pointer: { touch: false }
+      // pointer: { buttons: [1, 2, 4] },
+      // pointer: { capture: true }
+      /**
+       * in a way that capture works on mobile,
+       * you'd probably have to use
+       * document.elementFromPoint.
+       * @link https://developer.mozilla.org/en-US/docs/Web/API/Document/elementFromPoint
+       */
+      lock: false,
+      bounds: {
+        /**
+         * Since v10 and for the drag gesture only,
+         * bounds can be a React ref or an HTMLElement
+         * */
+        left: -4,
+        right: 4,
+        top: -4,
+        bottom: 4,
+      },
+      rubberband: true, // adds friction on bounds
+      transform: ([x, y]) => {
+        /** bounds, mx, my, offset.... */
+        return [x / factor, -y / factor];
+      },
+      from: () => [x.get(), y.get()],
+    }
+  );
 
   return (
     <a.mesh
-      {...handlers()}
-      // onClick={(e) => {
-      //   e.stopPropagation();
-      //   setActive(Number(!active));
-      // }}
-      rotation-x={rotation}
+      {...dragHandlers()}
+      onClick={(e) => {
+        e.stopPropagation();
+        setActive(Number(!active));
+      }}
+      // rotation-x={rotation}
       scale={scale}
       position-x={x}
       position-y={y}
-      position-z={pos}
+      // position-z={pos}
     >
       <boxGeometry />
-      <a.meshStandardMaterial color={colorA} wireframe={wireframe} />
+      <a.meshStandardMaterial color={colorA} wireframe={!true} />
     </a.mesh>
   );
 }
 
 function Cubo({ color }: { color: string }) {
   const [active, setActive] = React.useState(0);
-  const { position, wireframe } = useControls({
-    wireframe: false,
-    position: { min: -3, max: 3, value: { x: 0, y: 0, z: 0 }, step: 0.1 },
-  });
   const cubo = React.useRef<T.Mesh>(null);
   const { pos } = useSpring({
     to: {
@@ -209,7 +243,7 @@ function Cubo({ color }: { color: string }) {
       position-z={pos}
     >
       <planeBufferGeometry args={[4, 4]} />
-      <a.meshStandardMaterial color={colorA} wireframe={wireframe} />
+      <a.meshStandardMaterial color={colorA} wireframe={!true} />
     </a.mesh>
   );
 }
