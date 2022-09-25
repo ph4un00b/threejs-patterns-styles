@@ -225,10 +225,10 @@ function MyGalaxy() {
   const points = React.useRef<T.Points>(null!);
 
   const { pointsSize, pointsAtenuation, offset, mul, particles } = useControls({
-    pointsSize: { value: 0.1, min: 0, max: 1, step: 0.01 },
+    pointsSize: { value: 0.02, min: 0, max: 1, step: 0.01 },
     offset: { value: 0.5, min: 0, max: 1, step: 0.01 },
-    mul: { value: 3, min: 1, max: 20, step: 1 },
-    particles: { value: 1_000, min: 100, max: 100_000, step: 1_000 },
+    mul: { value: 9, min: 1, max: 20, step: 1 },
+    particles: { value: 100_000, min: 100, max: 100_000, step: 1_000 },
     pointsAtenuation: { value: true },
   });
 
