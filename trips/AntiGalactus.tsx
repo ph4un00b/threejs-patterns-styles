@@ -221,6 +221,9 @@ window.addEventListener('dblclick', () => {
 });
 
 function MyGalaxy() {
+  const geo = React.useRef<T.BufferGeometry>(null!);
+  const points = React.useRef<T.Points>(null!);
+
   const { pointsSize, pointsAtenuation, offset, mul, particles } = useControls({
     pointsSize: { value: 0.1, min: 0, max: 1, step: 0.01 },
     offset: { value: 0.5, min: 0, max: 1, step: 0.01 },
@@ -228,17 +231,6 @@ function MyGalaxy() {
     particles: { value: 1_000, min: 100, max: 100_000, step: 1_000 },
     pointsAtenuation: { value: true },
   });
-
-  const arrays = React.useMemo(() => {
-    const positions = new Float32Array(particles * 3);
-    for (let i = 0; i < particles * 3; i++) {
-      const [x, y, z] = [i, i + 1, i + 2];
-      positions[x] = Math.sin(Math.random() - offset) * mul;
-      positions[y] = Math.cos(Math.random() - offset) * mul;
-      positions[z] = Math.sin(Math.random() - offset) * mul;
-    }
-    return [positions] as const;
-  }, [particles, offset, mul]);
 
   const mat = React.useMemo(
     () =>
@@ -262,14 +254,33 @@ function MyGalaxy() {
     [pointsSize, pointsAtenuation /** color */]
   );
 
-  const geo = React.useRef<T.BufferGeometry>(null!);
+  const { scene } = useThree();
+  React.useLayoutEffect(() => {
+    if (points.current != null) {
+      geo.current.dispose();
+      mat.dispose();
+      // scene.remove(points.current);
+    }
+  }, [particles, offset, mul]);
+
+  const arrays = React.useMemo(() => {
+    const positions = new Float32Array(particles * 3);
+    for (let i = 0; i < particles * 3; i++) {
+      const [x, y, z] = [i, i + 1, i + 2];
+      positions[x] = Math.sin(Math.random() - offset) * mul;
+      positions[y] = Math.cos(Math.random() - offset) * mul;
+      positions[z] = Math.sin(Math.random() - offset) * mul;
+    }
+    return [positions] as const;
+  }, [particles, offset, mul]);
+
   useFrame(({ clock }) => {
     const t = clock.getElapsedTime();
     geo.current.attributes.position.needsUpdate = true;
   });
   return (
     <points
-      // ref={particles}
+      ref={points}
       // castShadow={true}
       material={mat}
     >
