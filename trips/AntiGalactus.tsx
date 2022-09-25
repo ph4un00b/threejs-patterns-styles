@@ -13,6 +13,7 @@ import { proxy, useSnapshot } from 'valtio';
 import { useControls } from 'leva';
 import { useSpring, animated, config, a } from '@react-spring/three';
 import { useDrag } from '@use-gesture/react';
+import nice_colors from '../utils/colors';
 
 var PointersProxy = proxy({
   x: 0,
@@ -220,14 +221,55 @@ window.addEventListener('dblclick', () => {
   }
 });
 
+function useNiceColors({
+  quantity,
+  preset = Math.floor(Math.random() * 900),
+}: {
+  quantity: number;
+  preset?: number;
+}) {
+  return React.useState(() => {
+    const c = new T.Color();
+
+    const colors = Array.from(
+      { length: quantity },
+      () => nice_colors[preset][Math.floor(Math.random() * 4)]
+    );
+
+    const colorsRGB = Float32Array.from(
+      Array.from({ length: quantity }, (_, i) =>
+        c.set(colors[i]).convertSRGBToLinear().toArray()
+      ).flat()
+    );
+
+    return [colorsRGB, colors] as const;
+  });
+}
+
 function MyGalaxy() {
   const geo = React.useRef<T.BufferGeometry>(null!);
   const points = React.useRef<T.Points>(null!);
 
-  const { pointsSize, pointsAtenuation, offset, mul, particles } = useControls({
-    pointsSize: { value: 0.02, min: 0, max: 1, step: 0.01 },
+  const {
+    pointsSize,
+    pointsAtenuation,
+    offset,
+    mul,
+    particles,
+    radius,
+    ramas,
+    curva,
+    noise,
+    noiseCurva,
+  } = useControls({
+    pointsSize: { value: 0.01, min: 0, max: 1, step: 0.01 },
     offset: { value: 0.5, min: 0, max: 1, step: 0.01 },
     mul: { value: 9, min: 1, max: 20, step: 1 },
+    ramas: { value: 3, min: 2, max: 20, step: 1 },
+    curva: { value: 1, min: -5, max: 5, step: 0.001 },
+    radius: { value: 5, min: 0.01, max: 20, step: 0.01 },
+    noise: { value: 0.2, min: 0, max: 2, step: 0.001 },
+    noiseCurva: { value: 3, min: 1, max: 10, strep: 0.001 },
     particles: { value: 100_000, min: 100, max: 100_000, step: 1_000 },
     pointsAtenuation: { value: true },
   });
@@ -235,49 +277,69 @@ function MyGalaxy() {
   const mat = React.useMemo(
     () =>
       new T.PointsMaterial({
-        // color: color,
+        // color: '#ff5588',
+        depthWrite: false,
+        vertexColors: true,
+        blending: T.AdditiveBlending,
         size: pointsSize,
         sizeAttenuation: pointsAtenuation,
-        // transparent: true,
-        // alphaMap: p[Math.floor(Math.random() * 12)],
-        // /** testing ways of eliminate border
-        //  * we can mix and match
-        //  */
-        // // alphaTest: 0.001,
-        // // depthTest: false,
-        // depthWrite: false,
-        // //
-        // /** watch out for perf! */
-        // blending: T.AdditiveBlending,
-        // vertexColors: true,
       }),
     [pointsSize, pointsAtenuation /** color */]
   );
 
   const { scene } = useThree();
   React.useLayoutEffect(() => {
-    if (points.current != null) {
+    if (points.current) {
       geo.current.dispose();
       mat.dispose();
       // scene.remove(points.current);
     }
-  }, [particles, offset, mul]);
+  }, [particles, offset, mul, radius, ramas, curva, noise, noiseCurva]);
+
+  const [[, niceColors]] = useNiceColors({ quantity: 2 });
+  // console.log({ colors });
 
   const arrays = React.useMemo(() => {
     const positions = new Float32Array(particles * 3);
+    const colors = new Float32Array(particles * 3);
+    const colorIn = new T.Color(niceColors[0]);
+    const colorOut = new T.Color(niceColors[1]);
+
     for (let i = 0; i < particles * 3; i++) {
-      const [x, y, z] = [i, i + 1, i + 2];
-      positions[x] = Math.sin(Math.random() - offset) * mul;
-      positions[y] = Math.cos(Math.random() - offset) * mul;
-      positions[z] = Math.sin(Math.random() - offset) * mul;
+      const xyz = i * 3;
+      const [x, y, z] = [xyz, xyz + 1, xyz + 2];
+      const random_radius = Math.random() * radius;
+      const random_noise = Math.random() * noise;
+      const ramaAngle = ((i % ramas) / ramas) * Math.PI * 2;
+      const curveAngle = random_radius * curva;
+      const angle = ramaAngle + curveAngle;
+
+      const [rx, ry, rz] = [
+        Math.pow(Math.random(), noiseCurva) * (Math.random() < 0.5 ? 1 : -1),
+        Math.pow(Math.random(), noiseCurva) * (Math.random() < 0.5 ? 1 : -1),
+        Math.pow(Math.random(), noiseCurva) * (Math.random() < 0.5 ? 1 : -1),
+      ];
+
+      positions[x] = Math.cos(angle) * random_radius + rx;
+      positions[y] = ry;
+      positions[z] = Math.sin(angle) * random_radius + rz;
+
+      colors: {
+        const mixedColor = colorIn.clone();
+        mixedColor.lerp(colorOut, random_radius / radius);
+        colors[x] = mixedColor.r;
+        colors[y] = mixedColor.g;
+        colors[z] = mixedColor.b;
+      }
     }
-    return [positions] as const;
-  }, [particles, offset, mul]);
+    return [positions, colors] as const;
+  }, [particles, offset, mul, radius, ramas, curva, noise, noiseCurva]);
 
   useFrame(({ clock }) => {
     const t = clock.getElapsedTime();
     geo.current.attributes.position.needsUpdate = true;
   });
+
   return (
     <points
       ref={points}
@@ -291,12 +353,12 @@ function MyGalaxy() {
           count={arrays[0].length / 3}
           itemSize={3}
         />
-        {/* <bufferAttribute
+        <bufferAttribute
           attach="attributes-color"
-          array={colorArray}
-          count={colorArray.length / 3}
+          array={arrays[1]}
+          count={arrays[1].length / 3}
           itemSize={3}
-        /> */}
+        />
       </bufferGeometry>
       {/* from drei */}
       {/* <PointMaterial

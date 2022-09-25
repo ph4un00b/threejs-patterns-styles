@@ -102,8 +102,8 @@ export default function () {
   );
 }
 
-function MyParticles({ quantity = 20_000, color = 'red' }) {
-  const [colorArray] = React.useState(() => {
+function useNiceColors(quantity: number) {
+  return React.useState(() => {
     const c = new T.Color();
     const colors = Array.from(
       { length: quantity },
@@ -119,6 +119,10 @@ function MyParticles({ quantity = 20_000, color = 'red' }) {
       ).flat()
     );
   });
+}
+
+function MyParticles({ quantity = 20_000, color = 'red' }) {
+  const [colorArray] = useNiceColors(quantity);
 
   const { pointsSize, pointsAtenuation } = useControls({
     pointsSize: { value: 0.1, min: 0, max: 1, step: 0.01 },
