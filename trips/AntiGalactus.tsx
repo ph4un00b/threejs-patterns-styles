@@ -90,7 +90,7 @@ export default function () {
             </Center>
           </group>
 
-          <Cubo color={material} />
+          {/* <Cubo color={material} /> */}
           <MyGalaxy />
 
           <axesHelper args={[4]} />
@@ -342,6 +342,8 @@ function MyGalaxy() {
 
   return (
     <points
+      rotation={[Math.PI / 2, 0, 0]}
+      // position={[0, 0, 0]}
       ref={points}
       // castShadow={true}
       material={mat}
