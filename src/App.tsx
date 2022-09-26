@@ -7,13 +7,15 @@ import './App.css';
 import Lights from './Lights';
 import Materials from './Materials';
 import Particles from './Particles';
+import Physics from './Physics';
 import Raycaster from './Raycaster';
 import Shadows from './Shadows';
 import Textures from './Textures';
 import Three from './Three';
 
 function App() {
-  return <Raycaster />;
+  return <Physics />;
+  // return <Raycaster />;
   // return <AntiGalactus />;
   // return <Drag />;
   // return <Particles />;
