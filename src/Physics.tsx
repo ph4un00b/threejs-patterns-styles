@@ -133,7 +133,7 @@ function World() {
 
   useContactMaterial(groundMat, bouncyMat, {
     friction: 0.1,
-    restitution: 1.2 /** bouncing! */,
+    restitution: 0.7 /** bouncing! */,
   });
 
   return (
@@ -155,7 +155,11 @@ function Piso({
   ...props
 }: PlaneProps & { receiveShadow?: boolean }) {
   // infinite grid floor
-  const [piso, api] = usePlane(() => ({ mass: 0, ...props }));
+  const [piso, api] = usePlane(
+    () => ({ mass: 0, ...props }),
+    React.useRef<T.Mesh>(null!)
+  );
+
   return (
     <mesh ref={piso} receiveShadow>
       <planeBufferGeometry args={[16, 16]} />
@@ -174,7 +178,10 @@ function Esfera({
   castShadow,
   ...props
 }: SphereProps & { receiveShadow?: boolean; castShadow?: boolean }) {
-  const [esfera, api] = useSphere(() => ({ mass: 1, ...props }));
+  const [esfera, api] = useSphere(
+    () => ({ mass: 1, ...props }),
+    React.useRef<T.Mesh>(null!)
+  );
 
   // useFrame(({ clock }) =>
   //   api.position.set(Math.sin(clock.getElapsedTime()) * 5, 0, 0)
