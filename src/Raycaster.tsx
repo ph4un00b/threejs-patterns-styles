@@ -107,6 +107,7 @@ export default function () {
 
 var mouse = new T.Vector2();
 var raycasterMouse = new T.Raycaster();
+var currentOnHover = null;
 
 function TestObjectsMouse(props) {
   const { scene } = useThree();
@@ -116,6 +117,7 @@ function TestObjectsMouse(props) {
   useEventListener('mousemove', (event: React.MouseEvent) => {
     mouse.x = /** normalized [-1,1] */ (event.clientX / CanvasProxy.w) * 2 - 1;
     // todo: ray xy seems a bit out of bounds
+    // maybe try aspect from viewport
     mouse.y = /** normalized [-1,1] */ -(event.clientY / CanvasProxy.h) * 2 + 1;
   });
 
@@ -139,6 +141,19 @@ function TestObjectsMouse(props) {
 
     for (let obj of intersects) {
       obj.object.material.color.set('yellow');
+    }
+
+    /** nothing on hover */
+    if (intersects.length == 0) {
+      if (currentOnHover) {
+        console.log('on leave');
+      }
+      currentOnHover = null;
+    } else {
+      if (!currentOnHover) {
+        console.log('on enter');
+      }
+      [currentOnHover] = intersects;
     }
   });
 
