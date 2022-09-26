@@ -72,16 +72,16 @@ export default function () {
         >
           {/* <React.Suspense> */}
 
-          {/* <PerspectiveCamera
+          <PerspectiveCamera
             ref={cam_}
             position={[0, 0, 10]}
             fov={75}
             // auto updates the viewport
             manual={false}
-            makeDefault={!true}
-          /> */}
+            makeDefault={true}
+          />
 
-          {/* <OrbitControls enableDamping={true} makeDefault={true} /> */}
+          <OrbitControls enableDamping={true} makeDefault={true} />
 
           <group position={[0, 4, 0]}>
             <Center>
