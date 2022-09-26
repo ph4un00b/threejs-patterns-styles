@@ -93,8 +93,8 @@ export default function () {
                 </Center>
               </group>
 
-              {/* <Cubo /> */}
-              <mesh castShadow={true} position-y={1}>
+              <Cubo castShadow={true} />
+              <mesh castShadow={true} position-x={-2} position-y={1}>
                 <sphereBufferGeometry args={[1, 32, 32]} />
                 <meshStandardMaterial roughness={0.4} metalness={0.3} />
               </mesh>
@@ -114,6 +114,7 @@ export default function () {
           <axesHelper args={[4]} />
           <ambientLight color={ambient} intensity={ambientIntensity} />
           <DirectionalLight
+            castShadow={true}
             position={[5, 5, 5]}
             intensity={0.2}
             color={ambient}
@@ -125,7 +126,7 @@ export default function () {
   );
 }
 
-function Cubo({ color = '#e83abf' }: { color?: string }) {
+function Cubo(props) {
   const [active, setActive] = React.useState(0);
   const { position, wireframe } = useControls({
     wireframe: false,
@@ -140,7 +141,7 @@ function Cubo({ color = '#e83abf' }: { color?: string }) {
   });
   const { scale } = useSpring({ scale: active ? 4 : 1 });
   const { rotation } = useSpring({ rotation: active ? Math.PI : 0 });
-  const { colorA } = useSpring({ colorA: active ? 'royalblue' : color });
+  const { colorA } = useSpring({ colorA: active ? 'royalblue' : '#e83abf' });
   /** interpolate values from common spring */
   // const { spring } = useSpring({
   //   spring: active,
@@ -152,7 +153,7 @@ function Cubo({ color = '#e83abf' }: { color?: string }) {
   // const colorA = spring.to([0, 1], ['#6246ea', 'royalblue']);
 
   const { viewport } = useThree();
-  const [{ x, y }, api] = useSpring(() => ({ x: 0, y: 0 }));
+  const [{ x, y }, api] = useSpring(() => ({ x: 0, y: 1 }));
 
   const handlers = useDrag(function ({ event, offset: [x, y] }) {
     event.stopPropagation();
@@ -164,6 +165,7 @@ function Cubo({ color = '#e83abf' }: { color?: string }) {
   return (
     <a.mesh
       {...handlers()}
+      {...props}
       onClick={(e) => {
         e.stopPropagation();
         setActive(Number(!active));
@@ -207,8 +209,8 @@ function DirectionalLight(props) {
       shadow-camera-far={15}
       shadow-camera-near={1}
       shadow-camera-top={7}
-      shadow-camera-bottom={7}
-      shadow-camera-left={7}
+      shadow-camera-bottom={-7}
+      shadow-camera-left={-7}
       shadow-camera-right={7}
       /** @link https://github.com/pmndrs/react-three-fiber/blob/master/packages/fiber/tests/core/renderer.test.tsx#L571
        *
