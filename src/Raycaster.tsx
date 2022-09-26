@@ -107,7 +107,7 @@ export default function () {
 
 var mouse = new T.Vector2();
 var raycasterMouse = new T.Raycaster();
-var currentOnHover = null;
+var currentOnHover: any | null = null;
 
 function TestObjectsMouse(props) {
   const { scene } = useThree();
@@ -119,6 +119,12 @@ function TestObjectsMouse(props) {
     // todo: ray xy seems a bit out of bounds
     // maybe try aspect from viewport
     mouse.y = /** normalized [-1,1] */ -(event.clientY / CanvasProxy.h) * 2 + 1;
+  });
+
+  useEventListener('click', (event: React.MouseEvent) => {
+    if (currentOnHover) {
+      console.log('click!');
+    }
   });
 
   const { camera } = useThree();
