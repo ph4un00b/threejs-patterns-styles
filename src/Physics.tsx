@@ -13,7 +13,15 @@ import { proxy, useSnapshot } from 'valtio';
 import { useControls } from 'leva';
 import { useSpring, animated, config, a } from '@react-spring/three';
 import { useDrag } from '@use-gesture/react';
-import { Debug, Physics } from '@react-three/cannon';
+import {
+  Debug,
+  Physics,
+  PlaneProps,
+  SphereProps,
+  useContactMaterial,
+  usePlane,
+  useSphere,
+} from '@react-three/cannon';
 
 var PointersProxy = proxy({
   x: 0,
@@ -55,6 +63,7 @@ export default function () {
     ambient: { value: '#ffffff' },
     fondo: { value: global.fog },
   });
+
   return (
     <>
       <section>
@@ -94,20 +103,7 @@ export default function () {
               </group>
 
               <Cubo castShadow={true} />
-              <mesh castShadow={true} position-x={-2} position-y={1}>
-                <sphereBufferGeometry args={[1, 32, 32]} />
-                <meshStandardMaterial roughness={0.4} metalness={0.3} />
-              </mesh>
-
-              <mesh receiveShadow={true} rotation-x={-Math.PI * 0.5}>
-                <planeBufferGeometry args={[16, 16]} />
-                <meshStandardMaterial
-                  color={'#777777'}
-                  roughness={0.4}
-                  metalness={0.3}
-                  side={T.DoubleSide}
-                />
-              </mesh>
+              <World />
             </Debug>
           </Physics>
 
@@ -123,6 +119,73 @@ export default function () {
         </Canvas>
       </section>
     </>
+  );
+}
+
+function World() {
+  const bouncyMat = {
+    name: 'plastic',
+  };
+
+  const groundMat = {
+    name: 'concreto',
+  };
+
+  useContactMaterial(groundMat, bouncyMat, {
+    friction: 0.1,
+    restitution: 1.2 /** bouncing! */,
+  });
+
+  return (
+    <>
+      {/* using position instead of granular ones 'position-x' */}
+      <Esfera castShadow={true} material={bouncyMat} position={[-2, 5, 0]} />
+      {/* using rotation instead of granular ones 'rotation-x' */}
+      <Piso
+        receiveShadow={true}
+        material={groundMat}
+        rotation={[-Math.PI * 0.5, 0, 0]}
+      />
+    </>
+  );
+}
+
+function Piso({
+  receiveShadow,
+  ...props
+}: PlaneProps & { receiveShadow?: boolean }) {
+  // infinite grid floor
+  const [piso, api] = usePlane(() => ({ mass: 0, ...props }));
+  return (
+    <mesh ref={piso} receiveShadow>
+      <planeBufferGeometry args={[16, 16]} />
+      <meshStandardMaterial
+        color={'#777777'}
+        roughness={0.4}
+        metalness={0.3}
+        side={T.DoubleSide}
+      />
+    </mesh>
+  );
+}
+
+function Esfera({
+  receiveShadow,
+  castShadow,
+  ...props
+}: SphereProps & { receiveShadow?: boolean; castShadow?: boolean }) {
+  const [esfera, api] = useSphere(() => ({ mass: 1, ...props }));
+
+  // useFrame(({ clock }) =>
+  //   api.position.set(Math.sin(clock.getElapsedTime()) * 5, 0, 0)
+  // );
+
+  return (
+    // shall we spread the props again?
+    <mesh ref={esfera} castShadow>
+      <sphereBufferGeometry args={[1, 32, 32]} />
+      <meshStandardMaterial roughness={0.4} metalness={0.3} />
+    </mesh>
   );
 }
 

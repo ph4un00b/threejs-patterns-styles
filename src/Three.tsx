@@ -13,7 +13,7 @@ import { proxy, useSnapshot } from 'valtio';
 import { useControls } from 'leva';
 import { useSpring, animated, config, a } from '@react-spring/three';
 import { useDrag } from '@use-gesture/react';
-import { Debug, Physics } from '@react-three/cannon';
+import { Debug, Physics, SphereProps, useSphere } from '@react-three/cannon';
 
 var PointersProxy = proxy({
   x: 0,
@@ -82,7 +82,7 @@ export default function () {
 
           <OrbitControls enableDamping={true} makeDefault={true} />
 
-          <Physics>
+          <Physics gravity={[0, -9.81, 0]}>
             <Debug color="black" scale={1.1}>
               <group position={[0, 4, 0]}>
                 <Center>
@@ -94,12 +94,10 @@ export default function () {
               </group>
 
               <Cubo castShadow={true} />
-              <mesh castShadow={true} position-x={-2} position-y={1}>
-                <sphereBufferGeometry args={[1, 32, 32]} />
-                <meshStandardMaterial roughness={0.4} metalness={0.3} />
-              </mesh>
 
-              <mesh receiveShadow={true} rotation-x={-Math.PI * 0.5}>
+              <Esfera position={[-2, 3, 0]} />
+
+              <mesh receiveShadow={true} rotation={[-Math.PI * 0.5, 0, 0]}>
                 <planeBufferGeometry args={[16, 16]} />
                 <meshStandardMaterial
                   color={'#777777'}
@@ -123,6 +121,21 @@ export default function () {
         </Canvas>
       </section>
     </>
+  );
+}
+
+function Esfera(props: SphereProps) {
+  const [esfera, api] = useSphere(() => ({ mass: 1, ...props }));
+
+  useFrame(({ clock }) =>
+    api.position.set(Math.sin(clock.getElapsedTime()) * 5, 0, 0)
+  );
+
+  return (
+    <mesh ref={esfera}>
+      <sphereBufferGeometry args={[1, 32, 32]} />
+      <meshStandardMaterial roughness={0.4} metalness={0.3} />
+    </mesh>
   );
 }
 
