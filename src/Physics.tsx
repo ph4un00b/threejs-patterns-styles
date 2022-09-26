@@ -122,7 +122,9 @@ export default function () {
   );
 }
 
-function World() {
+function World({ items = 3 }) {
+  const [circulos, setCirculos] = React.useState(items);
+
   const bouncyMat = {
     name: 'plastic',
   };
@@ -136,17 +138,55 @@ function World() {
     restitution: 0.7 /** bouncing! */,
   });
 
+  useControls({
+    circulos: {
+      value: circulos,
+      min: 0,
+      max: 10,
+      step: 1,
+      onEditEnd: (value, path, context) => {
+        // alert(value, path, context);
+        // alert(path);
+        // alert(JSON.stringify(context, null, 2));
+        setCirculos((p) => value);
+      },
+    },
+  });
   return (
     <>
       {/* using position instead of granular ones 'position-x' */}
       <Esfera castShadow={true} material={bouncyMat} position={[-2, 5, 0]} />
+
       {/* using rotation instead of granular ones 'rotation-x' */}
       <Piso
         receiveShadow={true}
         material={groundMat}
         rotation={[-Math.PI * 0.5, 0, 0]}
       />
+
+      {Array.from({ length: circulos }, (_, i) => {
+        /** [-6,6] */
+        const x = Math.random() - 0.5 * 3;
+        const z = Math.random() - 0.5 * 3;
+        return [x, z];
+      }).map(([x, z]) => {
+        return <Circulo radius={Math.random() * 0.5} position={[x, 3, z]} />;
+      })}
     </>
+  );
+}
+
+function Circulo({ radius, position = [0, 3, 0], ...props }: SphereProps) {
+  const [ref, world] = useSphere(
+    () => ({ mass: 1, radius, position, ...props }),
+    React.useRef<T.Mesh>(null!)
+  );
+
+  return (
+    <mesh ref={ref} castShadow>
+      <sphereBufferGeometry args={[radius, 20, 20]} />
+      <meshStandardMaterial metalness={0.3} roughness={0.4} />
+    </mesh>
   );
 }
 
@@ -178,14 +218,19 @@ function Esfera({
   castShadow,
   ...props
 }: SphereProps & { receiveShadow?: boolean; castShadow?: boolean }) {
-  const [esfera, api] = useSphere(
+  const [esfera, world] = useSphere(
     () => ({ mass: 1, ...props }),
     React.useRef<T.Mesh>(null!)
   );
 
-  // useFrame(({ clock }) =>
-  //   api.position.set(Math.sin(clock.getElapsedTime()) * 5, 0, 0)
-  // );
+  React.useEffect(() => {
+    world.applyLocalForce([150, 0, 0], [0, 0, 0]);
+  }, []);
+
+  useFrame(({ clock }) => {
+    // api.position.set(Math.sin(clock.getElapsedTime()) * 5, 1, 0)
+    world.applyForce([-0.05, 0, 0], esfera.current!.position.toArray());
+  });
 
   return (
     // shall we spread the props again?
