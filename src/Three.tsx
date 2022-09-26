@@ -13,6 +13,7 @@ import { proxy, useSnapshot } from 'valtio';
 import { useControls } from 'leva';
 import { useSpring, animated, config, a } from '@react-spring/three';
 import { useDrag } from '@use-gesture/react';
+import { Debug, Physics } from '@react-three/cannon';
 
 var PointersProxy = proxy({
   x: 0,
@@ -70,29 +71,54 @@ export default function () {
 
           <PerspectiveCamera
             ref={cam_}
-            position={[0, 0, 10]}
+            position={[-6, 6, 6]}
             fov={75}
+            near={0.1}
+            far={100}
             // auto updates the viewport
-            manual={false}
+            // manual={false}
             makeDefault={true}
           />
 
           <OrbitControls enableDamping={true} makeDefault={true} />
 
-          <group position={[0, 4, 0]}>
-            <Center>
-              <Text3D castShadow={true} font={global.font1}>
-                phau!
-                <meshStandardMaterial metalness={0} roughness={0} />
-              </Text3D>
-            </Center>
-          </group>
+          <Physics>
+            <Debug color="black" scale={1.1}>
+              <group position={[0, 4, 0]}>
+                <Center>
+                  <Text3D castShadow={true} font={global.font1}>
+                    phau!
+                    <meshStandardMaterial metalness={0} roughness={0} />
+                  </Text3D>
+                </Center>
+              </group>
 
-          <Cubo />
+              <Cubo castShadow={true} />
+              <mesh castShadow={true} position-x={-2} position-y={1}>
+                <sphereBufferGeometry args={[1, 32, 32]} />
+                <meshStandardMaterial roughness={0.4} metalness={0.3} />
+              </mesh>
+
+              <mesh receiveShadow={true} rotation-x={-Math.PI * 0.5}>
+                <planeBufferGeometry args={[16, 16]} />
+                <meshStandardMaterial
+                  color={'#777777'}
+                  roughness={0.4}
+                  metalness={0.3}
+                  side={T.DoubleSide}
+                />
+              </mesh>
+            </Debug>
+          </Physics>
 
           <axesHelper args={[4]} />
           <ambientLight color={ambient} intensity={ambientIntensity} />
-          <DirectionalLight color={ambient} />
+          <DirectionalLight
+            castShadow={true}
+            position={[5, 5, 5]}
+            intensity={0.2}
+            color={ambient}
+          />
           {/* </React.Suspense> */}
         </Canvas>
       </section>
@@ -100,7 +126,7 @@ export default function () {
   );
 }
 
-function Cubo({ color = '#e83abf' }: { color?: string }) {
+function Cubo(props) {
   const [active, setActive] = React.useState(0);
   const { position, wireframe } = useControls({
     wireframe: false,
@@ -115,7 +141,7 @@ function Cubo({ color = '#e83abf' }: { color?: string }) {
   });
   const { scale } = useSpring({ scale: active ? 4 : 1 });
   const { rotation } = useSpring({ rotation: active ? Math.PI : 0 });
-  const { colorA } = useSpring({ colorA: active ? 'royalblue' : color });
+  const { colorA } = useSpring({ colorA: active ? 'royalblue' : '#e83abf' });
   /** interpolate values from common spring */
   // const { spring } = useSpring({
   //   spring: active,
@@ -127,7 +153,7 @@ function Cubo({ color = '#e83abf' }: { color?: string }) {
   // const colorA = spring.to([0, 1], ['#6246ea', 'royalblue']);
 
   const { viewport } = useThree();
-  const [{ x, y }, api] = useSpring(() => ({ x: 0, y: 0 }));
+  const [{ x, y }, api] = useSpring(() => ({ x: 0, y: 1 }));
 
   const handlers = useDrag(function ({ event, offset: [x, y] }) {
     event.stopPropagation();
@@ -139,6 +165,7 @@ function Cubo({ color = '#e83abf' }: { color?: string }) {
   return (
     <a.mesh
       {...handlers()}
+      {...props}
       onClick={(e) => {
         e.stopPropagation();
         setActive(Number(!active));
@@ -156,7 +183,7 @@ function Cubo({ color = '#e83abf' }: { color?: string }) {
 }
 
 /** suports shadows! */
-function DirectionalLight({ color }: { color: string }) {
+function DirectionalLight(props) {
   const light = React.useRef<T.DirectionalLight>(null!);
   const camera = React.useRef<T.OrthographicCamera>(null!);
   useHelper(light, T.DirectionalLightHelper, 0.5);
@@ -174,17 +201,17 @@ function DirectionalLight({ color }: { color: string }) {
 
   return (
     <directionalLight
+      {...props}
       ref={light}
-      castShadow={true}
       // power of 2 due to bitmapping
-      shadow-mapSize-width={256}
-      shadow-mapSize-height={256}
-      shadow-camera-near={1}
+      shadow-mapSize-width={1024}
+      shadow-mapSize-height={1024}
       shadow-camera-far={15}
-      // shadow-camera-top={top}
-      // shadow-camera-bottom={bottom}
-      // shadow-camera-left={left}
-      // shadow-camera-right={right}
+      shadow-camera-near={1}
+      shadow-camera-top={7}
+      shadow-camera-bottom={-7}
+      shadow-camera-left={-7}
+      shadow-camera-right={7}
       /** @link https://github.com/pmndrs/react-three-fiber/blob/master/packages/fiber/tests/core/renderer.test.tsx#L571
        *
        * types:
@@ -197,8 +224,7 @@ function DirectionalLight({ color }: { color: string }) {
        */
       shadow-radius={10}
       // position={[directional.x, directional.y, directional.z]}
-      position={[0, 15, -20]}
-      args={[color, 0.5 /** intensity */]}
+      // args={[color, 0.5 /** intensity */]}
     />
   );
 }
