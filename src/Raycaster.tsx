@@ -14,6 +14,7 @@ import { useControls } from 'leva';
 import { useSpring, animated, config, a } from '@react-spring/three';
 import { useDrag } from '@use-gesture/react';
 import { mergeRefs } from '../utils/merge_refs';
+import { useEventListener } from '../utils/useListener';
 
 var PointersProxy = proxy({
   x: 0,
@@ -71,16 +72,16 @@ export default function () {
         >
           {/* <React.Suspense> */}
 
-          <PerspectiveCamera
+          {/* <PerspectiveCamera
             ref={cam_}
             position={[0, 0, 10]}
             fov={75}
             // auto updates the viewport
             manual={false}
-            makeDefault={true}
-          />
+            makeDefault={!true}
+          /> */}
 
-          <OrbitControls enableDamping={true} makeDefault={true} />
+          {/* <OrbitControls enableDamping={true} makeDefault={true} /> */}
 
           <group position={[0, 4, 0]}>
             <Center>
@@ -91,7 +92,8 @@ export default function () {
             </Center>
           </group>
 
-          <TestObjects />
+          <TestObjects position-y={1.9} />
+          <TestObjectsMouse position-y={-1} />
 
           <axesHelper args={[4]} />
           <ambientLight color={ambient} intensity={ambientIntensity} />
@@ -103,7 +105,61 @@ export default function () {
   );
 }
 
-function TestObjects() {
+var mouse = new T.Vector2();
+var raycasterMouse = new T.Raycaster();
+
+function TestObjectsMouse(props) {
+  const { scene } = useThree();
+  const object1 = React.useRef<T.Mesh>(null!);
+  const object2 = React.useRef<T.Mesh>(null!);
+
+  useEventListener('mousemove', (event: React.MouseEvent) => {
+    mouse.x = /** normalized [-1,1] */ (event.clientX / CanvasProxy.w) * 2 - 1;
+    // todo: ray xy seems a bit out of bounds
+    mouse.y = /** normalized [-1,1] */ -(event.clientY / CanvasProxy.h) * 2 + 1;
+  });
+
+  const { camera } = useThree();
+  useFrame(({ clock }) => {
+    const t = clock.getElapsedTime();
+    const tests = [object1.current, object2.current];
+
+    tests.forEach((ref, i) => {
+      ref.position.y = 1.5 * Math.sin(t * (i + 0.5));
+    });
+
+    raycasterMouse.setFromCamera(mouse, camera);
+
+    /** casting ray */
+    const intersects = raycasterMouse.intersectObjects(tests);
+
+    for (let obj of tests) {
+      obj.material.color.set('royalblue');
+    }
+
+    for (let obj of intersects) {
+      obj.object.material.color.set('yellow');
+    }
+  });
+
+  return (
+    <group {...props}>
+      <mesh ref={object1} position-x={-2}>
+        <sphereBufferGeometry args={[0.5, 16, 16]} />
+        <meshBasicMaterial color={'red'} />
+      </mesh>
+
+      <Cubo />
+
+      <mesh ref={object2} position-x={2}>
+        <sphereBufferGeometry args={[0.5, 16, 16]} />
+        <meshBasicMaterial color={'red'} />
+      </mesh>
+    </group>
+  );
+}
+
+function TestObjects(props) {
   const { scene } = useThree();
   const object1 = React.useRef<T.Mesh>(null!);
   const object2 = React.useRef<T.Mesh>(null!);
@@ -138,10 +194,10 @@ function TestObjects() {
     for (let obj of intersects) {
       obj.object.material.color.set('green');
     }
-    // obj.object.material.color.set('green');
   });
+
   return (
-    <>
+    <group {...props}>
       <mesh ref={object1} position-x={-2}>
         <sphereBufferGeometry args={[0.5, 16, 16]} />
         <meshBasicMaterial color={'red'} />
@@ -153,9 +209,10 @@ function TestObjects() {
         <sphereBufferGeometry args={[0.5, 16, 16]} />
         <meshBasicMaterial color={'red'} />
       </mesh>
-    </>
+    </group>
   );
 }
+
 var raycaster = new T.Raycaster();
 var rayOrigin = new T.Vector3(-3, 0, 0);
 var rayDirection = new T.Vector3(10, 0, 0);
