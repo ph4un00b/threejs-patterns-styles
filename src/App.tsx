@@ -6,6 +6,7 @@ import Fondos from '../trips/Fondos';
 import './App.css';
 import Lights from './Lights';
 import Materials from './Materials';
+import Models from './Models';
 import Particles from './Particles';
 import Physics from './Physics';
 import Raycaster from './Raycaster';
@@ -14,7 +15,8 @@ import Textures from './Textures';
 import Three from './Three';
 
 function App() {
-  return <Physics />;
+  return <Models />;
+  // return <Physics />;
   // return <Raycaster />;
   // return <AntiGalactus />;
   // return <Drag />;
