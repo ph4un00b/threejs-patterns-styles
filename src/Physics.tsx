@@ -191,6 +191,12 @@ function World({ items }) {
       {Array.from({ length: circulos }).map(() => {
         return <Cuadrados material={bouncyMat} />;
       })}
+      {Array.from({ length: circulos }).map(() => {
+        return <Cuadrados material={bouncyMat} />;
+      })}
+      {Array.from({ length: circulos }).map(() => {
+        return <Cuadrados material={bouncyMat} />;
+      })}
     </>
   );
 }
@@ -251,6 +257,7 @@ function Cuadrados({
   const [ref, world] = useBox(
     () => ({
       mass: 1,
+      /** fix size */
       args: [w, h, d],
       position: [
         1 + Math.floor(Math.random() * 3),
