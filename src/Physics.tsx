@@ -105,7 +105,7 @@ export default function () {
               </group>
 
               <Cubo castShadow={true} />
-              <World items={10} />
+              <World items={4} />
             </Debug>
           </Physics>
 
@@ -145,7 +145,7 @@ function World({ items }) {
     circulos: {
       value: circulos,
       min: 0,
-      max: 10,
+      max: 100,
       step: 1,
       onEditEnd: (value, path, context) => {
         // alert(value, path, context);
@@ -181,9 +181,15 @@ function World({ items }) {
         rotation={[-Math.PI * 0.5, 0, 0]}
       />
 
-      <Spheres colors={colors} number={10} size={Math.random()} />
+      <Spheres
+        material={bouncyMat}
+        colors={colors}
+        number={10}
+        size={Math.random()}
+      />
+
       {Array.from({ length: circulos }).map(() => {
-        return <Cuadrados />;
+        return <Cuadrados material={bouncyMat} />;
       })}
     </>
   );
@@ -247,9 +253,9 @@ function Cuadrados({
       mass: 1,
       args: [w, h, d],
       position: [
-        Math.floor(Math.random() * 6),
-        8,
-        Math.floor(Math.random() * 6),
+        1 + Math.floor(Math.random() * 3),
+        3,
+        Math.floor(Math.random() * 3),
       ],
       ...props,
     }),
