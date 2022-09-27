@@ -94,6 +94,7 @@ export default function () {
 
           <OrbitControls enableDamping={true} makeDefault={true} />
 
+          {/* @link https://pmndrs.github.io/cannon-es/docs/ */}
           <Physics
             /** SAPBroadphase : ideal (performance) if your objects are not traveling too fast
              * NaiveBroadphase
