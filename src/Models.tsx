@@ -5,6 +5,7 @@ import {
   LightProps,
   MeshProps,
   useFrame,
+  useLoader,
   useThree,
 } from '@react-three/fiber';
 import {
@@ -32,6 +33,7 @@ import {
   CollideEvent,
 } from '@react-three/cannon';
 import nice_colors from '../utils/colors';
+import { GLTFLoader } from 'three-stdlib';
 
 var dpr = { min: 1, max: 2 };
 var baseUrl = 'https://ph4un00b.github.io/data';
@@ -51,6 +53,20 @@ export default function () {
     ambient: { value: '#ffffff' },
     fondo: { value: global.fog },
   });
+
+  const gltf = useLoader(GLTFLoader, `${baseUrl}/models/Duck/glTF/Duck.gltf`);
+  const binary = useLoader(
+    GLTFLoader,
+    `${baseUrl}/models/Duck/glTF-Binary/Duck.glb`
+  );
+  // const draco = useLoader(
+  //   GLTFLoader,
+  //   `${baseUrl}/models/Duck/glTF-Draco/Duck.gltf`
+  // );
+  const embedded = useLoader(
+    GLTFLoader,
+    `${baseUrl}/models/Duck/glTF-Embedded/Duck.gltf`
+  );
 
   return (
     <>
@@ -100,6 +116,10 @@ export default function () {
                 </Center>
               </group>
 
+              <primitive position-x={-4} object={gltf.scene} />
+              <primitive position-x={-2} object={binary.scene} />
+              {/* <primitive position-x={2} object={draco.scene} /> */}
+              <primitive position-x={4} object={embedded.scene} />
               <Cubo castShadow={true} />
               <World items={4} />
             </Debug>
