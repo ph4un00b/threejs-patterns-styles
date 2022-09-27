@@ -24,6 +24,7 @@ import {
   useBox,
 } from '@react-three/cannon';
 import nice_colors from '../utils/colors';
+import { useEventListener } from '../utils/useListener';
 
 var PointersProxy = proxy({
   x: 0,
@@ -131,6 +132,20 @@ export default function () {
   );
 }
 
+var hitSound = new window.Audio(`${baseUrl}/sounds/hit.mp3`);
+
+function playHit({ contact: { impactVelocity } }) {
+  if (impactVelocity < 1.9) return;
+  /** todo:
+   * - change the  volume in relation to impact
+   * - add a little delay since hitting the floor
+   * fires multiple events (4?)
+   */
+  hitSound.volume = Math.random();
+  hitSound.currentTime = 0;
+  hitSound.play();
+}
+
 function World({ items }) {
   const [circulos, setCirculos] = React.useState(items);
   const [preset] = React.useState(Math.floor(Math.random() * 900));
@@ -155,7 +170,6 @@ function World({ items }) {
       max: 100,
       step: 1,
       onEditEnd: (value, path, context) => {
-        // alert(value, path, context);
         // alert(path);
         // alert(JSON.stringify(context, null, 2));
         setCirculos((p) => value);
@@ -166,7 +180,6 @@ function World({ items }) {
   const colors = React.useMemo(() => {
     const array = new Float32Array(items * 3);
     const color = new T.Color();
-    console.log(nice_colors);
     for (let i = 0; i < items; i++) {
       color
         .set(nice_colors[preset][Math.floor(Math.random() * 4)])
@@ -195,14 +208,14 @@ function World({ items }) {
         size={Math.random()}
       />
 
-      {Array.from({ length: circulos }).map(() => {
-        return <Cuadrados material={bouncyMat} />;
+      {Array.from({ length: circulos }).map((_, i) => {
+        return <Cuadrados key={i} material={bouncyMat} />;
       })}
-      {Array.from({ length: circulos }).map(() => {
-        return <Cuadrados material={bouncyMat} />;
+      {Array.from({ length: circulos }).map((_, i) => {
+        return <Cuadrados key={i} material={bouncyMat} />;
       })}
-      {Array.from({ length: circulos }).map(() => {
-        return <Cuadrados material={bouncyMat} />;
+      {Array.from({ length: circulos }).map((_, i) => {
+        return <Cuadrados key={i} material={bouncyMat} />;
       })}
     </>
   );
@@ -271,18 +284,15 @@ function Cuadrados({
         3,
         Math.floor(Math.random() * 3),
       ],
+      onCollide: (e) => {
+        playHit(e);
+      },
       ...props,
     }),
     React.useRef<T.Mesh>(null!)
   );
 
-  // React.useLayoutEffect(() => {
-  //   ref.current!.position.set(
-  //     Math.floor(Math.random() * 6),
-  //     3,
-  //     Math.floor(Math.random() * 6)
-  //   );
-  // }, []);
+  // useEventListener('collide', playHit, ref.current!);
 
   return (
     <mesh
