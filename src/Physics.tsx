@@ -98,6 +98,8 @@ export default function () {
              * NaiveBroadphase
              *  */
             broadphase={'SAP'}
+            /** does not update quiet objects */
+            allowSleep={true}
           >
             <Debug color="black" scale={1.1}>
               <group position={[0, 4, 0]}>
