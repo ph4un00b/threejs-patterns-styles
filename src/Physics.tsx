@@ -200,7 +200,11 @@ const Spheres = ({ colors, number = 3, size = 1 }: InstancedGeometryProps) => {
     () => ({
       args: [size],
       mass: 1,
-      position: [Math.random() - 0.5, Math.random() * 2, Math.random() - 0.5],
+      position: [
+        Math.floor(Math.random() * 8),
+        18,
+        Math.floor(Math.random() * 8),
+      ],
     }),
     React.useRef<T.InstancedMesh>(null!)
   );
@@ -231,11 +235,34 @@ const Spheres = ({ colors, number = 3, size = 1 }: InstancedGeometryProps) => {
 var mat = new T.MeshStandardMaterial({ metalness: 0.3, roughness: 0.4 });
 var geo = new T.BoxGeometry(1);
 
-function Cuadrados({ ...props }: SphereProps & { radius: number }) {
+function Cuadrados({
+  w = 1,
+  h = 1,
+  d = 1,
+  position,
+  ...props
+}: SphereProps & { radius: number; w: number; h: number; d: number }) {
   const [ref, world] = useBox(
-    () => ({ mass: 1, args: [2, 1, 1], ...props }),
+    () => ({
+      mass: 1,
+      args: [w, h, d],
+      position: [
+        Math.floor(Math.random() * 6),
+        8,
+        Math.floor(Math.random() * 6),
+      ],
+      ...props,
+    }),
     React.useRef<T.Mesh>(null!)
   );
+
+  // React.useLayoutEffect(() => {
+  //   ref.current!.position.set(
+  //     Math.floor(Math.random() * 6),
+  //     3,
+  //     Math.floor(Math.random() * 6)
+  //   );
+  // }, []);
 
   return (
     <mesh
