@@ -93,7 +93,12 @@ export default function () {
 
           <OrbitControls enableDamping={true} makeDefault={true} />
 
-          <Physics>
+          <Physics
+            /** SAPBroadphase : ideal (performance) if your objects are not traveling too fast
+             * NaiveBroadphase
+             *  */
+            broadphase={'SAP'}
+          >
             <Debug color="black" scale={1.1}>
               <group position={[0, 4, 0]}>
                 <Center>
