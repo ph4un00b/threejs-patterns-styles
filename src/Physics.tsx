@@ -11,7 +11,7 @@ import {
 } from '@react-three/drei/core';
 import { proxy, useSnapshot } from 'valtio';
 import { useControls } from 'leva';
-import { useSpring, animated, config, a } from '@react-spring/three';
+import { useSpring, config, a } from '@react-spring/three';
 import { useDrag } from '@use-gesture/react';
 import {
   Debug,
@@ -22,6 +22,7 @@ import {
   usePlane,
   useSphere,
 } from '@react-three/cannon';
+import nice_colors from '../utils/colors';
 
 var PointersProxy = proxy({
   x: 0,
@@ -124,6 +125,7 @@ export default function () {
 
 function World({ items = 3 }) {
   const [circulos, setCirculos] = React.useState(items);
+  const [preset] = React.useState(Math.floor(Math.random() * 900));
 
   const bouncyMat = {
     name: 'plastic',
@@ -152,6 +154,20 @@ function World({ items = 3 }) {
       },
     },
   });
+
+  const colors = React.useMemo(() => {
+    const array = new Float32Array(items * 3);
+    const color = new T.Color();
+    console.log(nice_colors);
+    for (let i = 0; i < items; i++) {
+      // color
+      //   .set(nice_colors[preset][0])
+      //   .convertSRGBToLinear()
+      //   .toArray(array, i * 3);
+    }
+    return array;
+  }, [items]);
+
   return (
     <>
       {/* using position instead of granular ones 'position-x' */}
@@ -164,14 +180,14 @@ function World({ items = 3 }) {
         rotation={[-Math.PI * 0.5, 0, 0]}
       />
 
-      {Array.from({ length: circulos }, (_, i) => {
-        /** [-6,6] */
-        const x = Math.random() - 0.5 * 3;
-        const z = Math.random() - 0.5 * 3;
-        return [x, z];
-      }).map(([x, z]) => {
-        return <Circulo radius={Math.random() * 0.5} position={[x, 3, z]} />;
-      })}
+      {/* {Array.from({ length: circulos }).map(() => {
+        return (
+          <Circulo
+            radius={Math.random() * 0.5}
+            position={[Math.random() - 0.5 * 8, 3, Math.random() - 0.5 * 8]}
+          />
+        );
+      })} */}
     </>
   );
 }
@@ -179,13 +195,48 @@ function World({ items = 3 }) {
 var mat = new T.MeshStandardMaterial({ metalness: 0.3, roughness: 0.4 });
 var geo = new T.SphereGeometry(1, 20, 20);
 
-function Circulo({
-  radius = 1,
-  position = [0, 3, 0],
-  ...props
-}: SphereProps & { radius: number }) {
+type InstancedGeometryProps = {
+  colors: Float32Array;
+  number: number;
+  size: number;
+};
+
+const Spheres = ({ colors, number, size }: InstancedGeometryProps) => {
   const [ref, world] = useSphere(
-    () => ({ mass: 1, position, ...props }),
+    () => ({
+      args: [size],
+      mass: 1,
+      position: [Math.random() - 0.5, Math.random() * 2, Math.random() - 0.5],
+    }),
+    React.useRef<T.InstancedMesh>(null!)
+  );
+
+  // useFrame(() =>
+  //   world
+  //     .at(Math.floor(Math.random() * number))
+  //     .position.set(0, Math.random() * 2, 0)
+  // );
+  return (
+    <instancedMesh
+      receiveShadow
+      castShadow
+      ref={ref}
+      args={[undefined, undefined, number]}
+    >
+      <sphereBufferGeometry args={[size, 20, 20]}>
+        <instancedBufferAttribute
+          attach="attributes-color"
+          args={[colors, 3]}
+        />
+      </sphereBufferGeometry>
+      <meshLambertMaterial vertexColors />
+    </instancedMesh>
+  );
+};
+
+function Circulo({ radius = 1, ...props }: SphereProps & { radius: number }) {
+  const [ref, world] = useSphere(
+    () => ({ mass: 1, ...props }),
     React.useRef<T.Mesh>(null!)
   );
 
