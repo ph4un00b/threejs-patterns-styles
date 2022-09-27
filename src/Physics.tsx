@@ -21,6 +21,7 @@ import {
   useContactMaterial,
   usePlane,
   useSphere,
+  useBox,
 } from '@react-three/cannon';
 import nice_colors from '../utils/colors';
 
@@ -104,7 +105,7 @@ export default function () {
               </group>
 
               <Cubo castShadow={true} />
-              <World />
+              <World items={10} />
             </Debug>
           </Physics>
 
@@ -123,7 +124,7 @@ export default function () {
   );
 }
 
-function World({ items = 3 }) {
+function World({ items }) {
   const [circulos, setCirculos] = React.useState(items);
   const [preset] = React.useState(Math.floor(Math.random() * 900));
 
@@ -160,10 +161,10 @@ function World({ items = 3 }) {
     const color = new T.Color();
     console.log(nice_colors);
     for (let i = 0; i < items; i++) {
-      // color
-      //   .set(nice_colors[preset][0])
-      //   .convertSRGBToLinear()
-      //   .toArray(array, i * 3);
+      color
+        .set(nice_colors[preset][Math.floor(Math.random() * 4)])
+        .convertSRGBToLinear()
+        .toArray(array, i * 3);
     }
     return array;
   }, [items]);
@@ -180,20 +181,13 @@ function World({ items = 3 }) {
         rotation={[-Math.PI * 0.5, 0, 0]}
       />
 
-      {/* {Array.from({ length: circulos }).map(() => {
-        return (
-          <Circulo
-            radius={Math.random() * 0.5}
-            position={[Math.random() - 0.5 * 8, 3, Math.random() - 0.5 * 8]}
-          />
-        );
-      })} */}
+      <Spheres colors={colors} number={10} size={Math.random()} />
+      {Array.from({ length: circulos }).map(() => {
+        return <Cuadrados />;
+      })}
     </>
   );
 }
-
-var mat = new T.MeshStandardMaterial({ metalness: 0.3, roughness: 0.4 });
-var geo = new T.SphereGeometry(1, 20, 20);
 
 type InstancedGeometryProps = {
   colors: Float32Array;
@@ -201,7 +195,7 @@ type InstancedGeometryProps = {
   size: number;
 };
 
-const Spheres = ({ colors, number, size }: InstancedGeometryProps) => {
+const Spheres = ({ colors, number = 3, size = 1 }: InstancedGeometryProps) => {
   const [ref, world] = useSphere(
     () => ({
       args: [size],
@@ -234,16 +228,19 @@ const Spheres = ({ colors, number, size }: InstancedGeometryProps) => {
   );
 };
 
-function Circulo({ radius = 1, ...props }: SphereProps & { radius: number }) {
-  const [ref, world] = useSphere(
-    () => ({ mass: 1, ...props }),
+var mat = new T.MeshStandardMaterial({ metalness: 0.3, roughness: 0.4 });
+var geo = new T.BoxGeometry(1);
+
+function Cuadrados({ ...props }: SphereProps & { radius: number }) {
+  const [ref, world] = useBox(
+    () => ({ mass: 1, args: [2, 1, 1], ...props }),
     React.useRef<T.Mesh>(null!)
   );
 
   return (
     <mesh
+      scale={Math.random()}
       ref={ref}
-      scale={[radius, radius, radius]}
       castShadow
       material={mat}
       geometry={geo}
