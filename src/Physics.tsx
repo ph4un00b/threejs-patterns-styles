@@ -176,17 +176,27 @@ function World({ items = 3 }) {
   );
 }
 
-function Circulo({ radius, position = [0, 3, 0], ...props }: SphereProps) {
+var mat = new T.MeshStandardMaterial({ metalness: 0.3, roughness: 0.4 });
+var geo = new T.SphereGeometry(1, 20, 20);
+
+function Circulo({
+  radius = 1,
+  position = [0, 3, 0],
+  ...props
+}: SphereProps & { radius: number }) {
   const [ref, world] = useSphere(
-    () => ({ mass: 1, radius, position, ...props }),
+    () => ({ mass: 1, position, ...props }),
     React.useRef<T.Mesh>(null!)
   );
 
   return (
-    <mesh ref={ref} castShadow>
-      <sphereBufferGeometry args={[radius, 20, 20]} />
-      <meshStandardMaterial metalness={0.3} roughness={0.4} />
-    </mesh>
+    <mesh
+      ref={ref}
+      scale={[radius, radius, radius]}
+      castShadow
+      material={mat}
+      geometry={geo}
+    ></mesh>
   );
 }
 
