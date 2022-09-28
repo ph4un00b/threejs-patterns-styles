@@ -15,6 +15,7 @@
     "@react-three/fiber": "^8.7.4",
     "@use-gesture/react": "^10.2.20",
     "leva": "^0.9.31",
+    "maath": "^0.4.2",
     "meshline": "^2.0.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

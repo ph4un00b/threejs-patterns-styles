@@ -108,6 +108,7 @@ export default function () {
             </Debug>
           </Physics>
 
+          {/* @link https://www.khanacademy.org/computing/computer-programming/programming-natural-simulations */}
           <MemoBackGround
             rotation={[-Math.PI * 0.5, 0, 0]}
             position={[0, 0, 0]}
