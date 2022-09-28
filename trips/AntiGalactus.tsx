@@ -124,7 +124,6 @@ export default function () {
             </Center>
           </group>
 
-          {/* <Cubo color={material} /> */}
           <MyGalaxy />
 
           <axesHelper args={[4]} />
@@ -134,62 +133,6 @@ export default function () {
         </Canvas>
       </section>
     </>
-  );
-}
-
-function Cubo({ color }: { color: string }) {
-  const [active, setActive] = React.useState(0);
-  const { position, wireframe } = useControls({
-    wireframe: false,
-    position: { min: -3, max: 3, value: { x: 0, y: 0, z: 0 }, step: 0.1 },
-  });
-  const cubo = React.useRef<T.Mesh>(null);
-  const { pos } = useSpring({
-    to: {
-      pos: 0,
-    },
-    from: { pos: -20 },
-    config: config.gentle,
-  });
-  const { scale } = useSpring({ scale: active ? 4 : 1 });
-  const { rotation } = useSpring({ rotation: active ? Math.PI : 0 });
-  const { colorA } = useSpring({ colorA: active ? 'royalblue' : color });
-  /** interpolate values from common spring */
-  // const { spring } = useSpring({
-  //   spring: active,
-  //   config: config.molasses,
-  // });
-  // const { pos } = useSpring({ pos: active ? -2 : 0 });
-  // const scale = spring.to([0, 1], [1, 4]);
-  // const rotation = spring.to([0, 1], [0, Math.PI]);
-  // const colorA = spring.to([0, 1], ['#6246ea', 'royalblue']);
-
-  const { viewport } = useThree();
-  const [{ x, y }, api] = useSpring(() => ({ x: 0, y: 0 }));
-
-  const handlers = useDrag(function ({ event, offset: [x, y] }) {
-    event.stopPropagation();
-    const aspect = viewport.getCurrentViewport().factor;
-    console.log(x, y);
-    return api.start({ x: x / aspect, y: -y / aspect });
-  });
-
-  return (
-    <a.mesh
-      {...handlers()}
-      onClick={(e) => {
-        e.stopPropagation();
-        setActive(Number(!active));
-      }}
-      rotation-x={rotation}
-      scale={scale}
-      position-x={x}
-      position-y={y}
-      position-z={pos}
-    >
-      <boxGeometry />
-      <a.meshStandardMaterial color={colorA} wireframe={wireframe} />
-    </a.mesh>
   );
 }
 
