@@ -301,7 +301,7 @@ function MyGalaxy() {
       positions[y] = ry;
       positions[z] = Math.sin(angle) * random_radius + rz;
 
-      colors: {
+      fusion_colors: {
         const mixedColor = colorIn.clone();
         mixedColor.lerp(colorOut, random_radius / radius);
         colors[x] = mixedColor.r;
