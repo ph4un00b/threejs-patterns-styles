@@ -139,6 +139,9 @@ function createVertexBuffer({
   width: number;
   gap: number;
 }) {
+  const computeZ = ({ x, y, time = 0 }) => {
+    return 0;
+  };
   const positions = [];
   const colors = [];
   const normals = []; //  for lights
@@ -147,10 +150,14 @@ function createVertexBuffer({
     for (let wi = 0; wi < width; wi++) {
       let x = gap * (wi - (width - 1) / 2);
       let y = gap * (hi - (height + 1) / 2);
-      let z = 0;
+      let z = computeZ({ x, y });
       positions.push(x, y, z);
       // black
-      colors.push(0, 0, 0);
+      colors.push(
+        Math.floor(Math.random() * 255),
+        Math.floor(Math.random() * 255),
+        Math.floor(Math.random() * 255)
+      );
       // no manipulation at the moment
       normals.push(0, 0, 1);
     }
@@ -201,24 +208,30 @@ function Background({
   height: number;
   gap: number;
 }) {
-  const [positions, colors, normals] = React.useMemo(
-    () =>
-      createVertexBuffer({
+  const [positions, colors, normals, indices] = React.useMemo(
+    () => [
+      ...createVertexBuffer({
         width,
         height,
         gap,
       }),
-    [width, height, gap]
-  );
-
-  const indices = React.useMemo(
-    () =>
       createIndexBuffer({
         width,
         height,
       }),
-    [width, height]
+      [width, height],
+    ],
+    [width, height, gap]
   );
+
+  // const indices = React.useMemo(
+  //   () =>
+  //     createIndexBuffer({
+  //       width,
+  //       height,
+  //     }),
+  //   [width, height]
+  // );
 
   const bg = React.useRef<T.Mesh>(null!);
   const geo = React.useRef<T.BufferGeometry>(null!);
@@ -233,6 +246,50 @@ function Background({
     geo.current.setIndex(new T.BufferAttribute(indices, 1));
   }, [positions, colors, normals, indices]);
 
+  // const computeZ = React.useCallback(({ x, y, time = 0 }) => {
+  //   return Math.random();
+  // }, []);
+  const computeZ = ({ x, y, time = 0 }) => {
+    const res = (Math.random() - 0.5) * 2;
+    // console.log(res);
+    return res;
+  };
+
+  useFrame(({ clock }) => {
+    const t = clock.getElapsedTime();
+
+    let i = 0;
+    for (let yi = 0; yi < height; yi++) {
+      for (let xi = 0; xi < width; xi++) {
+        // const xyz = i * 3;
+        // positions[z] = computeZ({
+        //   x: positions[i],
+        //   y: positions[i + 1],
+        //   time: t,
+        // });
+        // geo.current.attributes.position.array[i + 2] = Math.random();
+        positions[i + 2] = computeZ({
+          x: positions[i],
+          y: positions[i + 1],
+        });
+
+        colors: {
+          // let c = colorOfXYZT(
+          //   positions[i],
+          //   positions[i + 1],
+          //   positions[i + 2],
+          //   t
+          // );
+          // colors[i] = c.r;
+          // colors[i + 1] = c.g;
+          // colors[i + 2] = c.b;
+          i += 3;
+        }
+      }
+    }
+
+    geo.current.attributes.position.needsUpdate = true;
+  });
   return (
     <mesh ref={bg} {...props}>
       <bufferGeometry ref={geo} />
