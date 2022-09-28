@@ -78,9 +78,11 @@ export default function () {
 
   const [bind, startRecording] = useCapture({ duration: 10, fps: 60 });
 
-  useTimeout(() => {
-    startRecording();
-  }, 5000);
+  // quitar para iniciar grabacion
+  // useTimeout(() => {
+  //   startRecording();
+  // }, 5000);
+
   return (
     <>
       <section>
