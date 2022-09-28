@@ -15,10 +15,10 @@ import Textures from './Textures';
 import Three from './Three';
 
 function App() {
-  return <Models />;
+  // return <Models />;
   // return <Physics />;
   // return <Raycaster />;
-  // return <AntiGalactus />;
+  return <AntiGalactus />;
   // return <Drag />;
   // return <Particles />;
   // return <Casita />;

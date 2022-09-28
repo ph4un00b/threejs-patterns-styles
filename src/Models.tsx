@@ -33,7 +33,7 @@ import {
   CollideEvent,
 } from '@react-three/cannon';
 import nice_colors from '../utils/colors';
-import { GLTFLoader } from 'three-stdlib';
+import { DRACOLoader, GLTFLoader } from 'three-stdlib';
 
 var dpr = { min: 1, max: 2 };
 var baseUrl = 'https://ph4un00b.github.io/data';
@@ -55,13 +55,23 @@ export default function () {
   });
 
   const gltf = useLoader(GLTFLoader, `${baseUrl}/models/Duck/glTF/Duck.gltf`);
+  const helmet = useLoader(
+    GLTFLoader,
+    `${baseUrl}/models/FlightHelmet/glTF/FlightHelmet.gltf`
+  );
   const binary = useLoader(
     GLTFLoader,
     `${baseUrl}/models/Duck/glTF-Binary/Duck.glb`
   );
   // const draco = useLoader(
   //   GLTFLoader,
-  //   `${baseUrl}/models/Duck/glTF-Draco/Duck.gltf`
+  //   `${baseUrl}/models/Duck/glTF-Draco/Duck.gltf`,
+  //   (loader) => {
+  //     /** @link https://google.github.io/draco/  */
+  //     const dracoLoader = new DRACOLoader();
+  //     dracoLoader.setDecoderPath('/draco-gltf/');
+  //     loader.setDRACOLoader(dracoLoader);
+  //   }
   // );
   const embedded = useLoader(
     GLTFLoader,
@@ -118,8 +128,9 @@ export default function () {
 
               <primitive position-x={-4} object={gltf.scene} />
               <primitive position-x={-2} object={binary.scene} />
-              {/* <primitive position-x={2} object={draco.scene} /> */}
+              <primitive position-x={0} object={draco.scene} />
               <primitive position-x={4} object={embedded.scene} />
+              <primitive position-y={2} object={helmet.scene} />
               <Cubo castShadow={true} />
               <World items={4} />
             </Debug>

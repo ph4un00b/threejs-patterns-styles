@@ -14,6 +14,7 @@ import { useControls } from 'leva';
 import { useSpring, animated, config, a } from '@react-spring/three';
 import { useDrag } from '@use-gesture/react';
 import nice_colors from '../utils/colors';
+import useCapture from 'use-capture';
 
 var PointersProxy = proxy({
   x: 0,
@@ -46,6 +47,24 @@ var global = {
   font1: `${baseUrl}/typeface/press-start-2p.json`,
 };
 
+/** @link https://overreacted.io/making-setinterval-declarative-with-react-hooks/ */
+function useTimeout(callback: () => void, delay: number) {
+  const savedCallback = React.useRef<() => void>(null!);
+
+  React.useEffect(() => {
+    savedCallback.current = callback;
+  });
+
+  React.useEffect(() => {
+    function tick() {
+      savedCallback.current();
+    }
+
+    let id = window.setTimeout(tick, delay);
+    return () => window.clearTimeout(id);
+  }, [delay]);
+}
+
 /** FREE! @link https://kenney.nl/assets */
 export default function () {
   const { cw, ch } = useCanvas();
@@ -56,10 +75,21 @@ export default function () {
     fondo: { value: global.fog },
     material: { value: global.mat },
   });
+
+  const [bind, startRecording] = useCapture({ duration: 10, fps: 60 });
+
+  useTimeout(() => {
+    startRecording();
+  }, 5000);
   return (
     <>
       <section>
         <Canvas
+          // 💡 preserveDrawingBuffer is mandatory
+          gl={{
+            preserveDrawingBuffer: true,
+          }}
+          onCreated={bind}
           shadows={true} /** enable shadowMap */
           dpr={[dpr.min, dpr.max]}
           style={{
@@ -68,6 +98,8 @@ export default function () {
             backgroundColor: fondo,
           }}
         >
+          {/* 💡 not having a clear color would glitch the recording */}
+          <color attach="background" args={['#000']} />
           {/* <React.Suspense> */}
 
           <PerspectiveCamera
