@@ -15,6 +15,8 @@ import {
   Center,
   Text3D,
   useHelper,
+  useAnimations,
+  useGLTF,
 } from '@react-three/drei/core';
 import { proxy, useSnapshot } from 'valtio';
 import { useControls } from 'leva';
@@ -87,12 +89,6 @@ export default function () {
     `${baseUrl}/models/Duck/glTF-Embedded/Duck.gltf`
   );
 
-  const fox = useLoader(GLTFLoader, `${baseUrl}/models/Fox/glTF/Fox.gltf`);
-
-  React.useLayoutEffect(() => {
-    // OR
-    // fox.scene.scale.set(0.025, 0.025, 0.025);
-  }, []);
   return (
     <>
       <section>
@@ -146,13 +142,7 @@ export default function () {
               <primitive position-x={2} object={draco.scene} />
               <primitive position-x={4} object={embedded.scene} />
               <primitive position-y={2} object={helmet.scene} />
-              <primitive
-                scale={[0.025, 0.025, 0.025]}
-                position-y={0}
-                position-z={2}
-                object={fox.scene}
-              />
-
+              <Fox />
               <Cubo castShadow={true} />
               <World items={4} />
             </Debug>
@@ -170,6 +160,47 @@ export default function () {
         </Canvas>
       </section>
     </>
+  );
+}
+
+function Fox() {
+  const group = React.useRef<T.Group>();
+  const fox = useGLTF(`${baseUrl}/models/Fox/glTF/Fox.gltf`);
+  const { ref, mixer, names, actions, clips } = useAnimations(
+    fox.animations,
+    group
+  );
+  const [trigger, setTrigger] = React.useState<
+    'Walk' | 'Run' | 'Survey' | null
+  >(null);
+
+  React.useLayoutEffect(() => {
+    // OR
+    // fox.scene.scale.set(0.025, 0.025, 0.025);
+  }, []);
+
+  React.useEffect(() => {
+    /** @link https://threejs.org/docs/index.html#api/en/animation/AnimationAction */
+    actions[trigger]?.reset().fadeIn(1).play();
+    return () => void actions[trigger]?.fadeOut(1);
+  }, [actions, trigger]);
+
+  return (
+    <group
+      ref={group}
+      onClick={() => {
+        // alert('clicked!');
+        const actions = ['Walk', 'Run', 'Survey'];
+        setTrigger(actions[Math.floor(Math.random() * 3)]);
+      }}
+    >
+      <primitive
+        scale={[0.025, 0.025, 0.025]}
+        position-y={0}
+        position-z={2}
+        object={fox.scene}
+      />
+    </group>
   );
 }
 
@@ -430,3 +461,21 @@ window.addEventListener('dblclick', () => {
     document.exitFullscreen();
   }
 });
+
+/** @link https://overreacted.io/making-setinterval-declarative-with-react-hooks/ */
+function useTimeout(callback: () => void, delay: number) {
+  const savedCallback = React.useRef<() => void>(null!);
+
+  React.useEffect(() => {
+    savedCallback.current = callback;
+  });
+
+  React.useEffect(() => {
+    function tick() {
+      savedCallback.current();
+    }
+
+    let id = window.setTimeout(tick, delay);
+    return () => window.clearTimeout(id);
+  }, [delay]);
+}
