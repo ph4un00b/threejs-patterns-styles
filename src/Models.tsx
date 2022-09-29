@@ -75,6 +75,10 @@ export default function () {
       /** @link https://google.github.io/draco/  */
       const dracoLoader = new DRACOLoader();
       dracoLoader.setDecoderPath(dracoPath);
+      /**
+       * for big geometries works great!
+       * watch out for initial freezes
+       */
       loader.setDRACOLoader(dracoLoader);
     }
   );
