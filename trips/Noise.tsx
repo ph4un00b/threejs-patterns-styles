@@ -32,6 +32,7 @@ import {
   CollideEvent,
 } from '@react-three/cannon';
 import nice_colors from '../utils/colors';
+import { noise } from 'maath/random';
 
 var dpr = { min: 1, max: 2 };
 var baseUrl = 'https://ph4un00b.github.io/data';
@@ -50,9 +51,9 @@ export default function () {
     ambientIntensity: { value: 0.3, min: 0, max: 1, step: 0.001 },
     ambient: { value: '#ffffff' },
     fondo: { value: global.fog },
-    w: { value: 3, min: 1, max: 100, step: 1 },
-    h: { value: 5, min: 1, max: 100, step: 1 },
-    gap: { value: 2, min: 0, max: 100, step: 1 },
+    w: { value: 20, min: 1, max: 100, step: 1 },
+    h: { value: 20, min: 1, max: 100, step: 1 },
+    gap: { value: 1.2, min: 0, max: 20, step: 0.1 },
   });
 
   return (
@@ -71,7 +72,7 @@ export default function () {
 
           <PerspectiveCamera
             ref={cam_}
-            position={[-6, 6, 6]}
+            position={[-0, 0, 10]}
             fov={75}
             near={0.1}
             far={100}
@@ -110,8 +111,8 @@ export default function () {
 
           {/* @link https://www.khanacademy.org/computing/computer-programming/programming-natural-simulations */}
           <MemoBackGround
-            rotation={[-Math.PI * 0.5, 0, 0]}
-            position={[0, 0, 0]}
+            rotation={[0, 0, 0]}
+            position={[0, 0, -1]}
             width={w}
             height={h}
             gap={gap}
@@ -140,9 +141,9 @@ function createVertexBuffer({
   width: number;
   gap: number;
 }) {
-  const computeZ = ({ x, y, time = 0 }) => {
-    return 0;
-  };
+  // const computeZ = ({ x, y, time = 0 }) => {
+  //   return 0;
+  // };
   const positions = [];
   const colors = [];
   const normals = []; //  for lights
@@ -151,14 +152,11 @@ function createVertexBuffer({
     for (let wi = 0; wi < width; wi++) {
       let x = gap * (wi - (width - 1) / 2);
       let y = gap * (hi - (height + 1) / 2);
-      let z = computeZ({ x, y });
+      // let z = computeZ({ x, y });
+      let z = 0;
       positions.push(x, y, z);
-      // black
-      colors.push(
-        Math.floor(Math.random() * 255),
-        Math.floor(Math.random() * 255),
-        Math.floor(Math.random() * 255)
-      );
+      // RGB in the range  of [0,1]
+      colors.push(0, 0, 0);
       // no manipulation at the moment
       normals.push(0, 0, 1);
     }
@@ -200,15 +198,56 @@ function createIndexBuffer({
 
 var MemoBackGround = React.memo(Background);
 function Background({
+  seed = Math.floor(Math.random() * 2 ** 16),
   width,
   height,
   gap,
   ...props
 }: MeshProps & {
+  seed?: number;
   width: number;
   height: number;
   gap: number;
 }) {
+  noise.seed(seed);
+
+  const { scale, octaves, persistence, lacunarity, amplitude, frequency } =
+    useControls({
+      scale: { value: 0.125, min: 0.0001, max: 1, step: 0.0001 },
+      octaves: { value: 20, min: 0, max: 100, step: 1 },
+      persistence: { value: 0.6, min: 0, max: 1, step: 0.1 },
+      lacunarity: { value: 2, min: 0, max: 5, step: 0.1 },
+      amplitude: { value: 1.0, min: 0, max: 3, step: 0.01 },
+      frequency: { value: 1.0, min: 0, max: 3, step: 0.01 },
+    });
+
+  const sampleNoise = ({ x, y, z }: { x: number; y: number; z: number }) => {
+    /** @link https://www.youtube.com/watch?v=MRNFcywkUSA&list=PLFt_AvWsXl0eBW2EiBtl_sxmDtSgZBxB3&index=4 */
+    let amp = amplitude;
+    let freq = frequency;
+
+    // let max = -Infinity;
+    // let min = Infinity;
+
+    let perlinValue = 0;
+    for (let i = 0; i < octaves; i++) {
+      perlinValue = noise.perlin3(
+        x * freq * scale,
+        y * freq * scale,
+        z
+      ); /** * (* 2 - 1) to allow values in the range of [-1,1] */
+      //  *
+      //   2 -
+      // 1;
+      perlinValue += amp * perlinValue;
+
+      amp *= persistence;
+      freq *= lacunarity;
+    }
+
+    return perlinValue;
+  };
+
   const [positions, colors, normals, indices] = React.useMemo(
     () => [
       ...createVertexBuffer({
@@ -250,46 +289,61 @@ function Background({
   // const computeZ = React.useCallback(({ x, y, time = 0 }) => {
   //   return Math.random();
   // }, []);
-  const computeZ = ({ x, y, time = 0 }) => {
-    const res = (Math.random() - 0.5) * 2;
+  const computeZ = ({
+    x,
+    y,
+    time = 0,
+  }: {
+    x: number;
+    y: number;
+    time?: number;
+  }) => {
+    // const res = (Math.random() - 0.5) * 2;
+    const res = sampleNoise({ x, y, z: time });
     // console.log(res);
     return res;
   };
 
+  const { r, g, b } = useControls({
+    r: { value: 1.0, min: -1.0, max: 1.0, step: 0.001 },
+    g: { value: 1.0, min: -5.0, max: 5.0, step: 0.001 },
+    b: { value: 1.0, min: -50, max: 100, step: 0.001 },
+  });
   useFrame(({ clock }) => {
     const t = clock.getElapsedTime();
 
     let i = 0;
     for (let yi = 0; yi < height; yi++) {
       for (let xi = 0; xi < width; xi++) {
-        // const xyz = i * 3;
-        // positions[z] = computeZ({
-        //   x: positions[i],
-        //   y: positions[i + 1],
-        //   time: t,
-        // });
         // geo.current.attributes.position.array[i + 2] = Math.random();
         positions[i + 2] = computeZ({
           x: positions[i],
           y: positions[i + 1],
+          time: t * 0.2,
         });
 
+        const x = positions[i];
+        const y = positions[i + 1];
+        const zHeight = positions[i + 2];
+
+        const R = i;
+        const G = i + 1;
+        const B = i + 2;
+
         colors: {
-          // let c = colorOfXYZT(
-          //   positions[i],
-          //   positions[i + 1],
-          //   positions[i + 2],
-          //   t
-          // );
-          // colors[i] = c.r;
-          // colors[i + 1] = c.g;
-          // colors[i + 2] = c.b;
+          colors[R] = zHeight / r;
+          // colors[R] = r;
+          colors[G] = zHeight / g;
+          // colors[G] = g;
+          // colors[B] = Math.sqrt(x ** 2 + y ** 2) / b;
+          colors[B] = b;
           i += 3;
         }
       }
     }
 
     geo.current.attributes.position.needsUpdate = true;
+    geo.current.attributes.color.needsUpdate = true;
   });
   return (
     <mesh ref={bg} {...props}>
@@ -297,7 +351,7 @@ function Background({
       <meshStandardMaterial
         vertexColors={true}
         side={T.DoubleSide}
-        wireframe={true}
+        wireframe={!true}
       />
     </mesh>
   );
