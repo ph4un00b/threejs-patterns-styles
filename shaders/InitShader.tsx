@@ -1,44 +1,46 @@
-import * as T from 'three';
-import * as React from 'react';
+import * as T from "three";
+import * as React from "react";
 import {
   Canvas,
   LightProps,
   MeshProps,
   useFrame,
   useThree,
-} from '@react-three/fiber';
+} from "@react-three/fiber";
 import {
-  OrbitControls,
-  PerspectiveCamera,
-  OrthographicCamera,
   Center,
+  OrbitControls,
+  OrthographicCamera,
+  PerspectiveCamera,
   Text3D,
   useHelper,
-} from '@react-three/drei/core';
-import { proxy, useSnapshot } from 'valtio';
-import { useControls } from 'leva';
-import { useSpring, config, a } from '@react-spring/three';
-import { useDrag } from '@use-gesture/react';
+} from "@react-three/drei/core";
+import { proxy, useSnapshot } from "valtio";
+import { useControls } from "leva";
+import { a, config, useSpring } from "@react-spring/three";
+import { useDrag } from "@use-gesture/react";
 import {
+  BoxProps,
+  CollideEvent,
   Debug,
   Physics,
   PlaneProps,
   SphereProps,
+  useBox,
   useContactMaterial,
   usePlane,
   useSphere,
-  useBox,
-  BoxProps,
-  CollideEvent,
-} from '@react-three/cannon';
-import nice_colors from '../utils/colors';
+} from "@react-three/cannon";
+import nice_colors from "../utils/colors";
+import vertex from "../shaders/Init.vertex.glsl";
+import frag from "../shaders/Init.frag.glsl";
 
 var dpr = { min: 1, max: 2 };
-var baseUrl = 'https://ph4un00b.github.io/data';
+var baseUrl = "https://ph4un00b.github.io/data";
 var global = {
-  bg: 'red',
-  fog: '#262837',
-  mat: '#e83abf',
+  bg: "red",
+  fog: "#262837",
+  mat: "#e83abf",
   font1: `${baseUrl}/typeface/press-start-2p.json`,
 };
 
@@ -48,7 +50,7 @@ export default function () {
   const cam_ = React.useRef(null);
   const { fondo, ambientIntensity, ambient } = useControls({
     ambientIntensity: { value: 0.3, min: 0, max: 1, step: 0.001 },
-    ambient: { value: '#ffffff' },
+    ambient: { value: "#ffffff" },
     fondo: { value: global.fog },
   });
 
@@ -59,13 +61,13 @@ export default function () {
           shadows={true} /** enable shadowMap */
           dpr={[dpr.min, dpr.max]}
           style={{
-            width: cw + 'px',
-            height: ch + 'px',
+            width: cw + "px",
+            height: ch + "px",
             backgroundColor: fondo,
           }}
         >
           {/* 💡 not having a clear color would glitch the recording */}
-          <color attach="background" args={['#000']} />
+          <color attach="background" args={["#000"]} />
           {/* <React.Suspense> */}
 
           <PerspectiveCamera
@@ -92,26 +94,8 @@ export default function () {
           <mesh>
             <planeBufferGeometry args={[1, 1, 32, 32]} />
             <rawShaderMaterial
-              vertexShader={`
-            uniform mat4 projectionMatrix;
-            uniform mat4 viewMatrix;
-            uniform mat4 modelMatrix;
-
-            attribute vec3 position;
-
-            void main()
-            {
-              gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(position, 1.0);
-            }
-            `}
-              fragmentShader={`
-            precision mediump float;
-
-            void main()
-            {
-              gl_FragColor = vec4(1.0,0.0,0.0,1.0);
-            }
-            `}
+              vertexShader={vertex}
+              fragmentShader={frag}
             />
           </mesh>
           <axesHelper args={[4]} />
@@ -141,6 +125,7 @@ function DirectionalLight(props: LightProps) {
   });
 
   return (
+    /** @ts-ignore */
     <directionalLight
       {...props}
       ref={light}
@@ -190,15 +175,15 @@ function useCanvas() {
   return { cw: snap.w, ch: snap.h } as const;
 }
 
-window.addEventListener('resize', () => {
+window.addEventListener("resize", () => {
   CanvasProxy.w = window.innerWidth;
   CanvasProxy.h = window.innerHeight;
 });
 
-window.addEventListener('dblclick', () => {
+window.addEventListener("dblclick", () => {
   // todo: verify on safari!
   if (!document.fullscreenElement) {
-    document.querySelector('canvas')!.requestFullscreen();
+    document.querySelector("canvas")!.requestFullscreen();
   } else {
     document.exitFullscreen();
   }
