@@ -16,8 +16,8 @@ import Textures from './Textures';
 import Three from './Three';
 
 function App() {
-  return <Noise />;
-  // return <Models />;
+  return <Models />;
+  // return <Noise />;
   // return <Physics />;
   // return <Raycaster />;
   // return <AntiGalactus />;
