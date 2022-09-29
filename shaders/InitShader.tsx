@@ -91,7 +91,7 @@ export default function () {
 
           <mesh>
             <planeBufferGeometry args={[1, 1, 32, 32]} />
-            <rawShaderMaterial vertexShader={''} fragmentShader={''} />
+            <rawShaderMaterial vertexShader={``} fragmentShader={``} />
           </mesh>
           <axesHelper args={[4]} />
           <ambientLight color={ambient} intensity={ambientIntensity} />
