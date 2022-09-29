@@ -65,13 +65,12 @@ export default function () {
     `${baseUrl}/models/Duck/glTF-Binary/Duck.glb`
   );
 
-  const dracoPath =
-    'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/js/libs/draco/';
-
   const draco = useLoader(
     GLTFLoader,
     `${baseUrl}/models/Duck/glTF-Draco/Duck.gltf`,
     (loader) => {
+      const dracoPath =
+        'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/js/libs/draco/';
       /** @link https://google.github.io/draco/  */
       const dracoLoader = new DRACOLoader();
       dracoLoader.setDecoderPath(dracoPath);
@@ -88,6 +87,12 @@ export default function () {
     `${baseUrl}/models/Duck/glTF-Embedded/Duck.gltf`
   );
 
+  const fox = useLoader(GLTFLoader, `${baseUrl}/models/Fox/glTF/Fox.gltf`);
+
+  React.useLayoutEffect(() => {
+    // OR
+    // fox.scene.scale.set(0.025, 0.025, 0.025);
+  }, []);
   return (
     <>
       <section>
@@ -107,7 +112,7 @@ export default function () {
             position={[-6, 6, 6]}
             fov={75}
             near={0.1}
-            far={100}
+            far={200}
             // auto updates the viewport
             // manual={false}
             makeDefault={true}
@@ -141,6 +146,12 @@ export default function () {
               <primitive position-x={2} object={draco.scene} />
               <primitive position-x={4} object={embedded.scene} />
               <primitive position-y={2} object={helmet.scene} />
+              <primitive
+                scale={[0.025, 0.025, 0.025]}
+                position-y={0}
+                position-z={2}
+                object={fox.scene}
+              />
 
               <Cubo castShadow={true} />
               <World items={4} />
