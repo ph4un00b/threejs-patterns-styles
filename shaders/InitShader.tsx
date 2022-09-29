@@ -91,7 +91,28 @@ export default function () {
 
           <mesh>
             <planeBufferGeometry args={[1, 1, 32, 32]} />
-            <rawShaderMaterial vertexShader={``} fragmentShader={``} />
+            <rawShaderMaterial
+              vertexShader={`
+            uniform mat4 projectionMatrix;
+            uniform mat4 viewMatrix;
+            uniform mat4 modelMatrix;
+
+            attribute vec3 position;
+
+            void main()
+            {
+              gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(position, 1.0);
+            }
+            `}
+              fragmentShader={`
+            precision mediump float;
+
+            void main()
+            {
+              gl_FragColor = vec4(1.0,0.0,0.0,1.0);
+            }
+            `}
+            />
           </mesh>
           <axesHelper args={[4]} />
           <ambientLight color={ambient} intensity={ambientIntensity} />
