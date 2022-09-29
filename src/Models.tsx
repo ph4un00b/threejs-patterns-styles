@@ -59,20 +59,26 @@ export default function () {
     GLTFLoader,
     `${baseUrl}/models/FlightHelmet/glTF/FlightHelmet.gltf`
   );
+
   const binary = useLoader(
     GLTFLoader,
     `${baseUrl}/models/Duck/glTF-Binary/Duck.glb`
   );
-  // const draco = useLoader(
-  //   GLTFLoader,
-  //   `${baseUrl}/models/Duck/glTF-Draco/Duck.gltf`,
-  //   (loader) => {
-  //     /** @link https://google.github.io/draco/  */
-  //     const dracoLoader = new DRACOLoader();
-  //     dracoLoader.setDecoderPath('/draco-gltf/');
-  //     loader.setDRACOLoader(dracoLoader);
-  //   }
-  // );
+
+  const dracoPath =
+    'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/js/libs/draco/';
+
+  const draco = useLoader(
+    GLTFLoader,
+    `${baseUrl}/models/Duck/glTF-Draco/Duck.gltf`,
+    (loader) => {
+      /** @link https://google.github.io/draco/  */
+      const dracoLoader = new DRACOLoader();
+      dracoLoader.setDecoderPath(dracoPath);
+      loader.setDRACOLoader(dracoLoader);
+    }
+  );
+
   const embedded = useLoader(
     GLTFLoader,
     `${baseUrl}/models/Duck/glTF-Embedded/Duck.gltf`
@@ -128,9 +134,10 @@ export default function () {
 
               <primitive position-x={-4} object={gltf.scene} />
               <primitive position-x={-2} object={binary.scene} />
-              <primitive position-x={0} object={draco.scene} />
+              <primitive position-x={2} object={draco.scene} />
               <primitive position-x={4} object={embedded.scene} />
               <primitive position-y={2} object={helmet.scene} />
+
               <Cubo castShadow={true} />
               <World items={4} />
             </Debug>
