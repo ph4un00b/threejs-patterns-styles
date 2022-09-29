@@ -164,7 +164,7 @@ export default function () {
 }
 
 function Fox() {
-  const group = React.useRef<T.Group>();
+  const group = React.useRef<T.Group>(null!);
   const fox = useGLTF(`${baseUrl}/models/Fox/glTF/Fox.gltf`);
   const { ref, mixer, names, actions, clips } = useAnimations(
     fox.animations,
