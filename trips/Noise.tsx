@@ -33,6 +33,7 @@ import {
 } from '@react-three/cannon';
 import nice_colors from '../utils/colors';
 import { noise } from 'maath/random';
+import useCapture from 'use-capture';
 
 var dpr = { min: 1, max: 2 };
 var baseUrl = 'https://ph4un00b.github.io/data';
@@ -51,16 +52,28 @@ export default function () {
     ambientIntensity: { value: 0.3, min: 0, max: 1, step: 0.001 },
     ambient: { value: '#ffffff' },
     fondo: { value: global.fog },
-    w: { value: 20, min: 1, max: 100, step: 1 },
-    h: { value: 20, min: 1, max: 100, step: 1 },
+    w: { value: 100, min: 1, max: 100, step: 1 },
+    h: { value: 100, min: 1, max: 100, step: 1 },
     gap: { value: 1.2, min: 0, max: 20, step: 0.1 },
   });
 
+  const [bind, startRecording] = useCapture({ duration: 10, fps: 60 });
+
+  // quitar para iniciar grabacion
+  // useTimeout(() => {
+  //   startRecording();
+  // }, 5000);
   return (
     <>
       <section>
         <Canvas
-          shadows={true} /** enable shadowMap */
+          // 💡 preserveDrawingBuffer is mandatory
+          gl={{
+            preserveDrawingBuffer: true,
+          }}
+          // estoy evita que se rerenderize el canvas
+          // onCreated={bind}
+          shadows={!true} /** enable shadowMap */
           dpr={[dpr.min, dpr.max]}
           style={{
             width: cw + 'px',
@@ -68,6 +81,8 @@ export default function () {
             backgroundColor: fondo,
           }}
         >
+          {/* 💡 not having a clear color would glitch the recording */}
+          <color attach="background" args={['#000']} />
           {/* <React.Suspense> */}
 
           <PerspectiveCamera
@@ -75,7 +90,7 @@ export default function () {
             position={[-0, 0, 10]}
             fov={75}
             near={0.1}
-            far={100}
+            far={1000}
             // auto updates the viewport
             // manual={false}
             makeDefault={true}
@@ -614,3 +629,21 @@ window.addEventListener('dblclick', () => {
     document.exitFullscreen();
   }
 });
+
+/** @link https://overreacted.io/making-setinterval-declarative-with-react-hooks/ */
+function useTimeout(callback: () => void, delay: number) {
+  const savedCallback = React.useRef<() => void>(null!);
+
+  React.useEffect(() => {
+    savedCallback.current = callback;
+  });
+
+  React.useEffect(() => {
+    function tick() {
+      savedCallback.current();
+    }
+
+    let id = window.setTimeout(tick, delay);
+    return () => window.clearTimeout(id);
+  }, [delay]);
+}
