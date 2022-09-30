@@ -15,9 +15,11 @@ import Shadows from '../basics/Shadows';
 import Textures from '../basics/Textures';
 import Three from '../basics/Three';
 import InitShader from '../shaders/InitShader';
+import SecondShader from '../shaders/SecondShader';
 
 function App() {
-  return <InitShader />;
+  return <SecondShader />;
+  // return <InitShader />;
   // return <Models />;
   // return <Noise />;
   // return <Physics />;
