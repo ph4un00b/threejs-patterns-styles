@@ -115,6 +115,7 @@ const MyMaterial = shaderMaterial(
     ufreq: new T.Vector2(0.1, 0.1),
     uTime: 0,
     uAmp: 0.1,
+    uColor: new T.Color('peru')
   },
   vertex,
   frag,
@@ -139,7 +140,7 @@ function RawPlane() {
     geo.current.setAttribute("aRandom", new T.BufferAttribute(randoms, 1));
   }, []);
 
-  const { ufreqX, ufreqY, uAmp } = useControls({
+  const { ufreqX, ufreqY, uAmp,uColor } = useControls({
     ufreqX: {
       value: 10.1,
       min: 0.1,
@@ -158,6 +159,9 @@ function RawPlane() {
       max: 5,
       step: 0.01,
     },
+    uColor: {
+        value: "#ff00bc"
+    }
   });
 
   useFrame(({clock}) => {
@@ -172,6 +176,7 @@ function RawPlane() {
         ref={shader}
         ufreq={new T.Vector2(ufreqX, ufreqY)}
         uAmp={uAmp}
+        uColor={uColor}
         wireframe={!true}
         side={T.DoubleSide}
         transparent={true}
