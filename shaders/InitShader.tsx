@@ -93,18 +93,7 @@ export default function () {
             </Center>
           </group>
 
-          <mesh>
-            <planeBufferGeometry args={[1, 1, 32, 32]} />
-            <rawShaderMaterial
-              vertexShader={vertex}
-              fragmentShader={frag}
-              // working props
-              wireframe={!true}
-              side={T.DoubleSide}
-              transparent={!true}
-              // manual props: color, map, alphaMap, opacity...
-            />
-          </mesh>
+          <RawPlane />
           <axesHelper args={[4]} />
           <ambientLight color={ambient} intensity={ambientIntensity} />
           {/* </React.Suspense> */}
@@ -112,6 +101,38 @@ export default function () {
       </section>
     </>
   );
+}
+
+function RawPlane() {
+  const geo = React.useRef<T.PlaneGeometry>(null!)
+
+  React.useLayoutEffect(() => {
+    const count = geo.current.attributes.position.count
+    const randoms = new Float32Array(count)
+
+    for (let index = 0; index < count; index++) {
+      randoms[index] = Math.random();
+    }
+
+    geo.current.setAttribute('aRandom', new T.BufferAttribute(randoms, 1))
+
+
+  }, [])
+
+  return (
+    <mesh>
+      <planeBufferGeometry ref={geo} args={[1, 1, 32, 32]} />
+      <rawShaderMaterial
+        vertexShader={vertex}
+        fragmentShader={frag}
+        // working props
+        wireframe={!true}
+        side={T.DoubleSide}
+        transparent={true}
+      // manual props: color, map, alphaMap, opacity...
+      />
+    </mesh>
+  )
 }
 
 /** suports shadows! */
@@ -156,8 +177,8 @@ function DirectionalLight(props: LightProps) {
        * 3RF set PCFSoftShadowMap as the default shadow map
        */
       shadow-radius={10}
-      // position={[directional.x, directional.y, directional.z]}
-      // args={[color, 0.5 /** intensity */]}
+    // position={[directional.x, directional.y, directional.z]}
+    // args={[color, 0.5 /** intensity */]}
     />
   );
 }
