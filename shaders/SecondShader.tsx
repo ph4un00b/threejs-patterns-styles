@@ -86,6 +86,7 @@ export default function () {
           />
 
           <OrbitControls enableDamping={true} makeDefault={true} />
+
           <group position={[0, 4, 0]}>
             <Center>
               <Text3D castShadow={true} font={global.font1}>
@@ -110,7 +111,11 @@ export default function () {
  * to make rerenders to take effect on the shader
  */
 const MyMaterial = shaderMaterial(
-  { ufreq: new T.Vector2(0.1, 0.1) },
+  {
+    ufreq: new T.Vector2(0.1, 0.1),
+    uTime: 0,
+    uAmp: 0.1,
+  },
   vertex,
   frag,
 );
@@ -120,7 +125,8 @@ extend({ MyMaterial });
 function RawPlane() {
   console.log("hola");
   const geo = React.useRef<T.PlaneGeometry>(null!);
-//   const mat = React.useRef<T.RawShaderMaterial>(null!);
+  const shader = React.useRef<T.ShaderMaterial>(null!);
+  //   const mat = React.useRef<T.RawShaderMaterial>(null!);
 
   React.useLayoutEffect(() => {
     const count = geo.current.attributes.position.count;
@@ -133,7 +139,7 @@ function RawPlane() {
     geo.current.setAttribute("aRandom", new T.BufferAttribute(randoms, 1));
   }, []);
 
-  const { ufreqX, ufreqY } = useControls({
+  const { ufreqX, ufreqY, uAmp } = useControls({
     ufreqX: {
       value: 10.1,
       min: 0.1,
@@ -146,12 +152,30 @@ function RawPlane() {
       max: 20,
       step: 0.01,
     },
+    uAmp: {
+      value: 0.1,
+      min: 0.1,
+      max: 5,
+      step: 0.01,
+    },
   });
+
+  useFrame(({clock}) => {
+    /** do not use large numbers f.i. Date.now() */
+    shader.current.uTime = clock.elapsedTime
+  })
 
   return (
     <mesh>
       <planeBufferGeometry ref={geo} args={[1, 1, 32, 32]} />
-      <myMaterial ufreq={new T.Vector2(ufreqX, ufreqY)} />
+      <myMaterial
+        ref={shader}
+        ufreq={new T.Vector2(ufreqX, ufreqY)}
+        uAmp={uAmp}
+        wireframe={!true}
+        side={T.DoubleSide}
+        transparent={true}
+      />
       {
         /* <rawShaderMaterial
         ref={mat}

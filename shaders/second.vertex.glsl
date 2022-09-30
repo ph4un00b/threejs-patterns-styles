@@ -9,6 +9,8 @@
 
 /** all the above are automatically set on <ShaderMaterial/> */
 uniform vec2 ufreq;
+uniform float uTime;
+uniform float uAmp;
 
 /** context -> inputs */
 attribute float aRandom;
@@ -26,9 +28,8 @@ void main()
 
   /** or granular control */
   vec4 modelPosition = modelMatrix * vec4(position, 1.0);
-  modelPosition.z += sin(modelPosition.x * ufreq.x) * 0.6;
-  modelPosition.z += sin(modelPosition.y * ufreq.y) * 0.6;
-
+  modelPosition.z += sin(modelPosition.x * ufreq.x + uTime) * uAmp;
+  modelPosition.z += sin(modelPosition.y * ufreq.y + uTime) * uAmp;
   vec4 viewPosition = viewMatrix * modelPosition;
 
   vec4 projectedPosition = projectionMatrix * viewPosition;
