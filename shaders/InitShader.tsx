@@ -32,7 +32,9 @@ import {
   useSphere,
 } from "@react-three/cannon";
 import nice_colors from "../utils/colors";
+/** @ts-ignore */
 import vertex from "../shaders/Init.vertex.glsl";
+/** @ts-ignore */
 import frag from "../shaders/Init.frag.glsl";
 
 var dpr = { min: 1, max: 2 };
@@ -96,6 +98,11 @@ export default function () {
             <rawShaderMaterial
               vertexShader={vertex}
               fragmentShader={frag}
+              // working props
+              wireframe={!true}
+              side={T.DoubleSide}
+              transparent={!true}
+              // manual props: color, map, alphaMap, opacity...
             />
           </mesh>
           <axesHelper args={[4]} />
