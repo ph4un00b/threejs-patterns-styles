@@ -1,13 +1,17 @@
 /** @link https://learnopengl.com/Getting-started/Coordinate-Systems */
-uniform mat4 /** transform coords */ projectionMatrix; 
-uniform mat4 /** transform camera */ viewMatrix;
-uniform mat4 /** transform mesh */ modelMatrix;
+
+// uniform mat4 /** transform coords */ projectionMatrix; 
+// uniform mat4 /** transform camera */ viewMatrix;
+// uniform mat4 /** transform mesh */ modelMatrix;
 /** or use a shorcut */
-uniform mat4 modelViewMatrix;
+// uniform mat4 modelViewMatrix;
+// attribute vec3 position;
+
+/** all the above are automatically set on <ShaderMaterial/> */
+uniform vec2 ufreq;
 
 /** context -> inputs */
 attribute float aRandom;
-attribute vec3 position;
 
 /** outputs -> frag */
 varying float vRandom;  
@@ -22,7 +26,8 @@ void main()
 
   /** or granular control */
   vec4 modelPosition = modelMatrix * vec4(position, 1.0);
-  modelPosition.z += sin(modelPosition.x * 5.0) * 0.1;
+  modelPosition.z += sin(modelPosition.x * ufreq.x) * 0.6;
+  modelPosition.z += sin(modelPosition.y * ufreq.y) * 0.6;
 
   vec4 viewPosition = viewMatrix * modelPosition;
 
@@ -30,3 +35,25 @@ void main()
 
   gl_Position = projectedPosition;
 }
+
+/**
+ *    - functions are typed as well
+ *    - float sum(float a, float b) { return a + b; };
+ *
+ *    - classic built-in functions
+ *      - sin, cos, max, min, pow, exp, mod, clamp
+ *
+ *    - practical built-in functions
+ *      - cross, dot, mix, step, smoothstep, length, distance, reflect, refract, normalize
+ *
+ * - Documentation: (not beginner-friendly)
+ *   - https://www.shaderific.com/glsl-functions
+ *   - https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/indexflat.php
+ *   - https://thebookofshaders.com/glossary/
+ * 
+ * - Inspirational Links:
+ *   - https://thebookofshaders.com/
+ *   - https://www.shadertoy.com/
+ *   - https://www.youtube.com/channel/UCcAlTqd9zID6aNX3TzwxJXg
+ *   - https://www.youtube.com/channel/UC8Wzk_R1GoPkPqLo-obU_kQ
+ */

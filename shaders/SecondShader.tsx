@@ -2,6 +2,7 @@ import * as T from "three";
 import * as React from "react";
 import {
   Canvas,
+  extend,
   LightProps,
   MeshProps,
   useFrame,
@@ -12,6 +13,7 @@ import {
   OrbitControls,
   OrthographicCamera,
   PerspectiveCamera,
+  shaderMaterial,
   Text3D,
   useHelper,
 } from "@react-three/drei/core";
@@ -103,36 +105,72 @@ export default function () {
   );
 }
 
+/** it uses ShaderMaterial instead of RawShaderMaterial
+ * we do all this below in order
+ * to make rerenders to take effect on the shader
+ */
+const MyMaterial = shaderMaterial(
+  { ufreq: new T.Vector2(0.1, 0.1) },
+  vertex,
+  frag,
+);
+
+extend({ MyMaterial });
+
 function RawPlane() {
-  const geo = React.useRef<T.PlaneGeometry>(null!)
+  console.log("hola");
+  const geo = React.useRef<T.PlaneGeometry>(null!);
+//   const mat = React.useRef<T.RawShaderMaterial>(null!);
 
   React.useLayoutEffect(() => {
-    const count = geo.current.attributes.position.count
-    const randoms = new Float32Array(count)
+    const count = geo.current.attributes.position.count;
+    const randoms = new Float32Array(count);
 
     for (let index = 0; index < count; index++) {
       randoms[index] = Math.random();
     }
 
-    geo.current.setAttribute('aRandom', new T.BufferAttribute(randoms, 1))
+    geo.current.setAttribute("aRandom", new T.BufferAttribute(randoms, 1));
+  }, []);
 
-
-  }, [])
+  const { ufreqX, ufreqY } = useControls({
+    ufreqX: {
+      value: 10.1,
+      min: 0.1,
+      max: 20,
+      step: 0.01,
+    },
+    ufreqY: {
+      value: 0.1,
+      min: 0.1,
+      max: 20,
+      step: 0.01,
+    },
+  });
 
   return (
     <mesh>
       <planeBufferGeometry ref={geo} args={[1, 1, 32, 32]} />
-      <rawShaderMaterial
+      <myMaterial ufreq={new T.Vector2(ufreqX, ufreqY)} />
+      {
+        /* <rawShaderMaterial
+        ref={mat}
+        uniforms={{
+          ufreq: {
+            value: new T.Vector2(ufreqX, ufreqY)
+          },
+        }}
         vertexShader={vertex}
         fragmentShader={frag}
-        // working props
+
         wireframe={!true}
         side={T.DoubleSide}
         transparent={true}
-      // manual props: color, map, alphaMap, opacity...
-      />
+
+      /> */
+      }
     </mesh>
-  )
+  );
 }
 
 /** suports shadows! */
@@ -177,8 +215,8 @@ function DirectionalLight(props: LightProps) {
        * 3RF set PCFSoftShadowMap as the default shadow map
        */
       shadow-radius={10}
-    // position={[directional.x, directional.y, directional.z]}
-    // args={[color, 0.5 /** intensity */]}
+      // position={[directional.x, directional.y, directional.z]}
+      // args={[color, 0.5 /** intensity */]}
     />
   );
 }
