@@ -16,6 +16,7 @@ import {
   shaderMaterial,
   Text3D,
   useHelper,
+  useTexture,
 } from "@react-three/drei/core";
 import { proxy, useSnapshot } from "valtio";
 import { useControls } from "leva";
@@ -115,7 +116,8 @@ const MyMaterial = shaderMaterial(
     ufreq: new T.Vector2(0.1, 0.1),
     uTime: 0,
     uAmp: 0.1,
-    uColor: new T.Color('peru')
+    uColor: new T.Color('peru'),
+    uTexture: new T.Texture(),
   },
   vertex,
   frag,
@@ -169,6 +171,7 @@ function RawPlane() {
     shader.current.uTime = clock.elapsedTime
   })
 
+  const pow2img = useTexture(`${baseUrl}/pow2img.webp`)
   return (
     <mesh>
       <planeBufferGeometry ref={geo} args={[1, 1, 32, 32]} />
@@ -177,9 +180,10 @@ function RawPlane() {
         ufreq={new T.Vector2(ufreqX, ufreqY)}
         uAmp={uAmp}
         uColor={uColor}
+        uTexture={pow2img}
         wireframe={!true}
         side={T.DoubleSide}
-        transparent={true}
+        transparent={!true}
       />
       {
         /* <rawShaderMaterial

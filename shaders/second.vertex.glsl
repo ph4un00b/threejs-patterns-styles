@@ -6,6 +6,7 @@
 /** or use a shorcut */
 // uniform mat4 modelViewMatrix;
 // attribute vec3 position;
+// attribute vec2 uv;
 
 /** all the above are automatically set on <ShaderMaterial/> */
 uniform vec2 ufreq;
@@ -17,6 +18,7 @@ attribute float aRandom;
 
 /** outputs -> frag */
 varying float vRandom;  
+varying vec2 vUV;  
 
 void main()
 {
@@ -35,6 +37,7 @@ void main()
   vec4 projectedPosition = projectionMatrix * viewPosition;
 
   gl_Position = projectedPosition;
+  vUV = uv;
 }
 
 /**
