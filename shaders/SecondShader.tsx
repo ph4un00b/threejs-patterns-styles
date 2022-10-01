@@ -116,8 +116,10 @@ const MyMaterial = shaderMaterial(
     ufreq: new T.Vector2(0.1, 0.1),
     uTime: 0,
     uAmp: 0.1,
-    uColor: new T.Color('peru'),
+    uColor: new T.Color("peru"),
     uTexture: new T.Texture(),
+    uIntensity: 2.0,
+    uDelta: 0.1,
   },
   vertex,
   frag,
@@ -142,7 +144,7 @@ function RawPlane() {
     geo.current.setAttribute("aRandom", new T.BufferAttribute(randoms, 1));
   }, []);
 
-  const { ufreqX, ufreqY, uAmp,uColor } = useControls({
+  const { ufreqX, ufreqY, uAmp, uColor, uIntensity, uDelta } = useControls({
     ufreqX: {
       value: 10.1,
       min: 0.1,
@@ -161,17 +163,29 @@ function RawPlane() {
       max: 5,
       step: 0.01,
     },
+    uIntensity: {
+      value: 5.0,
+      min: 0.1,
+      max: 5,
+      step: 0.01,
+    },
+    uDelta: {
+      value: 5.0,
+      min: 0.1,
+      max: 5.0,
+      step: 0.01,
+    },
     uColor: {
-        value: "#ff00bc"
-    }
+      value: "#ff00bc",
+    },
   });
 
-  useFrame(({clock}) => {
+  useFrame(({ clock }) => {
     /** do not use large numbers f.i. Date.now() */
-    shader.current.uTime = clock.elapsedTime
-  })
+    shader.current.uTime = clock.elapsedTime;
+  });
 
-  const pow2img = useTexture(`${baseUrl}/pow2img.webp`)
+  const pow2img = useTexture(`${baseUrl}/pow2img.webp`);
   return (
     <mesh>
       <planeBufferGeometry ref={geo} args={[1, 1, 32, 32]} />
@@ -181,6 +195,8 @@ function RawPlane() {
         uAmp={uAmp}
         uColor={uColor}
         uTexture={pow2img}
+        uIntensity={uIntensity}
+        uDelta={uDelta}
         wireframe={!true}
         side={T.DoubleSide}
         transparent={!true}

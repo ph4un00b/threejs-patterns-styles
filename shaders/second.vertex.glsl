@@ -19,6 +19,7 @@ attribute float aRandom;
 /** outputs -> frag */
 varying float vRandom;  
 varying vec2 vUV;  
+varying float vElevation;  
 
 void main()
 {
@@ -30,14 +31,17 @@ void main()
 
   /** or granular control */
   vec4 modelPosition = modelMatrix * vec4(position, 1.0);
-  modelPosition.z += sin(modelPosition.x * ufreq.x + uTime) * uAmp;
-  modelPosition.z += sin(modelPosition.y * ufreq.y + uTime) * uAmp;
-  vec4 viewPosition = viewMatrix * modelPosition;
+  float elevation = sin(modelPosition.x * ufreq.x + uTime) * uAmp;
+  elevation += sin(modelPosition.y * ufreq.y + uTime) * uAmp;
 
+  modelPosition.z = elevation;
+
+  vec4 viewPosition = viewMatrix * modelPosition;
   vec4 projectedPosition = projectionMatrix * viewPosition;
 
   gl_Position = projectedPosition;
   vUV = uv;
+  vElevation = elevation;
 }
 
 /**
