@@ -368,10 +368,8 @@ varying float vElevation;
 
 void main() {
 
-  // bar
+  // bar X
   float barx = step(0.1, mod(vUv.x * uleverA, 1.0));
-
-  // horizontal
   barx *= step(uleverX , mod(vUv.y * uleverA, 1.0));
   
   // black 0,0,0 ,  white 1,1,1
@@ -398,12 +396,16 @@ void main() {
 
   // bar Y
   float bary = step(uleverX, mod(vUv.x * uleverA, 1.0));
-
-  // horizontal
   bary *= step(0.1 , mod(vUv.y * uleverA, 1.0));
+
+  // bar X
+  float barx = step(0.1, mod(vUv.x * uleverA, 1.0));
+  barx *= step(uleverX , mod(vUv.y * uleverA, 1.0));
+
+  float combo = barx + bary;
   
   // black 0,0,0 ,  white 1,1,1
-  gl_FragColor.rgba = vec4(bary, bary, bary, 1.0);
+  gl_FragColor.rgba = vec4(combo, combo, combo, 1.0);
 
 }
 `;
