@@ -17,9 +17,11 @@ import Three from '../basics/Three';
 import InitShader from '../shaders/InitShader';
 import SecondShader from '../shaders/SecondShader';
 import Patron from '../shaders/Patron';
+import PatronDraw from '../shaders/PatronDraw';
 
 function App() {
-  return <Patron />;
+  return <PatronDraw />;
+  // return <Patron />;
   // return <SecondShader />;
   // return <InitShader />;
   // return <Models />;
