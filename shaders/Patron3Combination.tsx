@@ -442,6 +442,40 @@ void main() {
 }
 `;
 
+var frag = glsl`
+/** context -> inputs */
+
+uniform float utime;
+uniform float uleverX;
+uniform float uleverY;
+uniform float uleverA;
+uniform float uleverB;
+
+/** vertex -> inputs */
+
+varying vec2 vUv;
+varying float vElevation;
+
+void main() {
+  float offset = 0.2;
+  // bar Y
+  float bary = step(uleverX, mod(vUv.x * uleverA + offset, 1.0));
+  bary *= step(uleverX * 0.5 , mod(vUv.y * uleverA, 1.0));
+
+  // bar X
+  float barx = step(uleverX * 0.5, mod(vUv.x * uleverA, 1.0));
+  barx *= step(uleverX , mod(vUv.y * uleverA + offset, 1.0));
+
+  /** range [0.0, 1.0]
+  // float combo = vUv.x;
+  /** range [0.5, 0.5]
+   float combo = abs(vUv.x - 0.5);
+
+  // black 0,0,0 ,  white 1,1,1
+  gl_FragColor.rgba = vec4(combo, combo, combo, 1.0);
+
+}
+`;
 type ShaderProps = T.ShaderMaterial & {
   [key: string]: any;
 };
