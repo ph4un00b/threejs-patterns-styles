@@ -367,6 +367,25 @@ void main() {
 }
 `;
 
+var frag = glsl`
+/** context -> inputs */
+
+uniform float utime;
+
+/** vertex -> inputs */
+
+varying vec2 vUv;
+varying float vElevation;
+
+void main() {
+  float coordValue = floor(vUv.x * 20.0) / 20.0; 
+  coordValue *= floor(vUv.y * 20.0) / 20.0; 
+
+  /// black 0,0,0, white 1,1,1
+  gl_FragColor.rgba = vec4(coordValue, coordValue, coordValue, 1.0);
+}
+`;
+
 type ShaderProps = T.ShaderMaterial & {
   [key: string]: any;
 };
