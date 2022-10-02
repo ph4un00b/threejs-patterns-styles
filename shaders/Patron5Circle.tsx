@@ -475,12 +475,22 @@ float pseudo_random(vec2 seed)
   return fract(sin(dot(seed.xy, vec2(12.9898, 78.233))) * 43758.5453123);
 }
 
+vec2 rotate(vec2 uv, float turn, vec2 pivot) 
+{
+  return vec2(
+    cos(turn) * (uv.x - pivot.x) + sin(turn) * (uv.y - pivot.y) + pivot.x,
+    cos(turn) * (uv.y - pivot.y) - sin(turn) * (uv.x - pivot.x) + pivot.y
+  );
+}
+
 void main() {
 
-  vec2 x = vec2(vUv.x * 0.1 + 0.45, vUv.y * 0.5 + 0.25);
+  vec2 rotatedUv = rotate(vUv, utime, vec2(0.5));
+
+  vec2 x = vec2(rotatedUv.x * 0.1 + 0.45, rotatedUv.y * 0.5 + 0.25);
   float lightX = 0.015 / distance(x, vec2(0.5));
 
-  vec2 y = vec2(vUv.y * 0.1 + 0.45, vUv.x * 0.5 + 0.25);
+  vec2 y = vec2(rotatedUv.y * 0.1 + 0.45, rotatedUv.x * 0.5 + 0.25);
   float lightY = 0.015 / distance(y, vec2(0.5));
 
   float combo = lightX * lightY;
