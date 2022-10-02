@@ -332,13 +332,15 @@ varying vec2 vUv;
 varying float vElevation;
 
 void main() {
-  float coordValuex = mod(vUv.x * uleverA, 1.0);
-  float coordValuey = mod(vUv.y * uleverB, 1.0);
-  // float coordValue = step(0.9, coordValuex); 
-  float coordValue = step(uleverX,coordValuex) + step(uleverX,coordValuey); 
+  // vertical
+  float coordValue = step(uleverX, mod(vUv.x * uleverA, 1.0));
 
-  /// black 0,0,0
-  //  white 1,1,1
+  // +
+
+  // horizontal
+  coordValue += step(uleverX, mod(vUv.y * uleverA, 1.0));
+  
+  // black 0,0,0 ,  white 1,1,1
   gl_FragColor.rgba = vec4(coordValue, coordValue, coordValue, 1.0);
 }
 `;
