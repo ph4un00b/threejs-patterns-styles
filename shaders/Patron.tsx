@@ -86,10 +86,11 @@ export default function () {
               </group>
 
               <Cubo castShadow={true} />
-              <World items={4} />
+              {/* <World items={4} /> */}
             </Debug>
           </Physics>
 
+          <Fondo />
           <axesHelper args={[4]} />
           <ambientLight color={ambient} intensity={ambientIntensity} />
           <DirectionalLight
@@ -102,128 +103,6 @@ export default function () {
         </Canvas>
       </section>
     </>
-  );
-}
-
-var hitSound = new window.Audio(`${baseUrl}/sounds/hit.mp3`);
-
-function playHit({ contact: { impactVelocity } }: C.CollideEvent) {
-  if (impactVelocity < 1.5) return;
-  /** todo:
-   * - change the  volume in relation to impact
-   * - add a little delay since hitting the floor
-   * fires multiple events (4?)
-   */
-  hitSound.volume = Math.random();
-  hitSound.currentTime = 0;
-  hitSound.play();
-}
-
-type MaterialOptions =
-  | string
-  | {
-      friction?: number | undefined;
-      restitution?: number | undefined;
-    }
-  | undefined;
-
-function World({ items }: { items: number }) {
-  const [circulos, setCirculos] = R.useState(items);
-  const [preset] = R.useState(Math.floor(Math.random() * 900));
-
-  const bouncyMat = {
-    name: 'plastic',
-  } as MaterialOptions;
-
-  const groundMat = {
-    name: 'concreto',
-  } as MaterialOptions;
-
-  C.useContactMaterial(groundMat, bouncyMat, {
-    friction: 0.1,
-    restitution: 0.7 /** bouncing! */,
-  });
-
-  const colors = R.useMemo(() => {
-    const array = new Float32Array(items * 3);
-    const color = new T.Color();
-    for (let i = 0; i < items; i++) {
-      color
-        .set(nice_colors[preset][Math.floor(Math.random() * 4)])
-        .convertSRGBToLinear()
-        .toArray(array, i * 3);
-    }
-    return array;
-  }, [items]);
-
-  return (
-    <>
-      {/* using position instead of granular ones 'position-x' */}
-      <Esfera castShadow={true} material={bouncyMat} position={[-2, 5, 0]} />
-
-      {/* using rotation instead of granular ones 'rotation-x' */}
-      <Piso
-        receiveShadow={true}
-        material={groundMat}
-        rotation={[-Math.PI * 0.5, 0, 0]}
-      />
-    </>
-  );
-}
-function Piso({
-  receiveShadow,
-  ...props
-}: C.PlaneProps & { receiveShadow?: boolean }) {
-  // infinite grid floor
-  const [piso, api] = C.usePlane(
-    () => ({ mass: 0, ...props }),
-    R.useRef<T.Mesh>(null!)
-  );
-
-  return (
-    <mesh ref={piso} receiveShadow>
-      <planeBufferGeometry args={[16, 16]} />
-      <meshStandardMaterial
-        color={'#777777'}
-        roughness={0.4}
-        metalness={0.3}
-        side={T.DoubleSide}
-      />
-    </mesh>
-  );
-}
-
-function Esfera({
-  receiveShadow,
-  castShadow,
-  ...props
-}: C.SphereProps & { receiveShadow?: boolean; castShadow?: boolean }) {
-  const [esfera, world] = C.useSphere(
-    () => ({
-      mass: 1,
-      onCollide: (e) => {
-        playHit(e);
-      },
-      ...props,
-    }),
-    R.useRef<T.Mesh>(null!)
-  );
-
-  R.useEffect(() => {
-    world.applyLocalForce([150, 0, 0], [0, 0, 0]);
-  }, []);
-
-  F.useFrame(({ clock }) => {
-    // api.position.set(Math.sin(clock.getElapsedTime()) * 5, 1, 0)
-    world.applyForce([-0.05, 0, 0], esfera.current!.position.toArray());
-  });
-
-  return (
-    // shall we spread the props again?
-    <mesh ref={esfera} castShadow>
-      <sphereBufferGeometry args={[1, 32, 32]} />
-      <meshStandardMaterial roughness={0.4} metalness={0.3} />
-    </mesh>
   );
 }
 
@@ -363,7 +242,7 @@ window.addEventListener('dblclick', () => {
   }
 });
 
-export function Fondo() {
+function Fondo() {
   const shader = R.useRef<ShaderProps>(null!);
 
   F.useFrame((state) => {
