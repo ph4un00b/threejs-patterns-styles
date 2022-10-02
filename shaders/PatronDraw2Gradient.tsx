@@ -317,7 +317,7 @@ const glsl = (x: TemplateStringsArray) => String(x);
  * - less control (f.i. animations)
  */
 
-const frag = glsl`
+var frag = glsl`
 /** context -> inputs */
 
 uniform float utime;
@@ -345,6 +345,24 @@ void main() {
 
   /// black 0,0,0
   //  white 1,1,1
+  gl_FragColor.rgba = vec4(coordValue, coordValue, coordValue, 1.0);
+}
+`;
+
+var frag = glsl`
+/** context -> inputs */
+
+uniform float utime;
+
+/** vertex -> inputs */
+
+varying vec2 vUv;
+varying float vElevation;
+
+void main() {
+  float coordValue = floor(vUv.x * 20.0) / 20.0; 
+
+  /// black 0,0,0, white 1,1,1
   gl_FragColor.rgba = vec4(coordValue, coordValue, coordValue, 1.0);
 }
 `;
