@@ -1,37 +1,22 @@
 import * as T from 'three';
-import * as React from 'react';
+import * as R from 'react';
+import * as F from '@react-three/fiber';
+import * as D from '@react-three/drei/core';
+import * as L from 'leva';
+import * as S from '@react-spring/three';
+import * as G from '@use-gesture/react';
+import * as C from '@react-three/cannon';
+import { proxy, useSnapshot } from 'valtio';
+import nice_colors from '../utils/colors';
+import { Canvas } from '@react-three/fiber';
 import {
-  Canvas,
-  LightProps,
-  MeshProps,
-  useFrame,
-  useThree,
-} from '@react-three/fiber';
-import {
+  Center,
   OrbitControls,
   PerspectiveCamera,
-  OrthographicCamera,
-  Center,
   Text3D,
-  useHelper,
 } from '@react-three/drei/core';
-import { proxy, useSnapshot } from 'valtio';
-import { useControls } from 'leva';
-import { useSpring, config, a } from '@react-spring/three';
-import { useDrag } from '@use-gesture/react';
-import {
-  Debug,
-  Physics,
-  PlaneProps,
-  SphereProps,
-  useContactMaterial,
-  usePlane,
-  useSphere,
-  useBox,
-  BoxProps,
-  CollideEvent,
-} from '@react-three/cannon';
-import nice_colors from '../utils/colors';
+import { Debug, Physics } from '@react-three/cannon';
+import { a } from '@react-spring/three';
 
 var dpr = { min: 1, max: 2 };
 var baseUrl = 'https://ph4un00b.github.io/data';
@@ -45,8 +30,8 @@ var global = {
 /** FREE! @link https://kenney.nl/assets */
 export default function () {
   const { cw, ch } = useCanvas();
-  const cam_ = React.useRef(null);
-  const { fondo, ambientIntensity, ambient } = useControls({
+  const cam_ = R.useRef(null);
+  const { fondo, ambientIntensity, ambient } = L.useControls({
     ambientIntensity: { value: 0.3, min: 0, max: 1, step: 0.001 },
     ambient: { value: '#ffffff' },
     fondo: { value: global.fog },
@@ -122,7 +107,7 @@ export default function () {
 
 var hitSound = new window.Audio(`${baseUrl}/sounds/hit.mp3`);
 
-function playHit({ contact: { impactVelocity } }: CollideEvent) {
+function playHit({ contact: { impactVelocity } }: C.CollideEvent) {
   if (impactVelocity < 1.5) return;
   /** todo:
    * - change the  volume in relation to impact
@@ -143,8 +128,8 @@ type MaterialOptions =
   | undefined;
 
 function World({ items }: { items: number }) {
-  const [circulos, setCirculos] = React.useState(items);
-  const [preset] = React.useState(Math.floor(Math.random() * 900));
+  const [circulos, setCirculos] = R.useState(items);
+  const [preset] = R.useState(Math.floor(Math.random() * 900));
 
   const bouncyMat = {
     name: 'plastic',
@@ -154,12 +139,12 @@ function World({ items }: { items: number }) {
     name: 'concreto',
   } as MaterialOptions;
 
-  useContactMaterial(groundMat, bouncyMat, {
+  C.useContactMaterial(groundMat, bouncyMat, {
     friction: 0.1,
     restitution: 0.7 /** bouncing! */,
   });
 
-  const colors = React.useMemo(() => {
+  const colors = R.useMemo(() => {
     const array = new Float32Array(items * 3);
     const color = new T.Color();
     for (let i = 0; i < items; i++) {
@@ -188,11 +173,11 @@ function World({ items }: { items: number }) {
 function Piso({
   receiveShadow,
   ...props
-}: PlaneProps & { receiveShadow?: boolean }) {
+}: C.PlaneProps & { receiveShadow?: boolean }) {
   // infinite grid floor
-  const [piso, api] = usePlane(
+  const [piso, api] = C.usePlane(
     () => ({ mass: 0, ...props }),
-    React.useRef<T.Mesh>(null!)
+    R.useRef<T.Mesh>(null!)
   );
 
   return (
@@ -212,8 +197,8 @@ function Esfera({
   receiveShadow,
   castShadow,
   ...props
-}: SphereProps & { receiveShadow?: boolean; castShadow?: boolean }) {
-  const [esfera, world] = useSphere(
+}: C.SphereProps & { receiveShadow?: boolean; castShadow?: boolean }) {
+  const [esfera, world] = C.useSphere(
     () => ({
       mass: 1,
       onCollide: (e) => {
@@ -221,14 +206,14 @@ function Esfera({
       },
       ...props,
     }),
-    React.useRef<T.Mesh>(null!)
+    R.useRef<T.Mesh>(null!)
   );
 
-  React.useEffect(() => {
+  R.useEffect(() => {
     world.applyLocalForce([150, 0, 0], [0, 0, 0]);
   }, []);
 
-  useFrame(({ clock }) => {
+  F.useFrame(({ clock }) => {
     // api.position.set(Math.sin(clock.getElapsedTime()) * 5, 1, 0)
     world.applyForce([-0.05, 0, 0], esfera.current!.position.toArray());
   });
@@ -242,19 +227,19 @@ function Esfera({
   );
 }
 
-function Cubo(props: BoxProps & MeshProps) {
-  const [active, setActive] = React.useState(0);
-  const cubo = React.useRef<T.Mesh>(null);
-  const { pos } = useSpring({
+function Cubo(props: C.BoxProps & F.MeshProps) {
+  const [active, setActive] = R.useState(0);
+  const cubo = R.useRef<T.Mesh>(null!);
+  const { pos } = S.useSpring({
     to: {
       pos: 0,
     },
     from: { pos: -20 },
-    config: config.gentle,
+    config: S.config.gentle,
   });
-  const { scale } = useSpring({ scale: active ? 4 : 1 });
-  const { rotation } = useSpring({ rotation: active ? Math.PI : 0 });
-  const { colorA } = useSpring({ colorA: active ? 'royalblue' : '#e83abf' });
+  const { scale } = S.useSpring({ scale: active ? 4 : 1 });
+  const { rotation } = S.useSpring({ rotation: active ? Math.PI : 0 });
+  const { colorA } = S.useSpring({ colorA: active ? 'royalblue' : '#e83abf' });
   /** interpolate values from common spring */
   // const { spring } = useSpring({
   //   spring: active,
@@ -265,10 +250,10 @@ function Cubo(props: BoxProps & MeshProps) {
   // const rotation = spring.to([0, 1], [0, Math.PI]);
   // const colorA = spring.to([0, 1], ['#6246ea', 'royalblue']);
 
-  const { viewport } = useThree();
-  const [{ x, y }, api] = useSpring(() => ({ x: 0, y: 1 }));
+  const { viewport } = F.useThree();
+  const [{ x, y }, api] = S.useSpring(() => ({ x: 0, y: 1 }));
 
-  const handlers = useDrag(function ({ event, offset: [x, y] }) {
+  const handlers = G.useDrag(function ({ event, offset: [x, y] }) {
     event.stopPropagation();
     const aspect = viewport.getCurrentViewport().factor;
     console.log(x, y);
@@ -298,19 +283,19 @@ function Cubo(props: BoxProps & MeshProps) {
 }
 
 /** suports shadows! */
-function DirectionalLight(props: LightProps) {
-  const light = React.useRef<T.DirectionalLight>(null!);
-  const camera = React.useRef<T.OrthographicCamera>(null!);
-  useHelper(light, T.DirectionalLightHelper, 0.5);
-  useHelper(camera, T.CameraHelper);
+function DirectionalLight(props: F.LightProps) {
+  const light = R.useRef<T.DirectionalLight>(null!);
+  const camera = R.useRef<T.OrthographicCamera>(null!);
+  D.useHelper(light, T.DirectionalLightHelper, 0.5);
+  D.useHelper(camera, T.CameraHelper);
 
-  React.useLayoutEffect(() => {
+  R.useLayoutEffect(() => {
     camera.current = light.current.shadow.camera;
     // light.current.shadow.radius = 10;
     // alert(JSON.stringify(light.current.shadow.mapSize, null, 2));
   }, []);
 
-  useFrame(() => {
+  F.useFrame(() => {
     camera.current.updateProjectionMatrix();
   });
 
@@ -377,3 +362,129 @@ window.addEventListener('dblclick', () => {
     document.exitFullscreen();
   }
 });
+
+export function Fondo() {
+  const shader = R.useRef<ShaderProps>(null!);
+
+  F.useFrame((state) => {
+    shader.current.utime = state.clock.elapsedTime;
+  });
+
+  return (
+    <mesh>
+      <planeBufferGeometry args={[10, 10, 2 ** 7, 2 ** 7]} />
+      <aguaMat
+        ref={shader}
+        wireframe={true}
+        color={0xff0000}
+        side={T.DoubleSide}
+      />
+    </mesh>
+  );
+}
+
+/** identity for template-literal */
+const glsl = (x: TemplateStringsArray) => String(x);
+
+const vertex = glsl`
+/** @link https://learnopengl.com/Getting-started/Coordinate-Systems */
+
+// uniform mat4 /** transform coords */ projectionMatrix; 
+// uniform mat4 /** transform camera */ viewMatrix;
+// uniform mat4 /** transform mesh */ modelMatrix;
+/** or use a shorcut */
+// uniform mat4 modelViewMatrix;
+// attribute vec3 position;
+// attribute vec2 uv;
+
+/** all the above are automatically set on <ShaderMaterial/> */
+
+/** context -> inputs */
+uniform float utime;
+
+
+/** outputs -> frag */
+
+varying vec2 vUv;  
+varying float vElevation;  
+
+void main()
+{
+// gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(position, 1.0);
+
+/** OR */
+
+// gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+
+/** OR */
+vec4 modelPosition = modelMatrix * vec4(position, 1.0);
+
+float elevation = sin(modelPosition.x * 4.0 + utime) * 0.5;
+elevation += sin(modelPosition.y * 4.0 + utime) * 0.2;
+modelPosition.z = elevation;
+
+vec4 viewPosition = viewMatrix * modelPosition;
+
+vec4 projectedPosition = projectionMatrix * viewPosition;
+
+gl_Position = projectedPosition;
+
+/* outputs */
+vUv = uv;
+vElevation = elevation;
+}
+
+/**
+*    - functions are typed as well
+*    - float sum(float a, float b) { return a + b; };
+*
+*    - classic built-in functions
+*      - sin, cos, max, min, pow, exp, mod, clamp
+*
+*    - practical built-in functions
+*      - cross, dot, mix, step, smoothstep, length, distance, reflect, refract, normalize
+*
+* - Documentation: (not beginner-friendly)
+*   - https://www.shaderific.com/glsl-functions
+*   - https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/indexflat.php
+*   - https://thebookofshaders.com/glossary/
+* 
+* - Inspirational Links:
+*   - https://thebookofshaders.com/
+*   - https://www.shadertoy.com/
+*   - https://www.youtube.com/channel/UCcAlTqd9zID6aNX3TzwxJXg
+*   - https://www.youtube.com/channel/UC8Wzk_R1GoPkPqLo-obU_kQ
+*/
+`;
+
+const frag = glsl`
+/** context -> inputs */
+uniform float utime;
+
+/** vertex -> inputs */
+varying vec2 vUv;
+// #pragma glslify: random = require(glsl-random)
+varying float vElevation;
+
+
+void main() {
+  // gl_FragColor.rgba = vec4(0.5 + 0.3 * sin(vUv.yxx + utime) + color, 1.0);
+  gl_FragColor.rgba = 1.0 * vElevation * vec4(0.5 + 0.3 * sin(vUv.yxy + utime), 1.0);
+  // gl_FragColor.rgba = 1.0 * vElevation * vec4(0.5 + 0.3 * 1.0, 0.5 + 0.3 * 1.0, 0.5 + 0.3 * 1.0, 1.0);
+  // gl_FragColor.rgba = vec4(vec3(0.), 1.);
+}
+`;
+
+type ShaderProps = T.ShaderMaterial & {
+  [key: string]: any;
+};
+
+declare module '@react-three/fiber' {
+  interface ThreeElements {
+    aguaMat: F.Object3DNode<ShaderProps, typeof AguaMat>;
+  }
+}
+
+const AguaMat = D.shaderMaterial({ utime: 0 }, vertex, frag);
+
+F.extend({ AguaMat }); // -> now you can do <aguaMat ... />
