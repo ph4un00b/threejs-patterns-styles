@@ -18,10 +18,11 @@ import InitShader from '../shaders/InitShader';
 import SecondShader from '../shaders/SecondShader';
 import Patron from '../shaders/Patron';
 import PatronDraw from '../shaders/PatronDraw';
-import PatronDraw2Gradient from '../shaders/PatronDraw2Gradient';
+import Patron3Combination from '../shaders/Patron3Combination';
 
 function App() {
-  return <PatronDraw2Gradient />;
+  return <Patron3Combination />;
+  // return <PatronDraw2Gradient />;
   // return <PatronDraw />;
   // return <Patron />;
   // return <SecondShader />;
