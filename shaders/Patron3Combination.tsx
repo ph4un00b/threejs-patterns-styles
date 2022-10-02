@@ -396,10 +396,10 @@ void main() {
 
   // bar Y
   float bary = step(uleverX, mod(vUv.x * uleverA, 1.0));
-  bary *= step(0.1 , mod(vUv.y * uleverA, 1.0));
+  bary *= step(uleverX * 0.5 , mod(vUv.y * uleverA, 1.0));
 
   // bar X
-  float barx = step(0.1, mod(vUv.x * uleverA, 1.0));
+  float barx = step(uleverX * 0.5, mod(vUv.x * uleverA, 1.0));
   barx *= step(uleverX , mod(vUv.y * uleverA, 1.0));
 
   float combo = barx + bary;
