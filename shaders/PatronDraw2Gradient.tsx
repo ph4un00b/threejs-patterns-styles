@@ -328,7 +328,9 @@ varying vec2 vUv;
 varying float vElevation;
 
 void main() {
-  gl_FragColor.rgba = vec4(vUv.x, vUv.x, vUv.x, 1.0);
+  // float coord = vUv.x;
+  float coord = vUv.y;
+  gl_FragColor.rgba = vec4(coord, coord, coord, 1.0);
 }
 `;
 
