@@ -515,6 +515,31 @@ void main() {
 
 }
 `;
+
+var frag = glsl`
+/** context -> inputs */
+
+uniform float utime;
+uniform float uleverX;
+uniform float uleverY;
+uniform float uleverA;
+uniform float uleverB;
+
+/** vertex -> inputs */
+
+varying vec2 vUv;
+varying float vElevation;
+
+void main() {
+  
+  float combo = step(0.3, max( abs(vUv.x - 0.5), abs(vUv.y - 0.5) ));
+
+  // black 0,0,0 ,  white 1,1,1
+  gl_FragColor = vec4(combo, combo, combo, 1.0);
+
+}
+
+`;
 type ShaderProps = T.ShaderMaterial & {
   [key: string]: any;
 };
