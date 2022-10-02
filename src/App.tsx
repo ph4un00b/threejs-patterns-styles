@@ -21,9 +21,11 @@ import PatronDraw from '../shaders/PatronDraw';
 import Patron3Combination from '../shaders/Patron3Combination';
 import PatronDraw2Gradient from '../shaders/PatronDraw2Gradient';
 import Patron4Random from '../shaders/Patron4Random';
+import Patron5Circle from '../shaders/Patron5Circle';
 
 function App() {
-  return <Patron4Random />;
+  return <Patron5Circle />;
+  // return <Patron4Random />;
   // return <Patron3Combination />;
   // return <PatronDraw2Gradient />;
   // return <PatronDraw />;
