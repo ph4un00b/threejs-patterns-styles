@@ -348,6 +348,37 @@ void main() {
 
 `;
 
+var frag = glsl`
+/** context -> inputs */
+
+uniform float utime;
+uniform float uleverX;
+uniform float uleverY;
+uniform float uleverA;
+uniform float uleverB;
+
+/** vertex -> inputs */
+
+varying vec2 vUv;
+varying float vElevation;
+
+float pseudo_random(vec2 seed)
+{
+  /** from the book of shaders */
+  return fract(sin(dot(seed.xy, vec2(12.9898, 78.233))) * 43758.5453123);
+}
+
+void main() {
+  
+  float combo = distance(vUv, vec2(uleverX, uleverY));
+
+  // black 0,0,0 ,  white 1,1,1
+  gl_FragColor = vec4(combo, combo, combo, 1.0);
+
+}
+
+`;
+
 type ShaderProps = T.ShaderMaterial & {
   [key: string]: any;
 };
