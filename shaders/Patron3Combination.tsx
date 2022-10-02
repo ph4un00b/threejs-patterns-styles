@@ -317,7 +317,7 @@ const glsl = (x: TemplateStringsArray) => String(x);
  * - less control (f.i. animations)
  */
 
-const frag = glsl`
+var frag = glsl`
 /** context -> inputs */
 
 uniform float utime;
@@ -348,6 +348,62 @@ void main() {
   
   // black 0,0,0 ,  white 1,1,1
   gl_FragColor.rgba = vec4(coordValue, coordValue, coordValue, 1.0);
+
+}
+`;
+
+var frag = glsl`
+/** context -> inputs */
+
+uniform float utime;
+uniform float uleverX;
+uniform float uleverY;
+uniform float uleverA;
+uniform float uleverB;
+
+/** vertex -> inputs */
+
+varying vec2 vUv;
+varying float vElevation;
+
+void main() {
+
+  // bar
+  float barx = step(0.1, mod(vUv.x * uleverA, 1.0));
+
+  // horizontal
+  barx *= step(uleverX , mod(vUv.y * uleverA, 1.0));
+  
+  // black 0,0,0 ,  white 1,1,1
+  gl_FragColor.rgba = vec4(barx, barx, barx, 1.0);
+
+}
+`;
+
+var frag = glsl`
+/** context -> inputs */
+
+uniform float utime;
+uniform float uleverX;
+uniform float uleverY;
+uniform float uleverA;
+uniform float uleverB;
+
+/** vertex -> inputs */
+
+varying vec2 vUv;
+varying float vElevation;
+
+void main() {
+
+  // bar
+  float barx = step(0.1, mod(vUv.x * uleverA, 1.0));
+
+  // horizontal
+  barx *= step(uleverX , mod(vUv.y * uleverA, 1.0));
+  
+  // black 0,0,0 ,  white 1,1,1
+  gl_FragColor.rgba = vec4(barx, barx, barx, 1.0);
 
 }
 `;
