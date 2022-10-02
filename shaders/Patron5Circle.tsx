@@ -249,17 +249,23 @@ function Fondo() {
     shader.current.utime = state.clock.elapsedTime;
   });
 
-  const { uleverX, uleverY, uleverA, ucolor, uleverB, uleverC } = L.useControls(
-    {
+  const { uleverX, uleverY, uleverZ, uleverA, ucolor, uleverB, uleverC } =
+    L.useControls({
       uleverX: {
-        value: 0.8,
+        value: 0.5,
         min: 0.1,
         max: 1,
         step: 0.01,
       },
       uleverY: {
-        value: 1.0,
+        value: 0.5,
         min: 0.1,
+        max: 1,
+        step: 0.01,
+      },
+      uleverZ: {
+        value: 0.01,
+        min: 0.01,
         max: 1,
         step: 0.01,
       },
@@ -284,8 +290,7 @@ function Fondo() {
       ucolor: {
         value: '#ff00bc',
       },
-    }
-  );
+    });
   return (
     <mesh>
       <planeBufferGeometry args={[10, 10, 2 ** 7, 2 ** 7]} />
@@ -296,6 +301,7 @@ function Fondo() {
         side={T.DoubleSide}
         uleverX={uleverX}
         uleverY={uleverY}
+        uleverZ={uleverZ}
         uleverA={uleverA}
         uleverB={uleverB}
         uleverC={uleverC}
@@ -371,6 +377,38 @@ float pseudo_random(vec2 seed)
 void main() {
   
   float combo = distance(vUv, vec2(uleverX, uleverY));
+
+  // black 0,0,0 ,  white 1,1,1
+  gl_FragColor = vec4(combo, combo, combo, 1.0);
+
+}
+
+`;
+
+var frag = glsl`
+/** context -> inputs */
+
+uniform float utime;
+uniform float uleverX;
+uniform float uleverY;
+uniform float uleverZ;
+uniform float uleverA;
+uniform float uleverB;
+
+/** vertex -> inputs */
+
+varying vec2 vUv;
+varying float vElevation;
+
+float pseudo_random(vec2 seed)
+{
+  /** from the book of shaders */
+  return fract(sin(dot(seed.xy, vec2(12.9898, 78.233))) * 43758.5453123);
+}
+
+void main() {
+  
+  float combo = uleverZ / distance(vUv, vec2(uleverX, uleverY));
 
   // black 0,0,0 ,  white 1,1,1
   gl_FragColor = vec4(combo, combo, combo, 1.0);
@@ -461,6 +499,7 @@ const AguaMat = D.shaderMaterial(
     utime: 0,
     uleverX: 1.0,
     uleverY: 1.0,
+    uleverZ: 1.0,
     uleverA: 1.0,
     uleverB: 1.0,
     uleverC: 1.0,
