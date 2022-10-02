@@ -328,9 +328,24 @@ varying vec2 vUv;
 varying float vElevation;
 
 void main() {
-  // float coord = vUv.x;
-  float coord = vUv.y;
-  gl_FragColor.rgba = vec4(coord, coord, coord, 1.0);
+  // float coordValue = vUv.x;
+  // float coordValue = vUv.y;
+
+  /** inverting coordValues values */
+  // float coordValue = 1.0 - vUv.y /** not - 1 */;
+  
+  /** translating coordValues by multiplying */
+  // float coordValue = 1.0 - vUv.y * 2.0;
+  
+  /** intervals of coordValues by mod */
+  float limit = 1.0;
+  float coordValue = mod(1.0 - vUv.x * 10.0, limit);
+  /** step -> coordValue < 0.9 ? 0.0 : 1.0 */
+  coordValue = step(0.9, coordValue); 
+
+  /// black 0,0,0
+  //  white 1,1,1
+  gl_FragColor.rgba = vec4(coordValue, coordValue, coordValue, 1.0);
 }
 `;
 
