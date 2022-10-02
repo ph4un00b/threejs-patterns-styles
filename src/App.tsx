@@ -16,9 +16,11 @@ import Textures from '../basics/Textures';
 import Three from '../basics/Three';
 import InitShader from '../shaders/InitShader';
 import SecondShader from '../shaders/SecondShader';
+import Patron from '../shaders/Patron';
 
 function App() {
-  return <SecondShader />;
+  return <Patron />;
+  // return <SecondShader />;
   // return <InitShader />;
   // return <Models />;
   // return <Noise />;
