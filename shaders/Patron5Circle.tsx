@@ -441,11 +441,49 @@ float pseudo_random(vec2 seed)
 void main() {
 
   vec2 lightXY = vec2(
-    vUv.x * 0.1 + 0.4,
-    vUv.y * 0.4 + 0.4
+    vUv.x * 0.2 + 0.4,
+    vUv.y * 0.5 + 0.4
   );
 
   float combo = uleverZ / distance(lightXY, vec2(uleverX, uleverY));
+
+  // black 0,0,0 ,  white 1,1,1
+  gl_FragColor = vec4(combo, combo, combo, 1.0);
+
+}
+
+`;
+
+var frag = glsl`
+/** context -> inputs */
+
+uniform float utime;
+uniform float uleverX;
+uniform float uleverY;
+uniform float uleverZ;
+uniform float uleverA;
+uniform float uleverB;
+
+/** vertex -> inputs */
+
+varying vec2 vUv;
+varying float vElevation;
+
+float pseudo_random(vec2 seed)
+{
+  /** from the book of shaders */
+  return fract(sin(dot(seed.xy, vec2(12.9898, 78.233))) * 43758.5453123);
+}
+
+void main() {
+
+  vec2 x = vec2(vUv.x * 0.1 + 0.45, vUv.y * 0.5 + 0.25);
+  float lightX = 0.015 / distance(x, vec2(0.5));
+
+  vec2 y = vec2(vUv.y * 0.1 + 0.45, vUv.x * 0.5 + 0.25);
+  float lightY = 0.015 / distance(y, vec2(0.5));
+
+  float combo = lightX * lightY;
 
   // black 0,0,0 ,  white 1,1,1
   gl_FragColor = vec4(combo, combo, combo, 1.0);
