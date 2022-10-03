@@ -1,4 +1,5 @@
 import AntiGalactus from '../trips/AntiGalactus';
+import AntiGalactusShader from '../trips/AntiGalactusShader';
 import Casita from '../trips/Casita';
 import Drag from '../trips/Drag';
 import Fondos from '../trips/Fondos';
@@ -26,7 +27,8 @@ import Patron6Angles from '../shaders/Patron6Angles';
 import Patron7Noise from '../shaders/Patron7Noise';
 
 function App() {
-  return <Patron7Noise />;
+  return <AntiGalactusShader />;
+  // return <Patron7Noise />;
   // return <Patron6Angles />;
   // return <Patron5Circle />;
   // return <Patron4Random />;
