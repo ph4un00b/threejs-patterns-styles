@@ -355,7 +355,8 @@ vec2 rotate(vec2 uv, float turn, vec2 pivot)
 
 void main() {
 
-  float combo = atan(vUv.x, vUv.y);
+  float offset = uleverX;
+  float combo = atan(vUv.x - offset, vUv.y - offset) * uleverY + uleverX;
 
   // black 0,0,0 ,  white 1,1,1
   gl_FragColor = vec4(combo, combo, combo, 1.0);
