@@ -94,7 +94,7 @@ function MyGalaxy() {
     noise,
     noiseCurva,
   } = useControls({
-    pointsSize: { value: 0.01, min: 0, max: 1, step: 0.01 },
+    pointsSize: { value: 1, min: 0, max: 5, step: 0.01 },
     offset: { value: 0.5, min: 0, max: 1, step: 0.01 },
     mul: { value: 9, min: 1, max: 20, step: 1 },
     ramas: { value: 3, min: 2, max: 20, step: 1 },
@@ -113,27 +113,6 @@ function MyGalaxy() {
         depthWrite: false,
         vertexColors: true,
         blending: T.AdditiveBlending,
-        /**
-         *    - functions are typed as well
-         *    - float sum(float a, float b) { return a + b; };
-         *
-         *    - classic built-in functions
-         *      - sin, cos, max, min, pow, exp, mod, clamp
-         *
-         *    - practical built-in functions
-         *      - cross, dot, mix, step, smoothstep, length, distance, reflect, refract, normalize
-         *
-         * - Documentation: (not beginner-friendly)
-         *   - https://www.shaderific.com/glsl-functions
-         *   - https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/indexflat.php
-         *   - https://thebookofshaders.com/glossary/
-         *
-         * - Inspirational Links:
-         *   - https://thebookofshaders.com/
-         *   - https://www.shadertoy.com/
-         *   - https://www.youtube.com/channel/UCcAlTqd9zID6aNX3TzwxJXg
-         *   - https://www.youtube.com/channel/UC8Wzk_R1GoPkPqLo-obU_kQ
-         */
         vertexShader: `
         /** context -> inputs */
 ${glslUniforms()}
@@ -158,7 +137,7 @@ void main()
   gl_Position = projectedPosition;
   
   /** Point Size */
-  gl_PointSize = 2.0;
+  gl_PointSize = uSize;
 
   /* outputs */
   vUv = uv;
@@ -180,6 +159,9 @@ ${fragmentFunctions()}
 void main() {
   gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
 }`,
+        uniforms: {
+          uSize: { value: pointsSize },
+        },
       }),
     [pointsSize, pointsAtenuation /** color */]
   );
@@ -275,9 +257,32 @@ void main() {
   );
 }
 
+/**
+ *    - functions are typed as well
+ *    - float sum(float a, float b) { return a + b; };
+ *
+ *    - classic built-in functions
+ *      - sin, cos, max, min, pow, exp, mod, clamp
+ *
+ *    - practical built-in functions
+ *      - cross, dot, mix, step, smoothstep, length, distance, reflect, refract, normalize
+ *
+ * - Documentation: (not beginner-friendly)
+ *   - https://www.shaderific.com/glsl-functions
+ *   - https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/indexflat.php
+ *   - https://thebookofshaders.com/glossary/
+ *
+ * - Inspirational Links:
+ *   - https://thebookofshaders.com/
+ *   - https://www.shadertoy.com/
+ *   - https://www.youtube.com/channel/UCcAlTqd9zID6aNX3TzwxJXg
+ *   - https://www.youtube.com/channel/UC8Wzk_R1GoPkPqLo-obU_kQ
+ */
+
 function glslUniforms() {
   return `
 uniform float utime;
+uniform float uSize;
 uniform float uleverX;
 uniform float uleverY;
 uniform float uleverZ;
