@@ -106,6 +106,12 @@ function MyGalaxy() {
     pointsAtenuation: { value: true },
   });
 
+  const { gl, viewport, size } = useThree();
+  /** @link https://github.com/pmndrs/react-three-fiber/discussions/1012 */
+  // gl.getPixelRatio()
+  // viewport -> size in three units
+  // size -> size in pixels
+
   const mat = React.useMemo(
     () =>
       new T.ShaderMaterial({
@@ -163,7 +169,7 @@ void main() {
   gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
 }`,
         uniforms: {
-          uSize: { value: pointsSize },
+          uSize: { value: pointsSize * gl.getPixelRatio() },
         },
       }),
     [pointsSize, pointsAtenuation /** color */]
