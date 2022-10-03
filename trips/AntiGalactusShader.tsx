@@ -108,13 +108,69 @@ function MyGalaxy() {
 
   const mat = React.useMemo(
     () =>
-      new T.PointsMaterial({
+      new T.ShaderMaterial({
         // color: '#ff5588',
         depthWrite: false,
         vertexColors: true,
         blending: T.AdditiveBlending,
-        size: pointsSize,
-        sizeAttenuation: pointsAtenuation,
+        /**
+         *    - functions are typed as well
+         *    - float sum(float a, float b) { return a + b; };
+         *
+         *    - classic built-in functions
+         *      - sin, cos, max, min, pow, exp, mod, clamp
+         *
+         *    - practical built-in functions
+         *      - cross, dot, mix, step, smoothstep, length, distance, reflect, refract, normalize
+         *
+         * - Documentation: (not beginner-friendly)
+         *   - https://www.shaderific.com/glsl-functions
+         *   - https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/indexflat.php
+         *   - https://thebookofshaders.com/glossary/
+         *
+         * - Inspirational Links:
+         *   - https://thebookofshaders.com/
+         *   - https://www.shadertoy.com/
+         *   - https://www.youtube.com/channel/UCcAlTqd9zID6aNX3TzwxJXg
+         *   - https://www.youtube.com/channel/UC8Wzk_R1GoPkPqLo-obU_kQ
+         */
+        vertexShader: `
+        /** context -> inputs */
+uniform float utime;
+uniform float uleverX;
+uniform float uleverY;
+uniform float uleverA;
+uniform float uleverB;
+uniform float uleverC;
+uniform float ucolor;
+
+/** outputs -> frag */
+
+varying vec2 vUv;  
+varying float vElevation;  
+
+void main()
+{
+  vec4 modelPosition = modelMatrix * vec4(position, 1.0);
+
+  float elevation = sin(modelPosition.x * uleverX + utime) * 1.0 * 1.0;
+  elevation += sin(modelPosition.y * uleverY + utime) * 1.0 * 1.0;
+  modelPosition.z = elevation;
+
+  vec4 viewPosition = viewMatrix * modelPosition;
+  vec4 projectedPosition = projectionMatrix * viewPosition;
+
+  /** Position */
+  gl_Position = projectedPosition;
+  
+  /** Point Size */
+  gl_PointSize = 2.0;
+
+  /* outputs */
+  vUv = uv;
+  vElevation = elevation;
+}
+        `,
       }),
     [pointsSize, pointsAtenuation /** color */]
   );
