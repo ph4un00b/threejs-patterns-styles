@@ -15,55 +15,7 @@ import { useSpring, animated, config, a } from '@react-spring/three';
 import { useDrag } from '@use-gesture/react';
 import nice_colors from '../utils/colors';
 import useCapture from 'use-capture';
-
-var PointersProxy = proxy({
-  x: 0,
-  y: 0,
-});
-
-var CanvasProxy = proxy({
-  w: window.innerWidth,
-  h: window.innerHeight,
-});
-
-function usePointers() {
-  const snap = useSnapshot(PointersProxy);
-  return { px: snap.x, py: snap.y } as const;
-}
-
-function useCanvas() {
-  const snap = useSnapshot(CanvasProxy);
-  return { cw: snap.w, ch: snap.h } as const;
-}
-
-var dpr = { min: 1, max: 2 };
-
-var baseUrl = 'https://ph4un00b.github.io/data';
-
-var global = {
-  bg: 'red',
-  fog: '#262837',
-  mat: '#e83abf',
-  font1: `${baseUrl}/typeface/press-start-2p.json`,
-};
-
-/** @link https://overreacted.io/making-setinterval-declarative-with-react-hooks/ */
-function useTimeout(callback: () => void, delay: number) {
-  const savedCallback = React.useRef<() => void>(null!);
-
-  React.useEffect(() => {
-    savedCallback.current = callback;
-  });
-
-  React.useEffect(() => {
-    function tick() {
-      savedCallback.current();
-    }
-
-    let id = window.setTimeout(tick, delay);
-    return () => window.clearTimeout(id);
-  }, [delay]);
-}
+import global from '../globals/index';
 
 /** FREE! @link https://kenney.nl/assets */
 export default function () {
@@ -76,7 +28,7 @@ export default function () {
     material: { value: global.mat },
   });
 
-  const [bind, startRecording] = useCapture({ duration: 10, fps: 60 });
+  // const [bind, startRecording] = useCapture({ duration: 10, fps: 60 });
 
   // quitar para iniciar grabacion
   // useTimeout(() => {
@@ -91,17 +43,16 @@ export default function () {
           gl={{
             preserveDrawingBuffer: true,
           }}
-          onCreated={bind}
+          // onCreated={bind}
           shadows={true} /** enable shadowMap */
-          dpr={[dpr.min, dpr.max]}
+          dpr={[global.dpr.min, global.dpr.max]}
           style={{
             width: cw + 'px',
             height: ch + 'px',
-            backgroundColor: fondo,
           }}
         >
           {/* 💡 not having a clear color would glitch the recording */}
-          <color attach="background" args={['#000']} />
+          <color attach="background" args={[fondo]} />
           {/* <React.Suspense> */}
 
           <PerspectiveCamera
@@ -114,15 +65,6 @@ export default function () {
           />
 
           <OrbitControls enableDamping={true} makeDefault={true} />
-
-          <group position={[0, 4, 0]}>
-            <Center>
-              <Text3D castShadow={true} font={global.font1}>
-                phau!
-                <meshStandardMaterial metalness={0} roughness={0} />
-              </Text3D>
-            </Center>
-          </group>
 
           <MyGalaxy />
 
@@ -353,4 +295,24 @@ function MyGalaxy() {
       {/* <pointsMaterial size={pointsSize} sizeAttenuation={pointsAtenuation} /> */}
     </points>
   );
+}
+
+var PointersProxy = proxy({
+  x: 0,
+  y: 0,
+});
+
+var CanvasProxy = proxy({
+  w: window.innerWidth,
+  h: window.innerHeight,
+});
+
+function usePointers() {
+  const snap = useSnapshot(PointersProxy);
+  return { px: snap.x, py: snap.y } as const;
+}
+
+function useCanvas() {
+  const snap = useSnapshot(CanvasProxy);
+  return { cw: snap.w, ch: snap.h } as const;
 }
