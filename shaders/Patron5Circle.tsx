@@ -597,6 +597,52 @@ void main() {
 
 `;
 
+var frag = glsl`
+/** context -> inputs */
+
+uniform float utime;
+uniform float uleverX;
+uniform float uleverY;
+uniform float uleverZ;
+uniform float uleverA;
+uniform float uleverB;
+
+/** vertex -> inputs */
+
+varying vec2 vUv;
+varying float vElevation;
+
+float pseudo_random(vec2 seed)
+{
+  /** from the book of shaders */
+  return fract(sin(dot(seed.xy, vec2(12.9898, 78.233))) * 43758.5453123);
+}
+
+vec2 rotate(vec2 uv, float turn, vec2 pivot) 
+{
+  /** @link https://www.computerenhance.com/p/turns-are-better-than-radians */
+  return vec2(
+    cos(turn) * (uv.x - pivot.x) + sin(turn) * (uv.y - pivot.y) + pivot.x,
+    cos(turn) * (uv.y - pivot.y) - sin(turn) * (uv.x - pivot.x) + pivot.y
+  );
+}
+
+void main() {
+
+  vec2 wave = vec2(
+    vUv.x + sin(vUv.y * utime) * uleverX,
+    vUv.y + sin(vUv.x * utime) * uleverX
+  );
+
+  float combo = step(0.01, abs(distance(wave, vec2(0.5)) - 0.3));
+
+  // black 0,0,0 ,  white 1,1,1
+  gl_FragColor = vec4(combo, combo, combo, 1.0);
+
+}
+
+`;
+
 type ShaderProps = T.ShaderMaterial & {
   [key: string]: any;
 };
