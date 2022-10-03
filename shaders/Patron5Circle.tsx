@@ -477,6 +477,7 @@ float pseudo_random(vec2 seed)
 
 vec2 rotate(vec2 uv, float turn, vec2 pivot) 
 {
+  /** @link https://www.computerenhance.com/p/turns-are-better-than-radians */
   return vec2(
     cos(turn) * (uv.x - pivot.x) + sin(turn) * (uv.y - pivot.y) + pivot.x,
     cos(turn) * (uv.y - pivot.y) - sin(turn) * (uv.x - pivot.x) + pivot.y
