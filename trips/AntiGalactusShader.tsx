@@ -78,93 +78,6 @@ export default function () {
   );
 }
 
-/** suports shadows! */
-function DirectionalLight({ color }: { color: string }) {
-  const light = React.useRef<T.DirectionalLight>(null!);
-  const camera = React.useRef<T.OrthographicCamera>(null!);
-  useHelper(light, T.DirectionalLightHelper, 0.5);
-  useHelper(camera, T.CameraHelper);
-
-  React.useLayoutEffect(() => {
-    camera.current = light.current.shadow.camera;
-    // light.current.shadow.radius = 10;
-    // alert(JSON.stringify(light.current.shadow.mapSize, null, 2));
-  }, []);
-
-  useFrame(() => {
-    camera.current.updateProjectionMatrix();
-  });
-
-  return (
-    <directionalLight
-      ref={light}
-      castShadow={true}
-      // power of 2 due to bitmapping
-      shadow-mapSize-width={256}
-      shadow-mapSize-height={256}
-      shadow-camera-near={1}
-      shadow-camera-far={15}
-      // shadow-camera-top={top}
-      // shadow-camera-bottom={bottom}
-      // shadow-camera-left={left}
-      // shadow-camera-right={right}
-      /** @link https://github.com/pmndrs/react-three-fiber/blob/master/packages/fiber/tests/core/renderer.test.tsx#L571
-       *
-       * types:
-       *
-       * T.BasicShadowMap
-       * T.PCFShadowMap
-       * T.VSMShadowMap
-       *
-       * 3RF set PCFSoftShadowMap as the default shadow map
-       */
-      shadow-radius={10}
-      // position={[directional.x, directional.y, directional.z]}
-      position={[0, 15, -20]}
-      args={[color, 0.5 /** intensity */]}
-    />
-  );
-}
-
-window.addEventListener('resize', () => {
-  CanvasProxy.w = window.innerWidth;
-  CanvasProxy.h = window.innerHeight;
-});
-
-window.addEventListener('dblclick', () => {
-  // todo: verify on safari!
-  if (!document.fullscreenElement) {
-    document.querySelector('canvas')!.requestFullscreen();
-  } else {
-    document.exitFullscreen();
-  }
-});
-
-function useNiceColors({
-  quantity,
-  preset = Math.floor(Math.random() * 900),
-}: {
-  quantity: number;
-  preset?: number;
-}) {
-  return React.useState(() => {
-    const c = new T.Color();
-
-    const colors = Array.from(
-      { length: quantity },
-      () => nice_colors[preset][Math.floor(Math.random() * 4)]
-    );
-
-    const colorsRGB = Float32Array.from(
-      Array.from({ length: quantity }, (_, i) =>
-        c.set(colors[i]).convertSRGBToLinear().toArray()
-      ).flat()
-    );
-
-    return [colorsRGB, colors] as const;
-  });
-}
-
 function MyGalaxy() {
   const geo = React.useRef<T.BufferGeometry>(null!);
   const points = React.useRef<T.Points>(null!);
@@ -315,4 +228,91 @@ function usePointers() {
 function useCanvas() {
   const snap = useSnapshot(CanvasProxy);
   return { cw: snap.w, ch: snap.h } as const;
+}
+
+/** suports shadows! */
+function DirectionalLight({ color }: { color: string }) {
+  const light = React.useRef<T.DirectionalLight>(null!);
+  const camera = React.useRef<T.OrthographicCamera>(null!);
+  useHelper(light, T.DirectionalLightHelper, 0.5);
+  useHelper(camera, T.CameraHelper);
+
+  React.useLayoutEffect(() => {
+    camera.current = light.current.shadow.camera;
+    // light.current.shadow.radius = 10;
+    // alert(JSON.stringify(light.current.shadow.mapSize, null, 2));
+  }, []);
+
+  useFrame(() => {
+    camera.current.updateProjectionMatrix();
+  });
+
+  return (
+    <directionalLight
+      ref={light}
+      castShadow={true}
+      // power of 2 due to bitmapping
+      shadow-mapSize-width={256}
+      shadow-mapSize-height={256}
+      shadow-camera-near={1}
+      shadow-camera-far={15}
+      // shadow-camera-top={top}
+      // shadow-camera-bottom={bottom}
+      // shadow-camera-left={left}
+      // shadow-camera-right={right}
+      /** @link https://github.com/pmndrs/react-three-fiber/blob/master/packages/fiber/tests/core/renderer.test.tsx#L571
+       *
+       * types:
+       *
+       * T.BasicShadowMap
+       * T.PCFShadowMap
+       * T.VSMShadowMap
+       *
+       * 3RF set PCFSoftShadowMap as the default shadow map
+       */
+      shadow-radius={10}
+      // position={[directional.x, directional.y, directional.z]}
+      position={[0, 15, -20]}
+      args={[color, 0.5 /** intensity */]}
+    />
+  );
+}
+
+window.addEventListener('resize', () => {
+  CanvasProxy.w = window.innerWidth;
+  CanvasProxy.h = window.innerHeight;
+});
+
+window.addEventListener('dblclick', () => {
+  // todo: verify on safari!
+  if (!document.fullscreenElement) {
+    document.querySelector('canvas')!.requestFullscreen();
+  } else {
+    document.exitFullscreen();
+  }
+});
+
+function useNiceColors({
+  quantity,
+  preset = Math.floor(Math.random() * 900),
+}: {
+  quantity: number;
+  preset?: number;
+}) {
+  return React.useState(() => {
+    const c = new T.Color();
+
+    const colors = Array.from(
+      { length: quantity },
+      () => nice_colors[preset][Math.floor(Math.random() * 4)]
+    );
+
+    const colorsRGB = Float32Array.from(
+      Array.from({ length: quantity }, (_, i) =>
+        c.set(colors[i]).convertSRGBToLinear().toArray()
+      ).flat()
+    );
+
+    return [colorsRGB, colors] as const;
+  });
 }
