@@ -117,6 +117,7 @@ function MyGalaxy() {
         /** context -> inputs */
 ${glslUniforms()}
 
+attribute float aScale;
 /** outputs -> frag */
 
 varying vec2 vUv;  
@@ -137,7 +138,9 @@ void main()
   gl_Position = projectedPosition;
   
   /** Point Size */
-  gl_PointSize = uSize;
+
+  // adding randomness for a bit more real feeling!
+  gl_PointSize = uSize * aScale;
 
   /* outputs */
   vUv = uv;
@@ -181,6 +184,9 @@ void main() {
   const arrays = React.useMemo(() => {
     const positions = new Float32Array(particles * 3);
     const colors = new Float32Array(particles * 3);
+    // recreating PointMaterial size as scale
+    const scales = new Float32Array(particles * 1 /** just need 1 dimension */);
+
     const colorIn = new T.Color(niceColors[0]);
     const colorOut = new T.Color(niceColors[1]);
 
@@ -210,8 +216,12 @@ void main() {
         colors[y] = mixedColor.g;
         colors[z] = mixedColor.b;
       }
+
+      scales: {
+        scales[i] = Math.random();
+      }
     }
-    return [positions, colors] as const;
+    return [positions, colors, scales] as const;
   }, [particles, offset, mul, radius, ramas, curva, noise, noiseCurva]);
 
   useFrame(({ clock }) => {
@@ -240,6 +250,12 @@ void main() {
           array={arrays[1]}
           count={arrays[1].length / 3}
           itemSize={3}
+        />
+        <bufferAttribute
+          attach="attributes-aScale"
+          array={arrays[2]}
+          count={arrays[2].length}
+          itemSize={1}
         />
       </bufferGeometry>
       {/* from drei */}
