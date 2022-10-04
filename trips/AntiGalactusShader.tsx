@@ -97,11 +97,11 @@ function MyGalaxy() {
   } = useControls({
     pointsSize: { value: 5, min: 0, max: 50, step: 0.01 },
     offset: { value: 0.5, min: 0, max: 1, step: 0.01 },
-    mul: { value: 9, min: 1, max: 20, step: 1 },
-    ramas: { value: 3, min: 2, max: 20, step: 1 },
-    curva: { value: 1, min: -5, max: 5, step: 0.001 },
+    mul: { value: 2, min: 1, max: 20, step: 1 },
+    ramas: { value: 1, min: 0, max: 20, step: 1 },
+    curva: { value: 0, min: -5, max: 5, step: 0.001 },
     radius: { value: 5, min: 0.01, max: 20, step: 0.01 },
-    noise: { value: 0.2, min: 0, max: 2, step: 0.001 },
+    noise: { value: 1, min: 0, max: 2, step: 0.001 },
     noiseCurva: { value: 3, min: 1, max: 10, strep: 0.001 },
     particles: { value: 100_000, min: 100, max: 100_000, step: 1_000 },
     pointsAtenuation: { value: true },
@@ -136,9 +136,41 @@ float attenuation(vec4 vm) {
   return ( 1.0 / - vm.z );
 }
 
+float spinAngle(vec4 m) {
+  float distance2Center = length(m.xz);
+  float angleOffset = (1.0 / distance2Center) * uTime * 0.1;
+
+  return angleOffset;
+}
+
 void main()
 {
   vec4 modelPosition = modelMatrix * vec4(position, 1.0);
+
+  // some weird pattern 1
+  // modelPosition.x = cos( spinAngle( modelPosition ) );
+  // modelPosition.z = sin( spinAngle( modelPosition ) );
+
+  // float angle = atan( modelPosition.x, modelPosition.z) ;
+  // angle += spinAngle( modelPosition );
+
+  // some weird cool pattern 2, toogle x/z for craziness
+  // modelPosition.x = cos( angle );
+  // modelPosition.z = sin( angle );
+
+  // some weird cool pattern 3, toogle x/z for craziness
+  // modelPosition.x = cos( angle );
+  // modelPosition.z = sin( angle ) * length(modelPosition.xz);
+
+  // some weird cool pattern 4, toogle x/z for craziness
+
+  float angle = atan(modelPosition.x, modelPosition.z);
+  float distanceToCenter = length(modelPosition.xz);
+  float angleOffset = (1.0 / distanceToCenter) * uTime;
+  angle += angleOffset;
+  modelPosition.x = cos(angle) * distanceToCenter;
+  modelPosition.z = sin(angle) * distanceToCenter;
+
   vec4 viewPosition = viewMatrix * modelPosition;
   vec4 projectedPosition = projectionMatrix * viewPosition;
 
@@ -204,6 +236,7 @@ void main() {
   gl_FragColor = vec4(rgb, 1.0);
 }`,
         uniforms: {
+          uTime: { value: 0 },
           uSize: { value: 20 * pointsSize * gl.getPixelRatio() },
         },
       }),
@@ -229,9 +262,9 @@ void main() {
     const scales = new Float32Array(particles * 1 /** just need 1 dimension */);
 
     const colorIn = new T.Color(niceColors[0]);
-    const colorOut = new T.Color(niceColors[1]);
+    const colorOut = new T.Color(niceColors[1 + Math.floor(Math.random() * 4)]);
 
-    for (let i = 0; i < particles * 3; i++) {
+    for (let i = 0; i < particles; i++) {
       const xyz = i * 3;
       const [x, y, z] = [xyz, xyz + 1, xyz + 2];
       const random_radius = Math.random() * radius;
@@ -268,7 +301,10 @@ void main() {
   useFrame(({ clock }) => {
     const t = clock.getElapsedTime();
     geo.current.attributes.position.needsUpdate = true;
-    points.current.rotation.y = t * 0.2;
+    // points.current.rotation.y = t * 0.2;
+
+    /** uniforms */
+    mat.uniforms.uTime.value = t;
   });
 
   return (
@@ -327,7 +363,6 @@ void main() {
 
 function glslUniforms() {
   return `
-uniform float utime;
 uniform float uTime;
 uniform float uSize;
 
