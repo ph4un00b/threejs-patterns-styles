@@ -574,7 +574,7 @@ void main() {
   // float combo = cnoise(vUv * utime);
   float combo = 1.0 - step(0.1,  sin(cnoise(vUv * utime) * utime));
 
-  // black 0,0,0 ,  white 1,1,1
+
   gl_FragColor = vec4(combo, combo, combo, 1.0);
 
 }

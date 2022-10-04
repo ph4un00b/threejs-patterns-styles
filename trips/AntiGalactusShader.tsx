@@ -16,6 +16,7 @@ import { useDrag } from '@use-gesture/react';
 import nice_colors from '../utils/colors';
 import useCapture from 'use-capture';
 import global from '../globals/index';
+import { useTimeout } from '../utils/useTimers';
 
 /** FREE! @link https://kenney.nl/assets */
 export default function () {
@@ -28,9 +29,9 @@ export default function () {
     material: { value: global.mat },
   });
 
-  // const [bind, startRecording] = useCapture({ duration: 10, fps: 60 });
+  // const [bind, startRecording] = useCapture({ duration: 10, fps: 25 });
 
-  // quitar para iniciar grabacion
+  //quitar para iniciar grabacion
   // useTimeout(() => {
   //   startRecording();
   // }, 5000);
@@ -173,8 +174,26 @@ varying float vElevation;
 
 ${fragmentFunctions()}
 
+float circleShape( vec2 pointA, vec2 pointB, float edge ) {
+  float value =  distance( pointA, pointB );
+  return step( edge, value );
+}
+
+float mirror(float value) {
+  return 1.0 - value;
+}
+
 void main() {
-  gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+  // black 0,0,0 ,  white 1,1,1
+
+  /**
+   * putting a rounded creafted shape pattern
+   */
+  vec2 coord = gl_PointCoord;
+  float value = circleShape(coord, vec2(0.5), 0.5);
+  vec3 rgb = vec3( mirror(value) );
+
+  gl_FragColor = vec4(rgb, 1.0);
 }`,
         uniforms: {
           uSize: { value: pointsSize * gl.getPixelRatio() },
