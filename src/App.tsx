@@ -27,7 +27,7 @@ import Patron6Angles from '../shaders/Patron6Angles';
 import Patron7Noise from '../shaders/Patron7Noise';
 
 function App() {
-  // return <AntiGalactusShader />;
+  return <AntiGalactusShader />;
   // return <Patron7Noise />;
   // return <Patron6Angles />;
   // return <Patron5Circle />;
@@ -42,7 +42,7 @@ function App() {
   // return <Noise />;
   // return <Physics />;
   // return <Raycaster />;
-  return <AntiGalactus />;
+  // return <AntiGalactus />;
   // return <Drag />;
   // return <Particles />;
   // return <Casita />;

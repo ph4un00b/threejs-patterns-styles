@@ -121,46 +121,39 @@ function MyGalaxy() {
         vertexColors: true,
         blending: T.AdditiveBlending,
         vertexShader: `
-        /** context -> inputs */
+/** context -> inputs */
 ${glslUniforms()}
 
 attribute float aScale;
+
 /** outputs -> frag */
 
 varying vec2 vUv;  
 varying vec3 vColor;  
 varying float vElevation;  
 
+float attenuation(vec4 vm) {
+  return ( 1.0 / - vm.z );
+}
+
 void main()
 {
   vec4 modelPosition = modelMatrix * vec4(position, 1.0);
-
-  float elevation = sin(modelPosition.x * uleverX + utime) * 1.0 * 1.0;
-  elevation += sin(modelPosition.y * uleverY + utime) * 1.0 * 1.0;
-  modelPosition.z = elevation;
-
   vec4 viewPosition = viewMatrix * modelPosition;
   vec4 projectedPosition = projectionMatrix * viewPosition;
 
   /** Position */
   gl_Position = projectedPosition;
   
-  /** Point Size */
-
-
   /** 
-   * - adding randomness for a bit more real feeling!
-   * 
    * @link https://github.com/mrdoob/three.js/blob/master/src/renderers/shaders/ShaderLib/points.glsl.js
-   * - adding attenuation from three
    */
   
-  gl_PointSize = uSize * aScale;
-  gl_PointSize *= ( 1.0 / - viewPosition.z );
+  gl_PointSize = uSize * aScale /** random scale for a bit more real feeling! */;
+  gl_PointSize *= attenuation( viewPosition );
 
   /* outputs */
   vUv = uv;
-  vElevation = elevation;
   vColor = color;
 }
         `,
@@ -335,7 +328,9 @@ void main() {
 function glslUniforms() {
   return `
 uniform float utime;
+uniform float uTime;
 uniform float uSize;
+
 uniform float uleverX;
 uniform float uleverY;
 uniform float uleverZ;
