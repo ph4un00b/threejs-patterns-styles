@@ -183,6 +183,10 @@ float mirror(float value) {
   return 1.0 - value;
 }
 
+float circleDifuse(vec2 pointA, vec2 pivot, float intensity) {
+  return mirror( distance( pointA, pivot ) * intensity );
+}
+
 void main() {
   // black 0,0,0 ,  white 1,1,1
 
@@ -190,9 +194,13 @@ void main() {
    * putting a rounded creafted shape pattern
    */
   vec2 coord = gl_PointCoord;
-  float value = circleShape(coord, vec2(0.5), 0.5);
-  vec3 rgb = vec3( mirror(value) );
 
+  //float value = circleShape(coord, vec2(0.5), 0.5);
+  // value = mirror(value);
+
+  float value = circleDifuse(coord, vec2(0.5), 3.0 );
+
+  vec3 rgb = vec3( value );
   gl_FragColor = vec4(rgb, 1.0);
 }`,
         uniforms: {
