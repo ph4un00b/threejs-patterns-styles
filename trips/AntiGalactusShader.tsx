@@ -183,7 +183,7 @@ float mirror(float value) {
   return 1.0 - value;
 }
 
-float circleDifuse(vec2 pointA, vec2 pivot, float intensity) {
+float circleLinearDifuse(vec2 pointA, vec2 pivot, float intensity) {
   return mirror( distance( pointA, pivot ) * intensity );
 }
 
@@ -198,19 +198,19 @@ void main() {
   //float value = circleShape(coord, vec2(0.5), 0.5);
   // value = mirror(value);
 
-  float value = circleDifuse(coord, vec2(0.5), 3.0 );
+  float value = pow(circleLinearDifuse(coord, vec2(0.5), 3.0 ), 7.0);
 
   vec3 rgb = vec3( value );
   gl_FragColor = vec4(rgb, 1.0);
 }`,
         uniforms: {
-          uSize: { value: pointsSize * gl.getPixelRatio() },
+          uSize: { value: 20 * pointsSize * gl.getPixelRatio() },
         },
       }),
     [pointsSize, pointsAtenuation /** color */]
   );
 
-  const { scene } = useThree();
+  // const { scene } = useThree();
   React.useLayoutEffect(() => {
     if (points.current) {
       geo.current.dispose();
