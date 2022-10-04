@@ -306,17 +306,6 @@ void main() {
           itemSize={1}
         />
       </bufferGeometry>
-      {/* from drei */}
-      {/* <PointMaterial
-      // transparent
-      // vertexColors
-      size={pointsSize}
-      sizeAttenuation={pointsAtenuation}
-      // depthWrite={false}
-    /> */}
-
-      {/* atenuation is not working on toggle controls */}
-      {/* <pointsMaterial size={pointsSize} sizeAttenuation={pointsAtenuation} /> */}
     </points>
   );
 }
