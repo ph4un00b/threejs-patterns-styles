@@ -95,7 +95,7 @@ function MyGalaxy() {
     noise,
     noiseCurva,
   } = useControls({
-    pointsSize: { value: 1, min: 0, max: 5, step: 0.01 },
+    pointsSize: { value: 5, min: 0, max: 50, step: 0.01 },
     offset: { value: 0.5, min: 0, max: 1, step: 0.01 },
     mul: { value: 9, min: 1, max: 20, step: 1 },
     ramas: { value: 3, min: 2, max: 20, step: 1 },
