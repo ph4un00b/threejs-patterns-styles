@@ -145,8 +145,16 @@ void main()
   
   /** Point Size */
 
-  // adding randomness for a bit more real feeling!
+
+  /** 
+   * - adding randomness for a bit more real feeling!
+   * 
+   * @link https://github.com/mrdoob/three.js/blob/master/src/renderers/shaders/ShaderLib/points.glsl.js
+   * - adding attenuation from three
+   */
+  
   gl_PointSize = uSize * aScale;
+  gl_PointSize *= ( 1.0 / - viewPosition.z );
 
   /* outputs */
   vUv = uv;
