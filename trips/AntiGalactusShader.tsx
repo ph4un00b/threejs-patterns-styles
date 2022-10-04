@@ -128,6 +128,7 @@ attribute float aScale;
 /** outputs -> frag */
 
 varying vec2 vUv;  
+varying vec3 vColor;  
 varying float vElevation;  
 
 void main()
@@ -160,6 +161,7 @@ void main()
   /* outputs */
   vUv = uv;
   vElevation = elevation;
+  vColor = color;
 }
         `,
         fragmentShader: `
@@ -171,6 +173,7 @@ ${glslUniforms()}
 
 varying vec2 vUv;
 varying float vElevation;
+varying vec3 vColor; 
 
 ${fragmentFunctions()}
 
@@ -187,6 +190,10 @@ float circleLinearDifuse(vec2 pointA, vec2 pivot, float intensity) {
   return mirror( distance( pointA, pivot ) * intensity );
 }
 
+vec3 black() {
+  return vec3(0.0);
+}
+
 void main() {
   // black 0,0,0 ,  white 1,1,1
 
@@ -195,12 +202,12 @@ void main() {
    */
   vec2 coord = gl_PointCoord;
 
-  //float value = circleShape(coord, vec2(0.5), 0.5);
-  // value = mirror(value);
+  //float punch = circleShape(coord, vec2(0.5), 0.5);
+  // punch = mirror(punch);
 
-  float value = pow(circleLinearDifuse(coord, vec2(0.5), 3.0 ), 7.0);
+  float punch = pow(circleLinearDifuse(coord, vec2(0.5), 3.0 ), 7.0);
 
-  vec3 rgb = vec3( value );
+  vec3 rgb = vec3( mix(black(), vColor, punch) );
   gl_FragColor = vec4(rgb, 1.0);
 }`,
         uniforms: {
