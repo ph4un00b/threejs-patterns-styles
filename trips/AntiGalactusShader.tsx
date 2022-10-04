@@ -98,7 +98,7 @@ function MyGalaxy() {
     pointsSize: { value: 5, min: 0, max: 50, step: 0.01 },
     offset: { value: 0.5, min: 0, max: 1, step: 0.01 },
     mul: { value: 2, min: 1, max: 20, step: 1 },
-    ramas: { value: 1, min: 0, max: 20, step: 1 },
+    ramas: { value: 3, min: 0, max: 20, step: 1 },
     curva: { value: 0, min: -5, max: 5, step: 0.001 },
     radius: { value: 5, min: 0.01, max: 20, step: 0.01 },
     noise: { value: 1, min: 0, max: 2, step: 0.001 },
@@ -125,6 +125,7 @@ function MyGalaxy() {
 ${glslUniforms()}
 
 attribute float aScale;
+attribute float aRandomness;
 
 /** outputs -> frag */
 
@@ -259,7 +260,10 @@ void main() {
     const positions = new Float32Array(particles * 3);
     const colors = new Float32Array(particles * 3);
     // recreating PointMaterial size as scale
-    const scales = new Float32Array(particles * 1 /** just need 1 dimension */);
+    const scales = new Float32Array(particles * 3 /** in xyz */);
+    const randomness = new Float32Array(
+      particles * 1 /** just need 1 dimension */
+    );
 
     const colorIn = new T.Color(niceColors[0]);
     const colorOut = new T.Color(niceColors[1 + Math.floor(Math.random() * 4)]);
@@ -279,9 +283,18 @@ void main() {
         Math.pow(Math.random(), noiseCurva) * (Math.random() < 0.5 ? 1 : -1),
       ];
 
-      positions[x] = Math.cos(angle) * random_radius + rx;
-      positions[y] = ry;
-      positions[z] = Math.sin(angle) * random_radius + rz;
+      randomness: {
+        randomness[x] = rx;
+        randomness[y] = ry;
+        randomness[z] = rz;
+      }
+
+      // positions[x] = Math.cos(angle) * random_radius + rx;
+      positions[x] = Math.cos(angle) * random_radius;
+      // positions[y] = ry;
+      positions[y] = 0;
+      // positions[z] = Math.sin(angle) * random_radius + rz;
+      positions[z] = Math.sin(angle) * random_radius;
 
       fusion_colors: {
         const mixedColor = colorIn.clone();
@@ -295,7 +308,7 @@ void main() {
         scales[i] = Math.random();
       }
     }
-    return [positions, colors, scales] as const;
+    return [positions, colors, scales, randomness] as const;
   }, [particles, offset, mul, radius, ramas, curva, noise, noiseCurva]);
 
   useFrame(({ clock }) => {
@@ -333,6 +346,12 @@ void main() {
           array={arrays[2]}
           count={arrays[2].length}
           itemSize={1}
+        />
+        <bufferAttribute
+          attach="attributes-aRandomness"
+          array={arrays[3]}
+          count={arrays[3].length}
+          itemSize={3}
         />
       </bufferGeometry>
     </points>
