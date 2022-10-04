@@ -121,75 +121,46 @@ function MyGalaxy() {
         vertexColors: true,
         blending: T.AdditiveBlending,
         vertexShader: `
-/** context -> inputs */
-${glslUniforms()}
+uniform float uTime;
+uniform float uSize;
 
+attribute vec3 aRandomness;
 attribute float aScale;
-attribute float aRandomness;
 
-/** outputs -> frag */
-
-varying vec2 vUv;  
-varying vec3 vColor;  
-varying float vElevation;  
-
-float attenuation(vec4 vm) {
-  return ( 1.0 / - vm.z );
-}
-
-float spinAngle(vec4 m) {
-  float distance2Center = length(m.xz);
-  float angleOffset = (1.0 / distance2Center) * uTime * 0.1;
-
-  return angleOffset;
-}
+varying vec3 vColor;
 
 void main()
 {
-  vec4 modelPosition = modelMatrix * vec4(position, 1.0);
+    /**
+     * Position
+     */
+    vec4 modelPosition = modelMatrix * vec4(position, 1.0);
+                
+    // Rotate
+    float angle = atan(modelPosition.x, modelPosition.z);
+    float distanceToCenter = length(modelPosition.xz);
+    float angleOffset = (1.0 / distanceToCenter) * uTime;
+    angle += angleOffset;
+    modelPosition.x = cos(angle) * distanceToCenter;
+    modelPosition.z = sin(angle) * distanceToCenter;
 
-  // some weird pattern 1
-  // modelPosition.x = cos( spinAngle( modelPosition ) );
-  // modelPosition.z = sin( spinAngle( modelPosition ) );
+    // Randomness
+    modelPosition.xyz += aRandomness;
 
-  // float angle = atan( modelPosition.x, modelPosition.z) ;
-  // angle += spinAngle( modelPosition );
+    vec4 viewPosition = viewMatrix * modelPosition;
+    vec4 projectedPosition = projectionMatrix * viewPosition;
+    gl_Position = projectedPosition;
 
-  // some weird cool pattern 2, toogle x/z for craziness
-  // modelPosition.x = cos( angle );
-  // modelPosition.z = sin( angle );
+    /**
+     * Size
+     */
+    gl_PointSize = uSize * aScale;
+    gl_PointSize *= (1.0 / - viewPosition.z);
 
-  // some weird cool pattern 3, toogle x/z for craziness
-  // modelPosition.x = cos( angle );
-  // modelPosition.z = sin( angle ) * length(modelPosition.xz);
-
-  // some weird cool pattern 4, toogle x/z for craziness
-
-  float angle = atan(modelPosition.x, modelPosition.z);
-  float distanceToCenter = length(modelPosition.xz);
-  float angleOffset = (1.0 / distanceToCenter) * uTime;
-  angle += angleOffset;
-  modelPosition.x = cos(angle) * distanceToCenter;
-  modelPosition.z = sin(angle) * distanceToCenter;
-
-  modelPosition.xyz += aRandomness;
-
-  vec4 viewPosition = viewMatrix * modelPosition;
-  vec4 projectedPosition = projectionMatrix * viewPosition;
-
-  /** Position */
-  gl_Position = projectedPosition;
-  
-  /** 
-   * @link https://github.com/mrdoob/three.js/blob/master/src/renderers/shaders/ShaderLib/points.glsl.js
-   */
-  
-  gl_PointSize = uSize * aScale /** random scale for a bit more real feeling! */;
-  gl_PointSize *= attenuation( viewPosition );
-
-  /* outputs */
-  vUv = uv;
-  vColor = color;
+    /**
+     * Color
+     */
+    vColor = color;
 }
         `,
         fragmentShader: `
@@ -316,7 +287,7 @@ void main() {
   useFrame(({ clock }) => {
     const t = clock.getElapsedTime();
     geo.current.attributes.position.needsUpdate = true;
-    // points.current.rotation.y = t * 0.2;
+    points.current.rotation.y = t * 0.2;
 
     /** uniforms */
     mat.uniforms.uTime.value = t;
