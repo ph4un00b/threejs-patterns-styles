@@ -212,6 +212,7 @@ function createIndexBuffer({
 }
 
 var MemoBackGround = React.memo(Background);
+
 function Background({
   seed = Math.floor(Math.random() * 2 ** 16),
   width,
@@ -224,7 +225,59 @@ function Background({
   height: number;
   gap: number;
 }) {
+  const shader = React.useRef<T.MeshStandardMaterial>(null!);
   noise.seed(seed);
+
+  React.useLayoutEffect(() => {
+    /**
+     * @link https://github.com/mrdoob/three.js/tree/master/src/renderers/shaders
+     *
+     * @link https://github.com/mrdoob/three.js/blob/master/src/renderers/shaders/ShaderLib/meshphysical.glsl.js
+     */
+    shader.current.onBeforeCompile = function (shader: T.Shader) {
+      console.log(shader);
+      /**
+       * aplicando rotación
+       * @link https://thebookofshaders.com/08/?lan=es
+       */
+      const newShaderCommon = shader.vertexShader.replace(
+        /**
+         * this is before void main()
+         */
+
+        '#include <common>',
+        `#include <common>
+        // transformed.xyz = 0.0;
+
+        mat2 rotateMatrix2D(float angle) {
+          return mat2(
+            cos( angle ), - sin( angle ),
+            sin( angle ), + cos( angle )
+            );
+        }
+        `
+      );
+
+      shader.vertexShader = newShaderCommon;
+
+      const newShader = shader.vertexShader.replace(
+        /**
+         * this is inside void main()
+         */
+
+        '#include <begin_vertex>',
+        `#include <begin_vertex>
+
+        float angle = 0.9;
+        mat2 rotateMat = rotateMatrix2D( angle );
+
+        transformed.xz = rotateMat * transformed.xz;
+        `
+      );
+
+      shader.vertexShader = newShader;
+    };
+  });
 
   const { scale, octaves, persistence, lacunarity, amplitude, frequency } =
     useControls({
@@ -324,6 +377,7 @@ function Background({
     g: { value: 1.0, min: -5.0, max: 5.0, step: 0.001 },
     b: { value: 1.0, min: -50, max: 100, step: 0.001 },
   });
+
   useFrame(({ clock }) => {
     const t = clock.getElapsedTime();
 
@@ -360,13 +414,15 @@ function Background({
     geo.current.attributes.position.needsUpdate = true;
     geo.current.attributes.color.needsUpdate = true;
   });
+
   return (
     <mesh ref={bg} {...props}>
       <bufferGeometry ref={geo} />
       <meshStandardMaterial
+        ref={shader}
         vertexColors={true}
         side={T.DoubleSide}
-        wireframe={!true}
+        wireframe={true}
       />
     </mesh>
   );
