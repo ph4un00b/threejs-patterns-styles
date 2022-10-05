@@ -212,6 +212,10 @@ function createIndexBuffer({
 }
 
 var MemoBackGround = React.memo(Background);
+var bgUniforms = {
+  uTime: { value: 0 },
+  uleverX: { value: 0.1 },
+};
 
 function Background({
   seed = Math.floor(Math.random() * 2 ** 16),
@@ -236,6 +240,14 @@ function Background({
      */
     shader.current.onBeforeCompile = function (shader: T.Shader) {
       console.log(shader);
+
+      /**
+       * adding more  uniforms
+       */
+
+      shader.uniforms.uTime = bgUniforms.uTime;
+      shader.uniforms.uleverX = bgUniforms.uleverX;
+
       /**
        * aplicando rotación
        * @link https://thebookofshaders.com/08/?lan=es
@@ -247,6 +259,10 @@ function Background({
 
         '#include <common>',
         `#include <common>
+
+        uniform float uTime;
+        uniform float uleverX;
+
         // transformed.xyz = 0.0;
 
         mat2 rotateMatrix2D(float angle) {
@@ -268,7 +284,7 @@ function Background({
         '#include <begin_vertex>',
         `#include <begin_vertex>
 
-        float angle = 0.9;
+        float angle = (position.y + uTime) * uleverX;
         mat2 rotateMat = rotateMatrix2D( angle );
 
         transformed.xz = rotateMat * transformed.xz;
@@ -277,17 +293,31 @@ function Background({
 
       shader.vertexShader = newShader;
     };
+  }, []);
+
+  const {
+    leverX,
+    scale,
+    octaves,
+    persistence,
+    lacunarity,
+    amplitude,
+    frequency,
+  } = useControls({
+    scale: { value: 0.125, min: 0.0001, max: 1, step: 0.0001 },
+    leverX: { value: 0.1, min: 0.0001, max: 1, step: 0.0001 },
+    octaves: { value: 20, min: 0, max: 100, step: 1 },
+    persistence: { value: 0.6, min: 0, max: 1, step: 0.1 },
+    lacunarity: { value: 2, min: 0, max: 5, step: 0.1 },
+    amplitude: { value: 1.0, min: 0, max: 3, step: 0.01 },
+    frequency: { value: 1.0, min: 0, max: 3, step: 0.01 },
   });
 
-  const { scale, octaves, persistence, lacunarity, amplitude, frequency } =
-    useControls({
-      scale: { value: 0.125, min: 0.0001, max: 1, step: 0.0001 },
-      octaves: { value: 20, min: 0, max: 100, step: 1 },
-      persistence: { value: 0.6, min: 0, max: 1, step: 0.1 },
-      lacunarity: { value: 2, min: 0, max: 5, step: 0.1 },
-      amplitude: { value: 1.0, min: 0, max: 3, step: 0.01 },
-      frequency: { value: 1.0, min: 0, max: 3, step: 0.01 },
-    });
+  useFrame((state) => {
+    // console.log(shader.current);
+    bgUniforms.uTime.value = state.clock.elapsedTime;
+    bgUniforms.uleverX.value = leverX;
+  });
 
   const sampleNoise = ({ x, y, z }: { x: number; y: number; z: number }) => {
     /** @link https://www.youtube.com/watch?v=MRNFcywkUSA&list=PLFt_AvWsXl0eBW2EiBtl_sxmDtSgZBxB3&index=4 */
@@ -422,7 +452,7 @@ function Background({
         ref={shader}
         vertexColors={true}
         side={T.DoubleSide}
-        wireframe={true}
+        wireframe={!true}
       />
     </mesh>
   );
