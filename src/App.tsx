@@ -25,9 +25,11 @@ import Patron4Random from '../shaders/Patron4Random';
 import Patron5Circle from '../shaders/Patron5Circle';
 import Patron6Angles from '../shaders/Patron6Angles';
 import Patron7Noise from '../shaders/Patron7Noise';
+import ModifiedNoiseMaterial from '../trips/ModifiedNoiseMaterial';
 
 function App() {
-  return <AntiGalactusShader />;
+  return <ModifiedNoiseMaterial />;
+  // return <AntiGalactusShader />;
   // return <Patron7Noise />;
   // return <Patron6Angles />;
   // return <Patron5Circle />;
