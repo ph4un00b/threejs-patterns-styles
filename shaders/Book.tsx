@@ -216,11 +216,8 @@ function Cubo(props: BoxProps & MeshProps) {
 
           vec3 color = vec3(y);
 
-          // Plot a line
-          // float pct = plot( st );
-
           // para la curva
-          float pct = plot(st,y);
+          float pct = plot( st, y );
 
           color = ( 1.0 - pct ) * color + pct * vec3( 0.0, 1.0, 0.0 );
 
