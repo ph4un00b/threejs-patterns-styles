@@ -27,9 +27,11 @@ import Patron6Angles from '../shaders/Patron6Angles';
 import Patron7Noise from '../shaders/Patron7Noise';
 import ModifiedNoiseMaterial from '../trips/ModifiedNoiseMaterial';
 import Book from '../shaders/Book';
+import CuriousZoom from '../shaders/CuriousZoom';
 
 function App() {
-  return <Book />;
+  return <CuriousZoom />;
+  // return <Book />;
   // return <ModifiedNoiseMaterial />;
   // return <AntiGalactusShader />;
   // return <Patron7Noise />;
