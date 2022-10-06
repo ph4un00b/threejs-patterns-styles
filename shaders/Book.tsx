@@ -206,7 +206,13 @@ function Cubo(props: BoxProps & MeshProps) {
 
           // Step will return 0.0 unless the value is over 0.5,
           // in that case it will return 1.0
-          float y = step(0.668,st.x);
+          // float y = step(0.668,st.x);
+
+          // Los primeros dos parámetros son para el
+          // comienzo y el final de la transición, el
+          // tercero es el valor a interpolar.
+          // Smooth interpolation between 0.1 and 0.9
+          float y = smoothstep(0.100,1.404,st.x);
 
           vec3 color = vec3(y);
 
