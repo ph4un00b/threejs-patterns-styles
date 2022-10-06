@@ -244,6 +244,9 @@ function Esfera({
 var localUniforms = {
   uTime: { value: 0 },
   uleverX: { value: 0.1 },
+  uleverR: { value: 0.1 },
+  uleverG: { value: 0.1 },
+  uleverB: { value: 0.1 },
 };
 
 function Cubo(props: BoxProps & MeshProps) {
@@ -264,6 +267,9 @@ function Cubo(props: BoxProps & MeshProps) {
 
       shader.uniforms.uTime = localUniforms.uTime;
       shader.uniforms.uleverX = localUniforms.uleverX;
+      shader.uniforms.uleverR = localUniforms.uleverR;
+      shader.uniforms.uleverG = localUniforms.uleverG;
+      shader.uniforms.uleverB = localUniforms.uleverB;
 
       /**
        * aplicando rotación
@@ -309,17 +315,40 @@ function Cubo(props: BoxProps & MeshProps) {
       );
 
       shader.vertexShader = newShader;
+
+      /**
+       * @link https://thebookofshaders.com/03/?lan=es
+       *
+       * aceleradas por hardware: sin(), cos(), tan(), asin(), acos(), atan(), pow(), exp(), log(), sqrt(), abs(), sign(), floor(), ceil(), fract(), mod(), min(), max() y clamp().
+       */
+      shader.fragmentShader = `
+      uniform float uTime;
+      uniform float uleverR;
+      uniform float uleverG;
+      uniform float uleverB;
+
+        void main() {
+          // gl_FragColor = vec4(abs(sin(uTime)),0.0,0.0,1.0);
+          gl_FragColor = vec4(abs(sin(uTime)),uleverG,uleverB,1.0);
+        }
+      `;
     };
   }, []);
 
-  const { leverX } = useControls({
+  const { leverX, leverR, leverG, leverB } = useControls({
     leverX: { value: 0.1, min: 0.0001, max: 1, step: 0.0001 },
+    leverR: { value: 0.1, min: 1 / 256, max: 1.0, step: 1 / 256 },
+    leverG: { value: 0.1, min: 1 / 256, max: 1.0, step: 1 / 256 },
+    leverB: { value: 0.1, min: 1 / 256, max: 1.0, step: 1 / 256 },
   });
 
   useFrame((state) => {
     // console.log(shader.current);
     localUniforms.uTime.value = state.clock.elapsedTime;
     localUniforms.uleverX.value = leverX;
+    localUniforms.uleverR.value = leverR;
+    localUniforms.uleverG.value = leverG;
+    localUniforms.uleverB.value = leverB;
   });
 
   const [active, setActive] = React.useState(0);
