@@ -329,7 +329,7 @@ function Cubo(props: BoxProps & MeshProps) {
 
         void main() {
           // gl_FragColor = vec4(abs(sin(uTime)),0.0,0.0,1.0);
-          gl_FragColor = vec4(abs(sin(uTime)),uleverG,uleverB,1.0);
+          gl_FragColor = vec4(abs(sin(uleverR)),uleverG,uleverB,1.0);
         }
       `;
     };
