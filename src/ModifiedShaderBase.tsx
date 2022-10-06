@@ -184,13 +184,14 @@ function Cubo(props: BoxProps & MeshProps) {
       uniform vec2 uPointer;
 
         void main() {
-          vec2 st = gl_FragCoord.xy / uResolution;
-          // vec2 st = gl_FragCoord.xy;
+          vec2 uv = (gl_FragCoord.xy - uResolution * .5) / uResolution.yy;
+          
+          vec3 color = vec3(0.5, 0.0, 0.5);
 
           gl_FragColor = vec4(
-            uPointer.x,
-            uPointer.y,
-              uleverB,
+              uv.x,
+              uv.y,
+              1.,
               1.0
           );
         }
@@ -209,10 +210,10 @@ function Cubo(props: BoxProps & MeshProps) {
 
   React.useLayoutEffect(() => {
     localUniforms.uPointer.value = pointer;
-    localUniforms.uResolution.value.x = viewport.width;
-    localUniforms.uResolution.value.y = viewport.height;
+    localUniforms.uResolution.value.x = CanvasProxy.w;
+    localUniforms.uResolution.value.y = CanvasProxy.h;
     // console.log({ w: viewport.width, h: viewport.height });
-  }, [viewport.width, viewport.height, pointer]);
+  }, [CanvasProxy.h, CanvasProxy.w, pointer]);
 
   useFrame((state) => {
     // console.log(shader.current);
