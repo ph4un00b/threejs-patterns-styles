@@ -184,13 +184,12 @@ function Cubo(props: BoxProps & MeshProps) {
       uniform vec2 uPointer;
 
         void main() {
-          vec2 uv = (gl_FragCoord.xy - uResolution * .5) / uResolution.yy;
+          vec2 uv = gl_FragCoord.xy / uResolution.xy;
           
           vec3 color = vec3(0.5, 0.0, 0.5);
 
           gl_FragColor = vec4(
-              uv.x,
-              uv.y,
+              fract(uv),
               1.,
               1.0
           );
