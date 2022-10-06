@@ -212,7 +212,7 @@ function Cubo(props: BoxProps & MeshProps) {
           // comienzo y el final de la transición, el
           // tercero es el valor a interpolar.
           // Smooth interpolation between 0.1 and 0.9
-          float y = smoothstep(0.100,1.404,st.x);
+          float y = smoothstep(0.2,0.5,st.x) - smoothstep(0.5,0.8,st.x);
 
           vec3 color = vec3(y);
 
