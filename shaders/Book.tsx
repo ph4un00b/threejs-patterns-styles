@@ -68,7 +68,7 @@ export default function () {
 
           <PerspectiveCamera
             ref={cam_}
-            position={[-6, 6, 6]}
+            position={[0, 0, 9]}
             fov={75}
             near={0.1}
             far={100}
@@ -79,31 +79,7 @@ export default function () {
 
           <OrbitControls enableDamping={true} makeDefault={true} />
 
-          {/* @link https://pmndrs.github.io/cannon-es/docs/ */}
-          <Physics
-            /**
-             * - SAPBroadphase : ideal (performance)
-             * if your objects are not traveling too fast
-             * - NaiveBroadphase
-             *  */
-            broadphase={'SAP'}
-            /** does not update quiet objects */
-            allowSleep={true}
-          >
-            <Debug color="black" scale={1.1}>
-              <group position={[0, 4, 0]}>
-                <Center>
-                  <Text3D castShadow={true} font={global.font1}>
-                    phau!
-                    <meshStandardMaterial metalness={0} roughness={0} />
-                  </Text3D>
-                </Center>
-              </group>
-
-              <Cubo castShadow={true} />
-              <World items={4} />
-            </Debug>
-          </Physics>
+          <Cubo castShadow={true} />
 
           <axesHelper args={[4]} />
           <ambientLight color={ambient} intensity={ambientIntensity} />
@@ -120,127 +96,6 @@ export default function () {
   );
 }
 
-var hitSound = new window.Audio(`${baseUrl}/sounds/hit.mp3`);
-
-function playHit({ contact: { impactVelocity } }: CollideEvent) {
-  if (impactVelocity < 1.5) return;
-  /** todo:
-   * - change the  volume in relation to impact
-   * - add a little delay since hitting the floor
-   * fires multiple events (4?)
-   */
-  hitSound.volume = Math.random();
-  hitSound.currentTime = 0;
-  hitSound.play();
-}
-
-type MaterialOptions =
-  | string
-  | {
-      friction?: number | undefined;
-      restitution?: number | undefined;
-    }
-  | undefined;
-
-function World({ items }: { items: number }) {
-  const [circulos, setCirculos] = React.useState(items);
-  const [preset] = React.useState(Math.floor(Math.random() * 900));
-
-  const bouncyMat = {
-    name: 'plastic',
-  } as MaterialOptions;
-
-  const groundMat = {
-    name: 'concreto',
-  } as MaterialOptions;
-
-  useContactMaterial(groundMat, bouncyMat, {
-    friction: 0.1,
-    restitution: 0.7 /** bouncing! */,
-  });
-
-  const colors = React.useMemo(() => {
-    const array = new Float32Array(items * 3);
-    const color = new T.Color();
-    for (let i = 0; i < items; i++) {
-      color
-        .set(nice_colors[preset][Math.floor(Math.random() * 4)])
-        .convertSRGBToLinear()
-        .toArray(array, i * 3);
-    }
-    return array;
-  }, [items]);
-
-  return (
-    <>
-      {/* using position instead of granular ones 'position-x' */}
-      <Esfera castShadow={true} material={bouncyMat} position={[-2, 5, 0]} />
-
-      {/* using rotation instead of granular ones 'rotation-x' */}
-      <Piso
-        receiveShadow={true}
-        material={groundMat}
-        rotation={[-Math.PI * 0.5, 0, 0]}
-      />
-    </>
-  );
-}
-function Piso({
-  receiveShadow,
-  ...props
-}: PlaneProps & { receiveShadow?: boolean }) {
-  // infinite grid floor
-  const [piso, api] = usePlane(
-    () => ({ mass: 0, ...props }),
-    React.useRef<T.Mesh>(null!)
-  );
-
-  return (
-    <mesh ref={piso} receiveShadow>
-      <planeBufferGeometry args={[16, 16]} />
-      <meshStandardMaterial
-        color={'#777777'}
-        roughness={0.4}
-        metalness={0.3}
-        side={T.DoubleSide}
-      />
-    </mesh>
-  );
-}
-
-function Esfera({
-  receiveShadow,
-  castShadow,
-  ...props
-}: SphereProps & { receiveShadow?: boolean; castShadow?: boolean }) {
-  const [esfera, world] = useSphere(
-    () => ({
-      mass: 1,
-      onCollide: (e) => {
-        playHit(e);
-      },
-      ...props,
-    }),
-    React.useRef<T.Mesh>(null!)
-  );
-
-  React.useEffect(() => {
-    world.applyLocalForce([150, 0, 0], [0, 0, 0]);
-  }, []);
-
-  useFrame(({ clock }) => {
-    // api.position.set(Math.sin(clock.getElapsedTime()) * 5, 1, 0)
-    world.applyForce([-0.05, 0, 0], esfera.current!.position.toArray());
-  });
-
-  return (
-    // shall we spread the props again?
-    <mesh ref={esfera} castShadow>
-      <sphereBufferGeometry args={[1, 32, 32]} />
-      <meshStandardMaterial roughness={0.4} metalness={0.3} />
-    </mesh>
-  );
-}
 var localUniforms = {
   uTime: { value: 0 },
   uleverX: { value: 0.1 },
@@ -336,13 +191,16 @@ function Cubo(props: BoxProps & MeshProps) {
       uniform vec2 uPointer;
 
         void main() {
-          vec2 st = gl_FragCoord.xy / uResolution;
+          float x = gl_FragCoord.x / uResolution.x;
+          float y = gl_FragCoord.y / uResolution.y;
           // vec2 st = gl_FragCoord.xy;
 
           gl_FragColor = vec4(
-            uPointer.x,
-            uPointer.y,
-              uleverB,
+            // uPointer.x,
+            x,
+            // uPointer.y,
+            y,
+              1.0,
               1.0
           );
         }
@@ -361,8 +219,10 @@ function Cubo(props: BoxProps & MeshProps) {
 
   React.useLayoutEffect(() => {
     localUniforms.uPointer.value = pointer;
-    localUniforms.uResolution.value.x = viewport.width;
-    localUniforms.uResolution.value.y = viewport.height;
+    // localUniforms.uResolution.value.x = viewport.width;
+    localUniforms.uResolution.value.x = CanvasProxy.w;
+    // localUniforms.uResolution.value.y = viewport.height;
+    localUniforms.uResolution.value.y = CanvasProxy.h;
     // console.log({ w: viewport.width, h: viewport.height });
   }, [viewport.width, viewport.height, pointer]);
 
@@ -407,12 +267,13 @@ function Cubo(props: BoxProps & MeshProps) {
   });
 
   return (
+    // @ts-ignore infinity
     <a.mesh
       {...handlers()}
       {...props}
       onClick={(e) => {
         e.stopPropagation();
-        setActive(Number(!active));
+        // setActive(Number(!active));
       }}
       rotation-x={rotation}
       scale={scale}
@@ -420,7 +281,7 @@ function Cubo(props: BoxProps & MeshProps) {
       position-y={y}
       position-z={pos}
     >
-      <boxGeometry />
+      <boxGeometry args={[8, 8, 8, 32 * 2, 32 * 2]} />
       {/* 
       // @ts-ignore */}
       <a.meshStandardMaterial ref={shader} color={colorA} />
@@ -446,6 +307,7 @@ function DirectionalLight(props: LightProps) {
   });
 
   return (
+    // @ts-ignore
     <directionalLight
       {...props}
       ref={light}
