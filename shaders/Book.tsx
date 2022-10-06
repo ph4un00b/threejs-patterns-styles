@@ -191,8 +191,9 @@ function Cubo(props: BoxProps & MeshProps) {
       uniform vec2 uPointer;
 
       // Plot a line on Y using a value between 0.0-1.0
-      float plot(vec2 st) {    
-          return smoothstep(0.02, 0.0, abs(st.y - st.x));
+      float plot(vec2 st, float pct){
+        return  smoothstep( pct-0.02, pct, st.y) -
+                smoothstep( pct, pct+0.02, st.y);
       }
 
         void main() {
@@ -200,12 +201,17 @@ function Cubo(props: BoxProps & MeshProps) {
           // float y = gl_FragCoord.y / uResolution.y;
           
           vec2 st = gl_FragCoord.xy/uResolution;
-          float y = st.x;
+          // curvando la linea, x^5
+          float y = pow( st.x, 2.760 );
 
           vec3 color = vec3(y);
 
           // Plot a line
-          float pct = plot( st );
+          // float pct = plot( st );
+
+          // para la curva
+          float pct = plot(st,y);
+
           color = ( 1.0 - pct ) * color + pct * vec3( 0.0, 1.0, 0.0 );
 
           // gl_FragColor = vec4(
