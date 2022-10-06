@@ -244,6 +244,11 @@ function Esfera({
 var localUniforms = {
   uTime: { value: 0 },
   uleverX: { value: 0.1 },
+  uleverR: { value: 0.1 },
+  uleverG: { value: 0.1 },
+  uleverB: { value: 0.1 },
+  uResolution: { value: new T.Vector2() },
+  uPointer: { value: new T.Vector2() },
 };
 
 function Cubo(props: BoxProps & MeshProps) {
@@ -264,6 +269,11 @@ function Cubo(props: BoxProps & MeshProps) {
 
       shader.uniforms.uTime = localUniforms.uTime;
       shader.uniforms.uleverX = localUniforms.uleverX;
+      shader.uniforms.uleverR = localUniforms.uleverR;
+      shader.uniforms.uleverG = localUniforms.uleverG;
+      shader.uniforms.uleverB = localUniforms.uleverB;
+      shader.uniforms.uResolution = localUniforms.uResolution;
+      shader.uniforms.uPointer = localUniforms.uPointer;
 
       /**
        * aplicando rotación
@@ -309,17 +319,60 @@ function Cubo(props: BoxProps & MeshProps) {
       );
 
       shader.vertexShader = newShader;
+
+      /**
+       * @link https://thebookofshaders.com/03/?lan=es
+       *
+       * aceleradas por hardware: sin(), cos(), tan(), asin(), acos(), atan(), pow(), exp(), log(), sqrt(), abs(), sign(), floor(), ceil(), fract(), mod(), min(), max() y clamp().
+       * todo: issue en es.
+       */
+      shader.fragmentShader = `
+      uniform float uTime;
+      uniform float uleverX;
+      uniform float uleverR;
+      uniform float uleverG;
+      uniform float uleverB;
+      uniform vec2 uResolution;
+      uniform vec2 uPointer;
+
+        void main() {
+          vec2 st = gl_FragCoord.xy / uResolution;
+          // vec2 st = gl_FragCoord.xy;
+
+          gl_FragColor = vec4(
+            uPointer.x,
+            uPointer.y,
+              uleverB,
+              1.0
+          );
+        }
+      `;
     };
   }, []);
 
-  const { leverX } = useControls({
+  const { leverX, leverR, leverG, leverB } = useControls({
     leverX: { value: 0.1, min: 0.0001, max: 1, step: 0.0001 },
+    leverR: { value: 0.1, min: 1 / 256, max: 1.0, step: 1 / 256 },
+    leverG: { value: 0.1, min: 1 / 256, max: 1.0, step: 1 / 256 },
+    leverB: { value: 0.1, min: 1 / 256, max: 1.0, step: 1 / 256 },
   });
+
+  const { pointer, viewport } = useThree();
+
+  React.useLayoutEffect(() => {
+    localUniforms.uPointer.value = pointer;
+    localUniforms.uResolution.value.x = viewport.width;
+    localUniforms.uResolution.value.y = viewport.height;
+    // console.log({ w: viewport.width, h: viewport.height });
+  }, [viewport.width, viewport.height, pointer]);
 
   useFrame((state) => {
     // console.log(shader.current);
     localUniforms.uTime.value = state.clock.elapsedTime;
     localUniforms.uleverX.value = leverX;
+    localUniforms.uleverR.value = leverR;
+    localUniforms.uleverG.value = leverG;
+    localUniforms.uleverB.value = leverB;
   });
 
   const [active, setActive] = React.useState(0);
@@ -344,7 +397,6 @@ function Cubo(props: BoxProps & MeshProps) {
   // const rotation = spring.to([0, 1], [0, Math.PI]);
   // const colorA = spring.to([0, 1], ['#6246ea', 'royalblue']);
 
-  const { viewport } = useThree();
   const [{ x, y }, api] = useSpring(() => ({ x: 0, y: 1 }));
 
   const handlers = useDrag(function ({ event, offset: [x, y] }) {
