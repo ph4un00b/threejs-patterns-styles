@@ -202,7 +202,11 @@ function Cubo(props: BoxProps & MeshProps) {
           
           vec2 st = gl_FragCoord.xy/uResolution;
           // curvando la linea, x^5
-          float y = pow( st.x, 2.760 );
+          // float y = pow( st.x, 2.760 );
+
+          // Step will return 0.0 unless the value is over 0.5,
+          // in that case it will return 1.0
+          float y = step(0.668,st.x);
 
           vec3 color = vec3(y);
 
