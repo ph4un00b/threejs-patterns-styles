@@ -190,19 +190,34 @@ function Cubo(props: BoxProps & MeshProps) {
       uniform vec2 uResolution;
       uniform vec2 uPointer;
 
-        void main() {
-          float x = gl_FragCoord.x / uResolution.x;
-          float y = gl_FragCoord.y / uResolution.y;
-          // vec2 st = gl_FragCoord.xy;
+      // Plot a line on Y using a value between 0.0-1.0
+      float plot(vec2 st) {    
+          return smoothstep(0.02, 0.0, abs(st.y - st.x));
+      }
 
-          gl_FragColor = vec4(
-            // uPointer.x,
-            x,
-            // uPointer.y,
-            y,
-              1.0,
-              1.0
-          );
+        void main() {
+          // float x = gl_FragCoord.x / uResolution.x;
+          // float y = gl_FragCoord.y / uResolution.y;
+          
+          vec2 st = gl_FragCoord.xy/uResolution;
+          float y = st.x;
+
+          vec3 color = vec3(y);
+
+          // Plot a line
+          float pct = plot( st );
+          color = ( 1.0 - pct ) * color + pct * vec3( 0.0, 1.0, 0.0 );
+
+          // gl_FragColor = vec4(
+          //   // uPointer.x,
+          //   x,
+          //   // uPointer.y,
+          //   y,
+          //     1.0,
+          //     1.0
+          // );
+
+          gl_FragColor = vec4(color,1.0);
         }
       `;
     };
