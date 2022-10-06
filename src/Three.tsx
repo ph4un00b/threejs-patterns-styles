@@ -241,8 +241,87 @@ function Esfera({
     </mesh>
   );
 }
+var localUniforms = {
+  uTime: { value: 0 },
+  uleverX: { value: 0.1 },
+};
 
 function Cubo(props: BoxProps & MeshProps) {
+  const shader = React.useRef<T.MeshStandardMaterial>(null!);
+
+  React.useLayoutEffect(() => {
+    /**
+     * @link https://github.com/mrdoob/three.js/tree/master/src/renderers/shaders
+     *
+     * @link https://github.com/mrdoob/three.js/blob/master/src/renderers/shaders/ShaderLib/meshphysical.glsl.js
+     */
+    shader.current.onBeforeCompile = function (shader: T.Shader) {
+      console.log(shader);
+
+      /**
+       * adding more  uniforms
+       */
+
+      shader.uniforms.uTime = localUniforms.uTime;
+      shader.uniforms.uleverX = localUniforms.uleverX;
+
+      /**
+       * aplicando rotación
+       * @link https://thebookofshaders.com/08/?lan=es
+       */
+      const newShaderCommon = shader.vertexShader.replace(
+        /**
+         * this is before void main()
+         */
+
+        '#include <common>',
+        `#include <common>
+
+        uniform float uTime;
+        uniform float uleverX;
+
+        // transformed.xyz = 0.0;
+
+        mat2 rotateMatrix2D(float angle) {
+          return mat2(
+            cos( angle ), - sin( angle ),
+            sin( angle ), + cos( angle )
+            );
+        }
+        `
+      );
+
+      shader.vertexShader = newShaderCommon;
+
+      const newShader = shader.vertexShader.replace(
+        /**
+         * this is inside void main()
+         */
+
+        '#include <begin_vertex>',
+        `#include <begin_vertex>
+
+        float angle = (position.y + uTime) * uleverX;
+        mat2 rotateMat = rotateMatrix2D( angle );
+
+        transformed.xz = rotateMat * transformed.xz;
+        `
+      );
+
+      shader.vertexShader = newShader;
+    };
+  }, []);
+
+  const { leverX } = useControls({
+    leverX: { value: 0.1, min: 0.0001, max: 1, step: 0.0001 },
+  });
+
+  useFrame((state) => {
+    // console.log(shader.current);
+    localUniforms.uTime.value = state.clock.elapsedTime;
+    localUniforms.uleverX.value = leverX;
+  });
+
   const [active, setActive] = React.useState(0);
   const cubo = React.useRef<T.Mesh>(null);
   const { pos } = useSpring({
@@ -292,7 +371,7 @@ function Cubo(props: BoxProps & MeshProps) {
       <boxGeometry />
       {/* 
       // @ts-ignore */}
-      <a.meshStandardMaterial color={colorA} />
+      <a.meshStandardMaterial ref={shader} color={colorA} />
     </a.mesh>
   );
 }
