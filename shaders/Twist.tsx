@@ -246,7 +246,7 @@ function Cubo(props: BoxProps & MeshProps) {
         '#include <begin_vertex>',
         `#include <begin_vertex>
 
-        float angle = uleverX;
+        float angle = position.y + uleverX;
         mat2 rotateMat = rotate2D( angle );
 
         transformed.xz = rotateMat * transformed.xz;
