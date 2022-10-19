@@ -207,7 +207,7 @@ function Cubo(props: BoxProps & MeshProps) {
 
   React.useLayoutEffect(() => {
     twistedMaterial(shader.current);
-    // twistedMaterial(customDepth.current);
+    twistedMaterial(customDepth.current);
   });
 
   const { leverX, leverR, leverG, leverB } = useControls({
@@ -337,14 +337,11 @@ function twistedMaterial(currentShader: T.Material) {
         transformed.xz = rotateMat * transformed.xz;
       `
     });
+  };
+}
 
-    /**
-     * @link https://thebookofshaders.com/03/?lan=es
-     *
-     * aceleradas por hardware: sin(), cos(), tan(), asin(), acos(), atan(), pow(), exp(), log(), sqrt(), abs(), sign(), floor(), ceil(), fract(), mod(), min(), max() y clamp().
-     * todo: issue en es.
-     */
-    shader.fragmentShader = `
+function setFragment(shader: T.Shader) {
+  shader.fragmentShader = `
       uniform float uTime;
       uniform float uleverX;
       uniform float uleverR;
@@ -365,7 +362,6 @@ function twistedMaterial(currentShader: T.Material) {
           );
         }
       `;
-  };
 }
 
 function setVertexMain(shader: T.Shader,
