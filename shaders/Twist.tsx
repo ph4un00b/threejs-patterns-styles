@@ -205,76 +205,8 @@ function Cubo(props: BoxProps & MeshProps) {
   const shader = React.useRef<T.MeshStandardMaterial>(null!);
 
   React.useLayoutEffect(() => {
-
-    shader.current.onBeforeCompile = function (shader: T.Shader) {
-      // console.log(shader);
-
-      shader.uniforms.uTime = localUniforms.uTime;
-      shader.uniforms.uleverX = localUniforms.uleverX;
-      shader.uniforms.uleverR = localUniforms.uleverR;
-      shader.uniforms.uleverG = localUniforms.uleverG;
-      shader.uniforms.uleverB = localUniforms.uleverB;
-      shader.uniforms.uResolution = localUniforms.uResolution;
-      shader.uniforms.uPointer = localUniforms.uPointer;
-
-
-      setBeforeVertex(shader, {
-        to: `
-        #include <common>
-
-        uniform float uTime;
-        uniform float uleverX;
-
-        mat2 rotate2D(float _angle) {
-          return mat2(
-            cos( _angle ), - sin( _angle ),
-            sin( _angle ), + cos( _angle )
-            );
-        }
-      `});
-
-      /**
-       * aplicando rotación
-       * @link https://thebookofshaders.com/08/?lan=es
-       */
-      setVertexMain(shader, {
-        to: `
-        #include <begin_vertex>
-
-        float angle = position.y * uleverX;
-        mat2 rotateMat = rotate2D( angle );
-
-        transformed.xz = rotateMat * transformed.xz;
-      `});
-
-      /**
-       * @link https://thebookofshaders.com/03/?lan=es
-       *
-       * aceleradas por hardware: sin(), cos(), tan(), asin(), acos(), atan(), pow(), exp(), log(), sqrt(), abs(), sign(), floor(), ceil(), fract(), mod(), min(), max() y clamp().
-       * todo: issue en es.
-       */
-      shader.fragmentShader = `
-      uniform float uTime;
-      uniform float uleverX;
-      uniform float uleverR;
-      uniform float uleverG;
-      uniform float uleverB;
-      uniform vec2 uResolution;
-      uniform vec2 uPointer;
-
-        void main() {
-          vec2 st = gl_FragCoord.xy / uResolution;
-          // vec2 st = gl_FragCoord.xy;
-
-          gl_FragColor = vec4(
-            1.0,
-            .5,
-            0.0,
-            1.0
-          );
-        }
-      `;
-    };
+    const currentShader = shader.current;
+    twistedMaterial(currentShader);
   }, []);
 
   const { leverX, leverR, leverG, leverB } = useControls({
@@ -356,6 +288,79 @@ function Cubo(props: BoxProps & MeshProps) {
   );
 }
 
+function twistedMaterial(currentShader: T.MeshStandardMaterial) {
+  currentShader.onBeforeCompile = function (shader: T.Shader) {
+    // console.log(shader);
+    shader.uniforms.uTime = localUniforms.uTime;
+    shader.uniforms.uleverX = localUniforms.uleverX;
+    shader.uniforms.uleverR = localUniforms.uleverR;
+    shader.uniforms.uleverG = localUniforms.uleverG;
+    shader.uniforms.uleverB = localUniforms.uleverB;
+    shader.uniforms.uResolution = localUniforms.uResolution;
+    shader.uniforms.uPointer = localUniforms.uPointer;
+
+
+    setBeforeVertex(shader, {
+      to: `
+        #include <common>
+
+        uniform float uTime;
+        uniform float uleverX;
+
+        mat2 rotate2D(float _angle) {
+          return mat2(
+            cos( _angle ), - sin( _angle ),
+            sin( _angle ), + cos( _angle )
+            );
+        }
+      `
+    });
+
+    /**
+     * aplicando rotación
+     * @link https://thebookofshaders.com/08/?lan=es
+     */
+    setVertexMain(shader, {
+      to: `
+        #include <begin_vertex>
+
+        float angle = position.y * uleverX;
+        mat2 rotateMat = rotate2D( angle );
+
+        transformed.xz = rotateMat * transformed.xz;
+      `
+    });
+
+    /**
+     * @link https://thebookofshaders.com/03/?lan=es
+     *
+     * aceleradas por hardware: sin(), cos(), tan(), asin(), acos(), atan(), pow(), exp(), log(), sqrt(), abs(), sign(), floor(), ceil(), fract(), mod(), min(), max() y clamp().
+     * todo: issue en es.
+     */
+    shader.fragmentShader = `
+      uniform float uTime;
+      uniform float uleverX;
+      uniform float uleverR;
+      uniform float uleverG;
+      uniform float uleverB;
+      uniform vec2 uResolution;
+      uniform vec2 uPointer;
+
+        void main() {
+          vec2 st = gl_FragCoord.xy / uResolution;
+          // vec2 st = gl_FragCoord.xy;
+
+          gl_FragColor = vec4(
+            1.0,
+            .5,
+            0.0,
+            1.0
+          );
+        }
+      `;
+  };
+}
+
 function setVertexMain(shader: T.Shader,
   { from = '#include <begin_vertex>', to }: { from?: string, to: string }) {
   const newShader = shader.vertexShader.replace(
@@ -404,6 +409,7 @@ function DirectionalLight(props: LightProps) {
   });
 
   return (
+    // @ts-ignore
     <directionalLight
       {...props}
       ref={light}
