@@ -120,26 +120,12 @@ export default function () {
   );
 }
 
-var hitSound = new window.Audio(`${baseUrl}/sounds/hit.mp3`);
-
-function playHit({ contact: { impactVelocity } }: CollideEvent) {
-  if (impactVelocity < 1.5) return;
-  /** todo:
-   * - change the  volume in relation to impact
-   * - add a little delay since hitting the floor
-   * fires multiple events (4?)
-   */
-  hitSound.volume = Math.random();
-  hitSound.currentTime = 0;
-  hitSound.play();
-}
-
 type MaterialOptions =
   | string
   | {
-      friction?: number | undefined;
-      restitution?: number | undefined;
-    }
+    friction?: number | undefined;
+    restitution?: number | undefined;
+  }
   | undefined;
 
 function World({ items }: { items: number }) {
@@ -173,9 +159,6 @@ function World({ items }: { items: number }) {
 
   return (
     <>
-      {/* using position instead of granular ones 'position-x' */}
-      <Esfera castShadow={true} material={bouncyMat} position={[-2, 5, 0]} />
-
       {/* using rotation instead of granular ones 'rotation-x' */}
       <Piso
         receiveShadow={true}
@@ -208,39 +191,6 @@ function Piso({
   );
 }
 
-function Esfera({
-  receiveShadow,
-  castShadow,
-  ...props
-}: SphereProps & { receiveShadow?: boolean; castShadow?: boolean }) {
-  const [esfera, world] = useSphere(
-    () => ({
-      mass: 1,
-      onCollide: (e) => {
-        playHit(e);
-      },
-      ...props,
-    }),
-    React.useRef<T.Mesh>(null!)
-  );
-
-  React.useEffect(() => {
-    world.applyLocalForce([150, 0, 0], [0, 0, 0]);
-  }, []);
-
-  useFrame(({ clock }) => {
-    // api.position.set(Math.sin(clock.getElapsedTime()) * 5, 1, 0)
-    world.applyForce([-0.05, 0, 0], esfera.current!.position.toArray());
-  });
-
-  return (
-    // shall we spread the props again?
-    <mesh ref={esfera} castShadow>
-      <sphereBufferGeometry args={[1, 32, 32]} />
-      <meshStandardMaterial roughness={0.4} metalness={0.3} />
-    </mesh>
-  );
-}
 var localUniforms = {
   uTime: { value: 0 },
   uleverX: { value: 0.1 },
@@ -255,17 +205,9 @@ function Cubo(props: BoxProps & MeshProps) {
   const shader = React.useRef<T.MeshStandardMaterial>(null!);
 
   React.useLayoutEffect(() => {
-    /**
-     * @link https://github.com/mrdoob/three.js/tree/master/src/renderers/shaders
-     *
-     * @link https://github.com/mrdoob/three.js/blob/master/src/renderers/shaders/ShaderLib/meshphysical.glsl.js
-     */
-    shader.current.onBeforeCompile = function (shader: T.Shader) {
-      console.log(shader);
 
-      /**
-       * adding more  uniforms
-       */
+    shader.current.onBeforeCompile = function (shader: T.Shader) {
+      // console.log(shader);
 
       shader.uniforms.uTime = localUniforms.uTime;
       shader.uniforms.uleverX = localUniforms.uleverX;
@@ -275,34 +217,27 @@ function Cubo(props: BoxProps & MeshProps) {
       shader.uniforms.uResolution = localUniforms.uResolution;
       shader.uniforms.uPointer = localUniforms.uPointer;
 
-      /**
-       * aplicando rotación
-       * @link https://thebookofshaders.com/08/?lan=es
-       */
-      const newShaderCommon = shader.vertexShader.replace(
-        /**
-         * this is before void main()
-         */
 
-        '#include <common>',
-        `#include <common>
+      setBeforeVertexShader(shader, {
+        from: '#include <common>', 
+        to: `
+        #include <common>
 
         uniform float uTime;
         uniform float uleverX;
 
-        // transformed.xyz = 0.0;
-
-        mat2 rotateMatrix2D(float angle) {
+        mat2 rotate2D(float _angle) {
           return mat2(
-            cos( angle ), - sin( angle ),
-            sin( angle ), + cos( angle )
+            cos( _angle ), - sin( _angle ),
+            sin( _angle ), + cos( _angle )
             );
         }
-        `
-      );
+      `});
 
-      shader.vertexShader = newShaderCommon;
-
+      /**
+       * aplicando rotación
+       * @link https://thebookofshaders.com/08/?lan=es
+       */
       const newShader = shader.vertexShader.replace(
         /**
          * this is inside void main()
@@ -311,8 +246,8 @@ function Cubo(props: BoxProps & MeshProps) {
         '#include <begin_vertex>',
         `#include <begin_vertex>
 
-        float angle = (position.y + uTime) * uleverX;
-        mat2 rotateMat = rotateMatrix2D( angle );
+        float angle = uleverX;
+        mat2 rotateMat = rotate2D( angle );
 
         transformed.xz = rotateMat * transformed.xz;
         `
@@ -340,10 +275,10 @@ function Cubo(props: BoxProps & MeshProps) {
           // vec2 st = gl_FragCoord.xy;
 
           gl_FragColor = vec4(
-            uPointer.x,
-            uPointer.y,
-              uleverB,
-              1.0
+            1.0,
+            .5,
+            0.0,
+            1.0
           );
         }
       `;
@@ -407,6 +342,7 @@ function Cubo(props: BoxProps & MeshProps) {
   });
 
   return (
+    /* ts-ignore infinity */
     <a.mesh
       {...handlers()}
       {...props}
@@ -426,6 +362,23 @@ function Cubo(props: BoxProps & MeshProps) {
       <a.meshStandardMaterial ref={shader} color={colorA} />
     </a.mesh>
   );
+}
+
+function setBeforeVertexShader(shader: T.Shader, { from, to }: { from: string, to: string }) {
+    /**
+   * dir: /src/renderers/shaders
+   *
+   * @link https://github.com/mrdoob/three.js/blob/master/src/renderers/shaders/ShaderLib/meshphysical.glsl.js
+   */
+
+  const newShaderCommon = shader.vertexShader.replace(
+    /**
+     * this code is setup before void main()
+     */
+    from, to
+  );
+
+  shader.vertexShader = newShaderCommon;
 }
 
 /** suports shadows! */
@@ -469,8 +422,8 @@ function DirectionalLight(props: LightProps) {
        * 3RF set PCFSoftShadowMap as the default shadow map
        */
       shadow-radius={10}
-      // position={[directional.x, directional.y, directional.z]}
-      // args={[color, 0.5 /** intensity */]}
+    // position={[directional.x, directional.y, directional.z]}
+    // args={[color, 0.5 /** intensity */]}
     />
   );
 }
