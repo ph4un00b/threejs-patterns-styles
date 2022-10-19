@@ -218,8 +218,7 @@ function Cubo(props: BoxProps & MeshProps) {
       shader.uniforms.uPointer = localUniforms.uPointer;
 
 
-      setBeforeVertexShader(shader, {
-        from: '#include <common>',
+      setBeforeVertex(shader, {
         to: `
         #include <common>
 
@@ -238,22 +237,15 @@ function Cubo(props: BoxProps & MeshProps) {
        * aplicando rotación
        * @link https://thebookofshaders.com/08/?lan=es
        */
-      const newShader = shader.vertexShader.replace(
-        /**
-         * this is inside void main()
-         */
+      setVertexMain(shader, {
+        to: `
+        #include <begin_vertex>
 
-        '#include <begin_vertex>',
-        `#include <begin_vertex>
-
-        float angle = position.y + uleverX;
+        float angle = position.y * uleverX;
         mat2 rotateMat = rotate2D( angle );
 
         transformed.xz = rotateMat * transformed.xz;
-        `
-      );
-
-      shader.vertexShader = newShader;
+      `});
 
       /**
        * @link https://thebookofshaders.com/03/?lan=es
@@ -364,7 +356,20 @@ function Cubo(props: BoxProps & MeshProps) {
   );
 }
 
-function setBeforeVertexShader(shader: T.Shader, { from, to }: { from: string, to: string }) {
+function setVertexMain(shader: T.Shader,
+  { from = '#include <begin_vertex>', to }: { from?: string, to: string }) {
+  const newShader = shader.vertexShader.replace(
+    /**
+     * this is inside void main()
+     */
+    from, to
+  );
+
+  shader.vertexShader = newShader;
+}
+
+function setBeforeVertex(shader: T.Shader,
+  { from = '#include <common>', to }: { from?: string, to: string }) {
   /**
  * dir: /src/renderers/shaders
  *
