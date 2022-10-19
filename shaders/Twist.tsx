@@ -203,11 +203,12 @@ var localUniforms = {
 
 function Cubo(props: BoxProps & MeshProps) {
   const shader = React.useRef<T.MeshStandardMaterial>(null!);
+  const customDepth = React.useRef<T.MeshDepthMaterial>(null!);
 
   React.useLayoutEffect(() => {
-    const currentShader = shader.current;
-    twistedMaterial(currentShader);
-  }, []);
+    twistedMaterial(shader.current);
+    // twistedMaterial(customDepth.current);
+  });
 
   const { leverX, leverR, leverG, leverB } = useControls({
     leverX: { value: 0.1, min: 0.0001, max: 1, step: 0.0001 },
@@ -268,6 +269,7 @@ function Cubo(props: BoxProps & MeshProps) {
   return (
     /* ts-ignore infinity */
     <a.mesh
+      castShadow={true}
       // {...handlers()}
       {...props}
       onClick={(e) => {
@@ -284,11 +286,16 @@ function Cubo(props: BoxProps & MeshProps) {
       {/* 
       // @ts-ignore */}
       <a.meshStandardMaterial ref={shader} color={colorA} />
+      <a.meshDepthMaterial
+          ref={customDepth}
+          attach="customDepthMaterial"
+          depthPacking={T.RGBADepthPacking}
+        />
     </a.mesh>
   );
 }
 
-function twistedMaterial(currentShader: T.MeshStandardMaterial) {
+function twistedMaterial(currentShader: T.Material) {
   currentShader.onBeforeCompile = function (shader: T.Shader) {
     // console.log(shader);
     shader.uniforms.uTime = localUniforms.uTime;
