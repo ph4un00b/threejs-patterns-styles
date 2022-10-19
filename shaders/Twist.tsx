@@ -219,7 +219,7 @@ function Cubo(props: BoxProps & MeshProps) {
 
 
       setBeforeVertexShader(shader, {
-        from: '#include <common>', 
+        from: '#include <common>',
         to: `
         #include <common>
 
@@ -344,11 +344,11 @@ function Cubo(props: BoxProps & MeshProps) {
   return (
     /* ts-ignore infinity */
     <a.mesh
-      {...handlers()}
+      // {...handlers()}
       {...props}
       onClick={(e) => {
         e.stopPropagation();
-        setActive(Number(!active));
+        // setActive(Number(!active));
       }}
       rotation-x={rotation}
       scale={scale}
@@ -356,7 +356,7 @@ function Cubo(props: BoxProps & MeshProps) {
       position-y={y}
       position-z={pos}
     >
-      <boxGeometry />
+      <boxGeometry args={[1, 1, 1, 64, 64]} />
       {/* 
       // @ts-ignore */}
       <a.meshStandardMaterial ref={shader} color={colorA} />
@@ -365,11 +365,11 @@ function Cubo(props: BoxProps & MeshProps) {
 }
 
 function setBeforeVertexShader(shader: T.Shader, { from, to }: { from: string, to: string }) {
-    /**
-   * dir: /src/renderers/shaders
-   *
-   * @link https://github.com/mrdoob/three.js/blob/master/src/renderers/shaders/ShaderLib/meshphysical.glsl.js
-   */
+  /**
+ * dir: /src/renderers/shaders
+ *
+ * @link https://github.com/mrdoob/three.js/blob/master/src/renderers/shaders/ShaderLib/meshphysical.glsl.js
+ */
 
   const newShaderCommon = shader.vertexShader.replace(
     /**
