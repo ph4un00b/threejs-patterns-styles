@@ -14,7 +14,7 @@ import Physics from '../basics/Physics';
 import Raycaster from '../basics/Raycaster';
 import Shadows from '../basics/Shadows';
 import Textures from '../basics/Textures';
-import Three from '../basics/Three';
+// import Three from '../basics/Three';
 import InitShader from '../shaders/InitShader';
 import SecondShader from '../shaders/SecondShader';
 import Patron from '../shaders/Patron';
@@ -27,11 +27,16 @@ import Patron6Angles from '../shaders/Patron6Angles';
 import Patron7Noise from '../shaders/Patron7Noise';
 import ModifiedNoiseMaterial from '../trips/ModifiedNoiseMaterial';
 import Book from '../shaders/Book';
-import CuriousZoom from '../shaders/CuriousZoom';
+import ModifiedShaderBase from './ModifiedShaderBase';
+import Three from './Three';
+import Twist from '../shaders/Twist';
+// import CuriousZoom from '../shaders/CuriousZoom';
 
 function App() {
-  return <CuriousZoom />;
+  return <Twist />;
   // return <Book />;
+  // return <Three />;
+  // return <CuriousZoom />;
   // return <ModifiedNoiseMaterial />;
   // return <AntiGalactusShader />;
   // return <Patron7Noise />;
