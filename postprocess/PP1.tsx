@@ -17,7 +17,7 @@ import {
   useHelper,
 } from "@react-three/drei/core";
 import { proxy, useSnapshot } from "valtio";
-import { useControls } from "leva";
+import { useControls, set } from "leva";
 import { useSpring, config, a } from "@react-spring/three";
 import { useDrag } from "@use-gesture/react";
 import {
@@ -40,6 +40,8 @@ import {
   Noise,
   Vignette,
   DotScreen,
+  Selection,
+  Select,
 } from "@react-three/postprocessing";
 import * as PP from "postprocessing";
 
@@ -61,6 +63,13 @@ export default function () {
     ambient: { value: "#ffffff" },
     fondo: { value: global.fog },
   });
+
+  const [{ pp, randomFactors }, set] = useControls(() => ({
+    pp: {
+      options: ["dots"],
+    },
+    randomFactors: [1, 1],
+  }));
 
   return (
     <>
@@ -110,10 +119,15 @@ export default function () {
                 </Center>
               </group>
 
-              <EffectComposer>
-                <DotScreen blendFunction={PP.BlendFunction.NORMAL} />
-                <Cubo castShadow={true} />
-              </EffectComposer>
+              <Selection>
+                <EffectComposer>
+                  <DotScreen blendFunction={PP.BlendFunction.NORMAL} />
+                </EffectComposer>
+
+                <Select enabled={true}>
+                  {pp === "dots" && <Cubo castShadow={true} />}
+                </Select>
+              </Selection>
 
               <World items={4} />
             </Debug>
