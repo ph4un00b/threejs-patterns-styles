@@ -42,6 +42,7 @@ import {
   DotScreen,
   Selection,
   Select,
+  Glitch,
 } from "@react-three/postprocessing";
 import * as PP from "postprocessing";
 
@@ -66,7 +67,7 @@ export default function () {
 
   const [{ pp, randomFactors }, set] = useControls(() => ({
     pp: {
-      options: ["dots"],
+      options: ["dots", "glitch"],
     },
     randomFactors: [1, 1],
   }));
@@ -121,11 +122,16 @@ export default function () {
 
               <Selection>
                 <EffectComposer>
-                  <DotScreen blendFunction={PP.BlendFunction.NORMAL} />
+                  {pp == "dots" && (
+                    <DotScreen blendFunction={PP.BlendFunction.NORMAL} />
+                  )}
+                  {pp == "glitch" && (
+                    <Glitch active={true} mode={PP.GlitchMode.SPORADIC} />
+                  )}
                 </EffectComposer>
 
                 <Select enabled={true}>
-                  {pp === "dots" && <Cubo castShadow={true} />}
+                  <Cubo castShadow={true} />
                 </Select>
               </Selection>
 
