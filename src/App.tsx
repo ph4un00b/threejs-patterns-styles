@@ -31,9 +31,11 @@ import ModifiedShaderBase from './ModifiedShaderBase';
 import Three from './Three';
 import Twist from '../shaders/Twist';
 // import CuriousZoom from '../shaders/CuriousZoom';
+import PP1 from '../postprocess/PP1'
 
 function App() {
-  return <Twist />;
+  return <PP1 />
+  // return <Twist />;
   // return <Book />;
   // return <Three />;
   // return <CuriousZoom />;
