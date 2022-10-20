@@ -5,6 +5,7 @@ import {
   LightProps,
   MeshProps,
   useFrame,
+  useLoader,
   useThree,
 } from '@react-three/fiber';
 import {
@@ -251,104 +252,24 @@ var localUniforms = {
   uPointer: { value: new T.Vector2() },
 };
 
+var textureAssets = [
+  `${baseUrl}/door/color.jpg`,
+  `${baseUrl}/door/alpha.jpg`,
+  `${baseUrl}/door/height.jpg`,
+  `${baseUrl}/door/normal.jpg`,
+  `${baseUrl}/door/ambientOcclusion.jpg`,
+  `${baseUrl}/door/metalness.jpg`,
+  `${baseUrl}/door/roughness.jpg`,
+];
+
 function Cubo(props: BoxProps & MeshProps) {
   const shader = React.useRef<T.MeshStandardMaterial>(null!);
+  const customDepth = React.useRef<T.MeshDepthMaterial>(null!);
 
   React.useLayoutEffect(() => {
-    /**
-     * @link https://github.com/mrdoob/three.js/tree/master/src/renderers/shaders
-     *
-     * @link https://github.com/mrdoob/three.js/blob/master/src/renderers/shaders/ShaderLib/meshphysical.glsl.js
-     */
-    shader.current.onBeforeCompile = function (shader: T.Shader) {
-      console.log(shader);
-
-      /**
-       * adding more  uniforms
-       */
-
-      shader.uniforms.uTime = localUniforms.uTime;
-      shader.uniforms.uleverX = localUniforms.uleverX;
-      shader.uniforms.uleverR = localUniforms.uleverR;
-      shader.uniforms.uleverG = localUniforms.uleverG;
-      shader.uniforms.uleverB = localUniforms.uleverB;
-      shader.uniforms.uResolution = localUniforms.uResolution;
-      shader.uniforms.uPointer = localUniforms.uPointer;
-
-      /**
-       * aplicando rotación
-       * @link https://thebookofshaders.com/08/?lan=es
-       */
-      const newShaderCommon = shader.vertexShader.replace(
-        /**
-         * this is before void main()
-         */
-
-        '#include <common>',
-        `#include <common>
-
-        uniform float uTime;
-        uniform float uleverX;
-
-        // transformed.xyz = 0.0;
-
-        mat2 rotateMatrix2D(float angle) {
-          return mat2(
-            cos( angle ), - sin( angle ),
-            sin( angle ), + cos( angle )
-            );
-        }
-        `
-      );
-
-      shader.vertexShader = newShaderCommon;
-
-      const newShader = shader.vertexShader.replace(
-        /**
-         * this is inside void main()
-         */
-
-        '#include <begin_vertex>',
-        `#include <begin_vertex>
-
-        float angle = (position.y + uTime) * uleverX;
-        mat2 rotateMat = rotateMatrix2D( angle );
-
-        transformed.xz = rotateMat * transformed.xz;
-        `
-      );
-
-      shader.vertexShader = newShader;
-
-      /**
-       * @link https://thebookofshaders.com/03/?lan=es
-       *
-       * aceleradas por hardware: sin(), cos(), tan(), asin(), acos(), atan(), pow(), exp(), log(), sqrt(), abs(), sign(), floor(), ceil(), fract(), mod(), min(), max() y clamp().
-       * todo: issue en es.
-       */
-      shader.fragmentShader = `
-      uniform float uTime;
-      uniform float uleverX;
-      uniform float uleverR;
-      uniform float uleverG;
-      uniform float uleverB;
-      uniform vec2 uResolution;
-      uniform vec2 uPointer;
-
-        void main() {
-          vec2 st = gl_FragCoord.xy / uResolution;
-          // vec2 st = gl_FragCoord.xy;
-
-          gl_FragColor = vec4(
-            uPointer.x,
-            uPointer.y,
-              uleverB,
-              1.0
-          );
-        }
-      `;
-    };
-  }, []);
+    twistedMaterial(shader.current);
+    twistedMaterial(customDepth.current);
+  });
 
   const { leverX, leverR, leverG, leverB } = useControls({
     leverX: { value: 0.1, min: 0.0001, max: 1, step: 0.0001 },
@@ -406,13 +327,19 @@ function Cubo(props: BoxProps & MeshProps) {
     return api.start({ x: x / aspect, y: -y / aspect });
   });
 
+  const [t1, t2, tH, tNornal, tAO] = useLoader(T.TextureLoader, [
+    ...textureAssets,
+  ]);
+
   return (
+    /* @ts-ignore infinity */
     <a.mesh
-      {...handlers()}
+      castShadow={true}
+      // {...handlers()}
       {...props}
       onClick={(e) => {
         e.stopPropagation();
-        setActive(Number(!active));
+        // setActive(Number(!active));
       }}
       rotation-x={rotation}
       scale={scale}
@@ -420,12 +347,125 @@ function Cubo(props: BoxProps & MeshProps) {
       position-y={y}
       position-z={pos}
     >
-      <boxGeometry />
+      <boxGeometry args={[1, 1, 1, 64, 64]} />
       {/* 
       // @ts-ignore */}
-      <a.meshStandardMaterial ref={shader} color={colorA} />
+      <a.meshStandardMaterial
+        ref={shader}
+        map={t1}
+        normalMap={tNornal}
+        alphaMap={t2}
+        transparent={!true}
+        roughness={0.4}
+        metalness={0.3}
+        color={colorA}
+      />
+      <a.meshDepthMaterial
+        ref={customDepth}
+        attach="customDepthMaterial"
+        depthPacking={T.RGBADepthPacking}
+      />
     </a.mesh>
   );
+}
+
+function twistedMaterial(currentShader: T.Material) {
+  currentShader.onBeforeCompile = function (shader: T.Shader) {
+    console.log(shader);
+    shader.uniforms.uTime = localUniforms.uTime;
+    shader.uniforms.uleverX = localUniforms.uleverX;
+    shader.uniforms.uleverR = localUniforms.uleverR;
+    shader.uniforms.uleverG = localUniforms.uleverG;
+    shader.uniforms.uleverB = localUniforms.uleverB;
+    shader.uniforms.uResolution = localUniforms.uResolution;
+    shader.uniforms.uPointer = localUniforms.uPointer;
+
+
+    setBeforeVertex(shader, {
+      from: '#include <common>',
+      to: `
+        #include <common>
+
+        uniform float uTime;
+        uniform float uleverX;
+
+        mat2 rotate2D(float _angle) {
+          return mat2(
+            cos( _angle ), - sin( _angle ),
+            sin( _angle ), + cos( _angle )
+            );
+        }
+      `
+    });
+
+    /**
+ * aplicando rotación en los normales
+ * @link https://thebookofshaders.com/08/?lan=es
+ */
+    setInsideVertexMain(shader, {
+      from: '#include <beginnormal_vertex>',
+      to: `
+      #include <beginnormal_vertex>
+      #define FAU_NORMAL
+
+        float angle = position.y * uleverX;
+        mat2 rotateMat = rotate2D( angle );
+
+        objectNormal.xz = rotateMat * objectNormal.xz;
+      `
+    });
+
+    /**
+     * aplicando rotación
+     * @link https://thebookofshaders.com/08/?lan=es
+     */
+    setInsideVertexMain(shader, {
+      from: '#include <begin_vertex>',
+      to: `
+        #include <begin_vertex>
+
+        #ifndef FAU_NORMAL
+          float angle = position.y * uleverX;
+          mat2 rotateMat = rotate2D( angle );
+          transformed.xz = rotateMat * transformed.xz;
+        #endif
+
+        #ifdef FAU_NORMAL
+          transformed.xz = rotateMat * transformed.xz;
+        #endif
+      `
+    });
+  };
+}
+
+function setInsideVertexMain(shader: T.Shader,
+  { from, to }: { from: string, to: string }) {
+  const newShader = shader.vertexShader.replace(
+    /**
+     * this is inside void main()
+     */
+    from, to
+  );
+
+  shader.vertexShader = newShader;
+}
+
+function setBeforeVertex(shader: T.Shader,
+  { from, to }: { from: string, to: string }) {
+  /**
+ * dir: /src/renderers/shaders
+ *
+ * @link https://github.com/mrdoob/three.js/blob/master/src/renderers/shaders/ShaderLib/meshphysical.glsl.js
+ */
+
+  const newShaderCommon = shader.vertexShader.replace(
+    /**
+     * this code is setup before void main()
+     */
+    from, to
+  );
+
+  shader.vertexShader = newShaderCommon;
 }
 
 /** suports shadows! */
@@ -446,6 +486,7 @@ function DirectionalLight(props: LightProps) {
   });
 
   return (
+    // @ts-ignore
     <directionalLight
       {...props}
       ref={light}

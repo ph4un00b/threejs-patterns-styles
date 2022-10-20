@@ -332,6 +332,7 @@ function twistedMaterial(currentShader: T.Material) {
 
 
     setBeforeVertex(shader, {
+      from: '#include <common>',
       to: `
         #include <common>
 
@@ -424,7 +425,7 @@ function setInsideVertexMain(shader: T.Shader,
 }
 
 function setBeforeVertex(shader: T.Shader,
-  { from = '#include <common>', to }: { from?: string, to: string }) {
+  { from, to }: { from: string, to: string }) {
   /**
  * dir: /src/renderers/shaders
  *
