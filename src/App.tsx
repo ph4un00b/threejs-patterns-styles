@@ -32,9 +32,11 @@ import Three from './Three';
 import Twist from '../shaders/Twist';
 // import CuriousZoom from '../shaders/CuriousZoom';
 import PP1 from '../postprocess/PP1'
+import PP2 from '../postprocess/PP2'
 
 function App() {
-  return <PP1 />
+  return <PP2 />
+  // return <PP1 />
   // return <Twist />;
   // return <Book />;
   // return <Three />;
