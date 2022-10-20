@@ -143,11 +143,7 @@ export default function () {
                   ) : (
                     <></>
                   )}
-                  {pp == "antialias" ? (
-                    <SMAA/>
-                  ) : (
-                    <></>
-                  )}
+                  {pp == "antialias" ? <SMAA /> : <></>}
                 </EffectComposer>
 
                 <Select enabled={true}>
@@ -197,9 +193,7 @@ class CustomEffect extends PP.Effect {
 
     super("CustomEffect", frag, {
       blendFunction: PP.BlendFunction.NORMAL,
-      uniforms: new Map([
-        ["weights", new T.Uniform(weights)],
-      ]),
+      uniforms: new Map([["weights", new T.Uniform(weights)]]),
     });
 
     _weights = weights;
@@ -274,6 +268,9 @@ function World({ items }: { items: number }) {
     return array;
   }, [items]);
 
+  const { gl } = useThree();
+  console.log(gl.capabilities);
+  
   return (
     <>
       {/* using position instead of granular ones 'position-x' */}
