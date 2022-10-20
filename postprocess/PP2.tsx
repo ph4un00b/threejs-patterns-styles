@@ -269,8 +269,9 @@ function World({ items }: { items: number }) {
   }, [items]);
 
   const { gl } = useThree();
+  // @link https://github.com/pmndrs/react-three-fiber/discussions/2494
   console.log(gl.capabilities);
-  
+
   return (
     <>
       {/* using position instead of granular ones 'position-x' */}
