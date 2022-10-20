@@ -5,6 +5,7 @@ import {
   LightProps,
   MeshProps,
   useFrame,
+  useLoader,
   useThree,
 } from '@react-three/fiber';
 import {
@@ -201,6 +202,16 @@ var localUniforms = {
   uPointer: { value: new T.Vector2() },
 };
 
+var textureAssets = [
+  `${baseUrl}/door/color.jpg`,
+  `${baseUrl}/door/alpha.jpg`,
+  `${baseUrl}/door/height.jpg`,
+  `${baseUrl}/door/normal.jpg`,
+  `${baseUrl}/door/ambientOcclusion.jpg`,
+  `${baseUrl}/door/metalness.jpg`,
+  `${baseUrl}/door/roughness.jpg`,
+];
+
 function Cubo(props: BoxProps & MeshProps) {
   const shader = React.useRef<T.MeshStandardMaterial>(null!);
   const customDepth = React.useRef<T.MeshDepthMaterial>(null!);
@@ -266,6 +277,10 @@ function Cubo(props: BoxProps & MeshProps) {
     return api.start({ x: x / aspect, y: -y / aspect });
   });
 
+  const [t1, t2, tH, tNornal, tAO] = useLoader(T.TextureLoader, [
+    ...textureAssets,
+  ]);
+  
   return (
     /* ts-ignore infinity */
     <a.mesh
@@ -285,7 +300,13 @@ function Cubo(props: BoxProps & MeshProps) {
       <boxGeometry args={[1, 1, 1, 64, 64]} />
       {/* 
       // @ts-ignore */}
-      <a.meshStandardMaterial ref={shader} color={colorA} />
+      <a.meshStandardMaterial 
+        ref={shader}
+        map={tH}
+        roughness={0.4}
+        metalness={0.3}
+        color={colorA} 
+      />
       <a.meshDepthMaterial
           ref={customDepth}
           attach="customDepthMaterial"
