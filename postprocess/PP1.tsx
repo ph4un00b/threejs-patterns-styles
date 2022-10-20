@@ -33,7 +33,8 @@ import {
     CollideEvent,
 } from '@react-three/cannon';
 import nice_colors from '../utils/colors';
-import { EffectComposer, DepthOfField, Bloom, Noise, Vignette } from '@react-three/postprocessing'
+import { EffectComposer, DepthOfField, Bloom, Noise, Vignette, DotScreen } from '@react-three/postprocessing'
+import * as PP from 'postprocessing'
 
 var dpr = { min: 1, max: 2 };
 var baseUrl = 'https://ph4un00b.github.io/data';
@@ -103,6 +104,7 @@ export default function () {
                             </group>
 
                             <EffectComposer>
+                                <DotScreen blendFunction={PP.BlendFunction.NORMAL} />
                                 <Cubo castShadow={true} />
                             </EffectComposer>
 
