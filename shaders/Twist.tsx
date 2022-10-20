@@ -282,7 +282,7 @@ function Cubo(props: BoxProps & MeshProps) {
   ]);
 
   return (
-    /* ts-ignore infinity */
+    /* @ts-ignore infinity */
     <a.mesh
       castShadow={true}
       // {...handlers()}
@@ -302,7 +302,10 @@ function Cubo(props: BoxProps & MeshProps) {
       // @ts-ignore */}
       <a.meshStandardMaterial
         ref={shader}
-        map={tH}
+        map={t1}
+        normalMap={tNornal}
+        alphaMap={t2}
+        transparent={!true}
         roughness={0.4}
         metalness={0.3}
         color={colorA}
@@ -318,7 +321,7 @@ function Cubo(props: BoxProps & MeshProps) {
 
 function twistedMaterial(currentShader: T.Material) {
   currentShader.onBeforeCompile = function (shader: T.Shader) {
-    // console.log(shader);
+    console.log(shader);
     shader.uniforms.uTime = localUniforms.uTime;
     shader.uniforms.uleverX = localUniforms.uleverX;
     shader.uniforms.uleverR = localUniforms.uleverR;
@@ -345,17 +348,40 @@ function twistedMaterial(currentShader: T.Material) {
     });
 
     /**
-     * aplicando rotación
-     * @link https://thebookofshaders.com/08/?lan=es
-     */
-    setVertexMain(shader, {
+ * aplicando rotación en los normales
+ * @link https://thebookofshaders.com/08/?lan=es
+ */
+    setInsideVertexMain(shader, {
+      from: '#include <beginnormal_vertex>',
       to: `
-        #include <begin_vertex>
+      #include <beginnormal_vertex>
+      #define FAU_NORMAL
 
         float angle = position.y * uleverX;
         mat2 rotateMat = rotate2D( angle );
 
-        transformed.xz = rotateMat * transformed.xz;
+        objectNormal.xz = rotateMat * objectNormal.xz;
+      `
+    });
+
+    /**
+     * aplicando rotación
+     * @link https://thebookofshaders.com/08/?lan=es
+     */
+    setInsideVertexMain(shader, {
+      from: '#include <begin_vertex>',
+      to: `
+        #include <begin_vertex>
+
+        #ifndef FAU_NORMAL
+          float angle = position.y * uleverX;
+          mat2 rotateMat = rotate2D( angle );
+          transformed.xz = rotateMat * transformed.xz;
+        #endif
+
+        #ifdef FAU_NORMAL
+          transformed.xz = rotateMat * transformed.xz;
+        #endif
       `
     });
   };
@@ -385,8 +411,8 @@ function setFragment(shader: T.Shader) {
       `;
 }
 
-function setVertexMain(shader: T.Shader,
-  { from = '#include <begin_vertex>', to }: { from?: string, to: string }) {
+function setInsideVertexMain(shader: T.Shader,
+  { from, to }: { from: string, to: string }) {
   const newShader = shader.vertexShader.replace(
     /**
      * this is inside void main()
