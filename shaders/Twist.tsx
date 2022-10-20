@@ -280,7 +280,7 @@ function Cubo(props: BoxProps & MeshProps) {
   const [t1, t2, tH, tNornal, tAO] = useLoader(T.TextureLoader, [
     ...textureAssets,
   ]);
-  
+
   return (
     /* ts-ignore infinity */
     <a.mesh
@@ -300,18 +300,18 @@ function Cubo(props: BoxProps & MeshProps) {
       <boxGeometry args={[1, 1, 1, 64, 64]} />
       {/* 
       // @ts-ignore */}
-      <a.meshStandardMaterial 
+      <a.meshStandardMaterial
         ref={shader}
         map={tH}
         roughness={0.4}
         metalness={0.3}
-        color={colorA} 
+        color={colorA}
       />
       <a.meshDepthMaterial
-          ref={customDepth}
-          attach="customDepthMaterial"
-          depthPacking={T.RGBADepthPacking}
-        />
+        ref={customDepth}
+        attach="customDepthMaterial"
+        depthPacking={T.RGBADepthPacking}
+      />
     </a.mesh>
   );
 }
