@@ -13,6 +13,7 @@
     "@react-three/cannon": "^6.4.0",
     "@react-three/drei": "^9.30.3",
     "@react-three/fiber": "^8.7.4",
+    "@react-three/postprocessing": "^2.7.0",
     "@use-gesture/react": "^10.2.20",
     "leva": "^0.9.31",
     "maath": "^0.4.2",
