@@ -43,6 +43,7 @@ import {
   Selection,
   Select,
   Glitch,
+  SMAA,
 } from "@react-three/postprocessing";
 import * as PP from "postprocessing";
 
@@ -68,7 +69,7 @@ export default function () {
   const [{ pp, randomFactors, leverA, leverB, leverC }, set] = useControls(
     () => ({
       pp: {
-        options: ["dots", "glitch", "custom"],
+        options: ["dots", "glitch", "custom", "antialias"],
       },
       randomFactors: [1, 1],
       leverA: { value: 1 },
@@ -142,6 +143,11 @@ export default function () {
                   ) : (
                     <></>
                   )}
+                  {pp == "antialias" ? (
+                    <SMAA/>
+                  ) : (
+                    <></>
+                  )}
                 </EffectComposer>
 
                 <Select enabled={true}>
@@ -199,6 +205,7 @@ class CustomEffect extends PP.Effect {
     _weights = weights;
   }
 
+  // @ts-ignore
   update(renderer, inputBuffer, deltaTime) {
     // @ts-ignore
     this.uniforms.get("weights").value = _weights;
