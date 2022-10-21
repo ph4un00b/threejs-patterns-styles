@@ -45,6 +45,7 @@ import {
   Glitch,
   SMAA,
 } from "@react-three/postprocessing";
+
 import * as PP from "postprocessing";
 
 var dpr = { min: 1, max: 2 };
@@ -66,17 +67,17 @@ export default function () {
     fondo: { value: global.fog },
   });
 
-  const [{ pp, randomFactors, leverA, leverB, leverC }, set] = useControls(
-    () => ({
+  const [{ pp, randomFactors, leverA, leverB, leverC, leverD }, set] =
+    useControls(() => ({
       pp: {
-        options: ["dots", "glitch", "custom", "antialias"],
+        options: ["dots", "glitch", "custom", "antialias", "bloom"],
       },
       randomFactors: [1, 1],
-      leverA: { value: 1 },
-      leverB: { value: 1 },
-      leverC: { value: 1 },
-    })
-  );
+      leverA: { value: 0.5, min: 0.1, step: 0.1, max: 5.0 },
+      leverB: { value: 0.5, min: 0.1, step: 0.1, max: 5.0 },
+      leverC: { value: 0.5, min: 0.1, step: 0.1, max: 5.0 },
+      leverD: { value: 0.5, min: 0.1, step: 0.1, max: 5.0 },
+    }));
 
   return (
     <>
@@ -144,6 +145,24 @@ export default function () {
                     <></>
                   )}
                   {pp == "antialias" ? <SMAA /> : <></>}
+                  {pp == "bloom" ? (
+                    <Bloom
+                      luminanceThreshold={leverA}
+                      luminanceSmoothing={leverB}
+                      mipmapBlur={true}
+                      intensity={leverC}
+                      radius={leverD}
+                      // intensity={1.0} // The bloom intensity.
+                      // blurPass={true} // A blur pass.
+                      // width={PP.Resizer.AUTO_SIZE} // render width
+                      // height={PP.Resizer.AUTO_SIZE} // render height
+                      kernelSize={PP.KernelSize.LARGE} // blur kernel size
+                      // luminanceThreshold={0.9} // luminance threshold. Raise this value to mask out darker elements in the scene.
+                      // luminanceSmoothing={0.025} // smoothness of the luminance threshold. Range is [0, 1]
+                    />
+                  ) : (
+                    <></>
+                  )}
                 </EffectComposer>
 
                 <Select enabled={true}>
