@@ -57,7 +57,7 @@ import {
   MyCustomNormalEffect,
 } from "../effects/primer";
 
-import { Perf } from 'r3f-perf';
+import { Perf } from "r3f-perf";
 
 var dpr = { min: 1, max: 2 };
 var baseUrl = "https://ph4un00b.github.io/data";
@@ -119,6 +119,9 @@ export default function () {
             <Debug color="black" scale={1.1}>
               <group position={[0, 4, 0]}>
                 <Center>
+                  {/*
+                   * optimize castShadow and ReceiveShadow for perf!
+                   */}
                   <Text3D castShadow={true} font={global.font1}>
                     phau!
                     <meshStandardMaterial metalness={0} roughness={0} />
@@ -128,7 +131,7 @@ export default function () {
 
               <PPEffects />
 
-              <TorusKnot  position={[-4,2,0]}>
+              <TorusKnot position={[-4, 2, 0]}>
                 <meshStandardMaterial
                   color={"white"}
                   roughness={0.4}
@@ -136,7 +139,7 @@ export default function () {
                   side={T.DoubleSide}
                 />
               </TorusKnot>
-              
+
               <World items={4} />
             </Debug>
           </Physics>
@@ -147,6 +150,9 @@ export default function () {
           <axesHelper args={[4]} />
           <ambientLight color={ambient} intensity={ambientIntensity} />
           <DirectionalLight
+            /**
+             * optimize castShadow and ReceiveShadow for perf!
+             */
             castShadow={true}
             position={[5, 5, 5]}
             intensity={0.2}
@@ -225,6 +231,9 @@ function PPEffects() {
       </EffectComposer>
 
       <Select enabled={true}>
+        {/**
+         * optimize castShadow and ReceiveShadow for perf!
+         */}
         <Cubo castShadow={true} />
       </Select>
     </Selection>
@@ -289,6 +298,10 @@ function World({ items }: { items: number }) {
   return (
     <>
       {/* using position instead of granular ones 'position-x' */}
+
+      {/**
+       * optimize castShadow and ReceiveShadow for perf!
+       */}
       <Esfera castShadow={true} material={bouncyMat} position={[-2, 5, 0]} />
 
       {/* using rotation instead of granular ones 'rotation-x' */}
@@ -349,7 +362,9 @@ function Esfera({
   });
 
   return (
-    // shall we spread the props again?
+    /**
+     * optimize castShadow and ReceiveShadow for perf!
+     */
     <mesh ref={esfera} castShadow>
       <sphereBufferGeometry args={[1, 32, 32]} />
       <meshStandardMaterial roughness={0.4} metalness={0.3} />
@@ -448,6 +463,9 @@ function Cubo(props: BoxProps & MeshProps) {
   return (
     /* @ts-ignore infinity */
     <a.mesh
+      /**
+       * optimize castShadow and ReceiveShadow for perf!
+       */
       castShadow={true}
       // {...handlers()}
       {...props}
@@ -588,9 +606,19 @@ function setBeforeVertex(
 }
 
 /** suports shadows! */
+/**
+ * use cheap lights for perf!:
+ * AmbientLight
+ * DirectionalLight
+ * HemisphereLight
+ */
 function DirectionalLight(props: LightProps) {
   const light = React.useRef<T.DirectionalLight>(null!);
   const camera = React.useRef<T.OrthographicCamera>(null!);
+
+  /**
+   * optimize shadows Map for perf!
+   */
   useHelper(light, T.DirectionalLightHelper, 0.5);
   useHelper(camera, T.CameraHelper);
 
@@ -609,7 +637,10 @@ function DirectionalLight(props: LightProps) {
     <directionalLight
       {...props}
       ref={light}
-      // power of 2 due to bitmapping
+      /**
+       * use the smallest mapSize possible for perf!
+       * use power of 2 due to bitmapping issues!
+       */
       shadow-mapSize-width={1024}
       shadow-mapSize-height={1024}
       shadow-camera-far={15}
