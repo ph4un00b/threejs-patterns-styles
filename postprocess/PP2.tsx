@@ -343,7 +343,7 @@ class CustomNormalEffect extends PP.Effect {
 
               vec4 color = texture2D(
                 inputBuffer,
-                uv + normalColor.xy
+                uv + normalColor.xy * 0.03
               );
 
     	        outputColor = color;
