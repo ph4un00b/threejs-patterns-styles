@@ -180,6 +180,7 @@ function PPEffects() {
         {pp == "antialias" ? <SMAA /> : <></>}
         {pp == "tint" ? <MyCustomTintPurpleEffect /> : <></>}
         {pp == "sin" ? <MyCustomSinEffect /> : <></>}
+        {pp == "normal" ?  <MyCustomNormalEffect normalMap={normal} /> : <></>}
         {pp == "bloom" ? (
           <Bloom
             luminanceThreshold={leverA}
@@ -198,7 +199,6 @@ function PPEffects() {
         ) : (
           <></>
         )}
-        <MyCustomNormalEffect normalMap={normal} />
       </EffectComposer>
 
       <Select enabled={true}>
