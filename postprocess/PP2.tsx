@@ -70,7 +70,7 @@ export default function () {
   const [{ pp, randomFactors, leverA, leverB, leverC, leverD }, set] =
     useControls(() => ({
       pp: {
-        options: ["dots", "glitch", "custom", "antialias", "bloom"],
+        options: ["dots", "glitch", "custom", "antialias", "bloom", "tint"],
       },
       randomFactors: [1, 1],
       leverA: { value: 0.5, min: 0.1, step: 0.1, max: 5.0 },
@@ -145,6 +145,11 @@ export default function () {
                     <></>
                   )}
                   {pp == "antialias" ? <SMAA /> : <></>}
+                  {pp == "tint" ? (
+                    <MyCustomTintPurpleEffect wx={0} wy={0} wz={0} />
+                  ) : (
+                    <></>
+                  )}
                   {pp == "bloom" ? (
                     <Bloom
                       luminanceThreshold={leverA}
@@ -230,6 +235,56 @@ var MyCustomEffect = React.forwardRef(
   ({ wx, wy, wz }: { wx: number; wy: number; wz: number }, ref) => {
     const effect = React.useMemo(
       () => new CustomEffect({ weights: [wx, wy, wz] }),
+      [wx, wy, wz]
+    );
+    return <primitive ref={ref} object={effect} />;
+  }
+);
+
+let _weights2: any;
+
+class CustomTintPurpleEffect extends PP.Effect {
+  constructor({ weights = [1, 1, 1] }: { weights: T.Vector3Tuple }) {
+    const frag = `
+        // prev pass texture in the webgl render target
+        // uniform sampler2D tDiffuse;
+        // this is equivalent to inputColor below
+
+        void mainImage(const in vec4 inputColor
+            , const in vec2 uv
+            , out vec4 outputColor) 
+            {
+              vec4 color = texture2D(
+                inputBuffer,
+                uv
+              );
+
+              color.r += 0.1;
+              color.b += 0.1;
+    	        outputColor = color;
+            }
+    `;
+
+    super("CustomTintPurpleEffect", frag, {
+      blendFunction: PP.BlendFunction.NORMAL,
+      uniforms: new Map([["weights", new T.Uniform(weights)]]),
+    });
+
+    _weights2 = weights;
+  }
+
+  // @ts-ignore
+  update(renderer, inputBuffer, deltaTime) {
+    // @ts-ignore
+    this.uniforms.get("weights").value = _weights2;
+  }
+}
+
+// Effect component
+var MyCustomTintPurpleEffect = React.forwardRef(
+  ({ wx, wy, wz }: { wx: number; wy: number; wz: number }, ref) => {
+    const effect = React.useMemo(
+      () => new CustomTintPurpleEffect({ weights: [wx, wy, wz] }),
       [wx, wy, wz]
     );
     return <primitive ref={ref} object={effect} />;
