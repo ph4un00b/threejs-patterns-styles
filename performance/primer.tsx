@@ -57,6 +57,8 @@ import {
   MyCustomNormalEffect,
 } from "../effects/primer";
 
+import { Perf } from 'r3f-perf';
+
 var dpr = { min: 1, max: 2 };
 var baseUrl = "https://ph4un00b.github.io/data";
 var global = {
@@ -141,6 +143,7 @@ export default function () {
 
           <Stats showPanel={0} />
           {/* <Stats showPanel={1} /> */}
+          <Perf />
           <axesHelper args={[4]} />
           <ambientLight color={ambient} intensity={ambientIntensity} />
           <DirectionalLight
