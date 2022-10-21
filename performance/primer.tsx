@@ -69,7 +69,11 @@ var global = {
   font1: `${baseUrl}/typeface/press-start-2p.json`,
 };
 
-/** FREE! @link https://kenney.nl/assets */
+/**
+ * @link https://discoverthreejs.com/tips-and-tricks/
+ * @link FREE! @link https://kenney.nl/assets
+ */
+
 export default function () {
   const { cw, ch } = useCanvas();
   const cam_ = React.useRef(null);
@@ -616,9 +620,9 @@ function twistedMaterial(currentShader: T.Material) {
    * try to do computation on the vertex side
    * since it is lesser vertex
    * than in fragment side fro perf!
-   * 
+   *
    * then pass the data as varyings!
-   * @param shader 
+   * @param shader
    */
   currentShader.onBeforeCompile = function (shader: T.Shader) {
     console.log(shader);
