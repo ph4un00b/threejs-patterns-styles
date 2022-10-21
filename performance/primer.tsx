@@ -58,6 +58,7 @@ import {
 } from "../effects/primer";
 
 import { Perf } from "r3f-perf";
+import { mergeBufferGeometries } from "three-stdlib";
 
 var dpr = { min: 1, max: 2 };
 var baseUrl = "https://ph4un00b.github.io/data";
@@ -152,6 +153,7 @@ export default function () {
             </Debug>
           </Physics>
 
+          <PermormantCubes />
           <Stats showPanel={0} />
           {/* <Stats showPanel={1} /> */}
           <Perf />
@@ -170,6 +172,32 @@ export default function () {
         </Canvas>
       </section>
     </>
+  );
+}
+
+function PermormantCubes() {
+  const geometry = React.useMemo(() => {
+    const geo = Array.from({ length: 50 }, () => {
+      // @ts-ignore
+      const geometry = new T.BoxBufferGeometry(0.5, 0.5, 0.5);
+      geometry.rotateY((Math.random() - 0.5) * Math.PI * 2);
+      geometry.rotateX((Math.random() - 0.5) * Math.PI * 2);
+      geometry.translate(
+        (Math.random() - 0.5) * 10,
+        (Math.random() - 0.5) * 10,
+        (Math.random() - 0.5) * 10
+      );
+      return geometry;
+    });
+
+    const mergedGeometry = mergeBufferGeometries(geo);
+    return mergedGeometry as T.BufferGeometry;
+  }, []);
+
+  return (
+    <mesh args={[geometry]}>
+      <meshNormalMaterial />
+    </mesh>
   );
 }
 
