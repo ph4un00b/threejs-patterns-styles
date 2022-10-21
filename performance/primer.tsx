@@ -153,7 +153,7 @@ export default function () {
             </Debug>
           </Physics>
 
-          <PermormantCubes />
+          <MergedCubes />
           <Stats showPanel={0} />
           {/* <Stats showPanel={1} /> */}
           <Perf />
@@ -175,7 +175,7 @@ export default function () {
   );
 }
 
-function PermormantCubes() {
+function MergedCubes() {
   const geometry = React.useMemo(() => {
     const geo = Array.from({ length: 50 }, () => {
       // @ts-ignore
@@ -190,12 +190,22 @@ function PermormantCubes() {
       return geometry;
     });
 
+    /**
+     * by merging then we cannot
+     * move a cube individually.
+     */
     const mergedGeometry = mergeBufferGeometries(geo);
     return mergedGeometry as T.BufferGeometry;
   }, []);
 
   return (
     <mesh args={[geometry]}>
+      {/**
+       * cheap materials:
+       * - meshBasicMaterial
+       * - meshLambertMaterial
+       * - meshPhongMaterial
+       */}
       <meshNormalMaterial />
     </mesh>
   );
