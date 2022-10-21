@@ -15,6 +15,7 @@ import {
   Center,
   Text3D,
   useHelper,
+  useTexture,
 } from "@react-three/drei/core";
 import { proxy, useSnapshot } from "valtio";
 import { useControls, set } from "leva";
@@ -67,18 +68,6 @@ export default function () {
     fondo: { value: global.fog },
   });
 
-  const [{ pp, randomFactors, leverA, leverB, leverC, leverD }, set] =
-    useControls(() => ({
-      pp: {
-        options: ["dots", "glitch", "custom", "antialias", "bloom", "tint"],
-      },
-      randomFactors: [1, 1],
-      leverA: { value: 0.5, min: 0.1, step: 0.1, max: 5.0 },
-      leverB: { value: 0.5, min: 0.1, step: 0.1, max: 5.0 },
-      leverC: { value: 0.5, min: 0.1, step: 0.1, max: 5.0 },
-      leverD: { value: 0.5, min: 0.1, step: 0.1, max: 5.0 },
-    }));
-
   return (
     <>
       <section>
@@ -127,51 +116,7 @@ export default function () {
                 </Center>
               </group>
 
-              <Selection>
-                <EffectComposer>
-                  {pp == "dots" ? (
-                    <DotScreen blendFunction={PP.BlendFunction.NORMAL} />
-                  ) : (
-                    <></>
-                  )}
-                  {pp == "glitch" ? (
-                    <Glitch active={true} mode={PP.GlitchMode.SPORADIC} />
-                  ) : (
-                    <></>
-                  )}
-                  {pp == "custom" ? (
-                    <MyCustomEffect wx={leverA} wy={leverB} wz={leverC} />
-                  ) : (
-                    <></>
-                  )}
-                  {pp == "antialias" ? <SMAA /> : <></>}
-                  {pp == "tint" ? <MyCustomTintPurpleEffect /> : <></>}
-                  {pp == "bloom" ? (
-                    <Bloom
-                      luminanceThreshold={leverA}
-                      luminanceSmoothing={leverB}
-                      mipmapBlur={true}
-                      intensity={leverC}
-                      radius={leverD}
-                      // intensity={1.0} // The bloom intensity.
-                      // blurPass={true} // A blur pass.
-                      // width={PP.Resizer.AUTO_SIZE} // render width
-                      // height={PP.Resizer.AUTO_SIZE} // render height
-                      kernelSize={PP.KernelSize.LARGE} // blur kernel size
-                      // luminanceThreshold={0.9} // luminance threshold. Raise this value to mask out darker elements in the scene.
-                      // luminanceSmoothing={0.025} // smoothness of the luminance threshold. Range is [0, 1]
-                    />
-                  ) : (
-                    <></>
-                  )}
-                  <MyCustomSinEffect />
-                </EffectComposer>
-
-                <Select enabled={true}>
-                  <Cubo castShadow={true} />
-                </Select>
-              </Selection>
-
+              <PPEffects />
               <World items={4} />
             </Debug>
           </Physics>
@@ -191,6 +136,77 @@ export default function () {
   );
 }
 
+function PPEffects() {
+  const [{ pp, randomFactors, leverA, leverB, leverC, leverD }, set] =
+    useControls(() => ({
+      pp: {
+        options: [
+          "dots",
+          "glitch",
+          "custom",
+          "antialias",
+          "bloom",
+          "tint",
+          "sin",
+          "normal",
+        ],
+      },
+      randomFactors: [1, 1],
+      leverA: { value: 0.5, min: 0.1, step: 0.1, max: 5.0 },
+      leverB: { value: 0.5, min: 0.1, step: 0.1, max: 5.0 },
+      leverC: { value: 0.5, min: 0.1, step: 0.1, max: 5.0 },
+      leverD: { value: 0.5, min: 0.1, step: 0.1, max: 5.0 },
+    }));
+
+  const { normal } = useTexture({ normal: "/public/NormalMap.png" });
+  return (
+    <Selection>
+      <EffectComposer>
+        {pp == "dots" ? (
+          <DotScreen blendFunction={PP.BlendFunction.NORMAL} />
+        ) : (
+          <></>
+        )}
+        {pp == "glitch" ? (
+          <Glitch active={true} mode={PP.GlitchMode.SPORADIC} />
+        ) : (
+          <></>
+        )}
+        {pp == "custom" ? (
+          <MyCustomEffect wx={leverA} wy={leverB} wz={leverC} />
+        ) : (
+          <></>
+        )}
+        {pp == "antialias" ? <SMAA /> : <></>}
+        {pp == "tint" ? <MyCustomTintPurpleEffect /> : <></>}
+        {pp == "sin" ? <MyCustomSinEffect /> : <></>}
+        {pp == "bloom" ? (
+          <Bloom
+            luminanceThreshold={leverA}
+            luminanceSmoothing={leverB}
+            mipmapBlur={true}
+            intensity={leverC}
+            radius={leverD}
+            // intensity={1.0} // The bloom intensity.
+            // blurPass={true} // A blur pass.
+            // width={PP.Resizer.AUTO_SIZE} // render width
+            // height={PP.Resizer.AUTO_SIZE} // render height
+            kernelSize={PP.KernelSize.LARGE} // blur kernel size
+            // luminanceThreshold={0.9} // luminance threshold. Raise this value to mask out darker elements in the scene.
+            // luminanceSmoothing={0.025} // smoothness of the luminance threshold. Range is [0, 1]
+          />
+        ) : (
+          <></>
+        )}
+        <MyCustomNormalEffect normalMap={normal} />
+      </EffectComposer>
+
+      <Select enabled={true}>
+        <Cubo castShadow={true} />
+      </Select>
+    </Selection>
+  );
+}
 let _weights: any;
 
 class CustomEffect extends PP.Effect {
@@ -308,6 +324,57 @@ var MyCustomSinEffect = React.forwardRef(({}, ref) => {
   const effect = React.useMemo(() => new CustomSinEffect(), []);
   return <primitive ref={ref} object={effect} />;
 });
+
+let _normalMap: any;
+class CustomNormalEffect extends PP.Effect {
+  constructor({ normalMap }: { normalMap: T.Texture }) {
+    const frag = `
+        uniform sampler2D u_normalMap;
+
+        void mainImage(const in vec4 inputColor
+            , const in vec2 uv
+            , out vec4 outputColor) 
+            {
+              // remapping -1, 1
+              vec3 normalColor = texture2D(
+                u_normalMap,
+                uv
+              ).xyz * 2.0 - 1.0;
+
+              vec4 color = texture2D(
+                inputBuffer,
+                uv + normalColor.xy
+              );
+
+    	        outputColor = color;
+            }
+    `;
+
+    super("CustomNormalEffect", frag, {
+      blendFunction: PP.BlendFunction.NORMAL,
+      uniforms: new Map([["u_normalMap", new T.Uniform(normalMap)]]),
+    });
+
+    _normalMap = normalMap;
+  }
+
+  // @ts-ignore
+  update(renderer, inputBuffer, deltaTime) {
+    // @ts-ignore
+    this.uniforms.get("u_normalMap").value = _normalMap;
+  }
+}
+
+// Effect component
+var MyCustomNormalEffect = React.forwardRef(
+  ({ normalMap }: { normalMap: T.Texture }, ref) => {
+    const effect = React.useMemo(
+      () => new CustomNormalEffect({ normalMap }),
+      [normalMap]
+    );
+    return <primitive ref={ref} object={effect} />;
+  }
+);
 
 var hitSound = new window.Audio(`${baseUrl}/sounds/hit.mp3`);
 
