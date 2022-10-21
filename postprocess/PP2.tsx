@@ -145,11 +145,7 @@ export default function () {
                     <></>
                   )}
                   {pp == "antialias" ? <SMAA /> : <></>}
-                  {pp == "tint" ? (
-                    <MyCustomTintPurpleEffect />
-                  ) : (
-                    <></>
-                  )}
+                  {pp == "tint" ? <MyCustomTintPurpleEffect /> : <></>}
                   {pp == "bloom" ? (
                     <Bloom
                       luminanceThreshold={leverA}
@@ -168,6 +164,7 @@ export default function () {
                   ) : (
                     <></>
                   )}
+                  <MyCustomSinEffect />
                 </EffectComposer>
 
                 <Select enabled={true}>
@@ -266,27 +263,51 @@ class CustomTintPurpleEffect extends PP.Effect {
     `;
 
     super("CustomTintPurpleEffect", frag, {
-      blendFunction: PP.BlendFunction.NORMAL
+      blendFunction: PP.BlendFunction.NORMAL,
     });
   }
 
   // @ts-ignore
   update(renderer, inputBuffer, deltaTime) {
     // @ts-ignore
-    this.uniforms.get("weights").value = _weights2;
+    // this.uniforms.get("weights").value = _weights2;
   }
 }
 
 // Effect component
-var MyCustomTintPurpleEffect = React.forwardRef(
-  ({}, ref) => {
-    const effect = React.useMemo(
-      () => new CustomTintPurpleEffect(),
-      []
-    );
-    return <primitive ref={ref} object={effect} />;
+var MyCustomTintPurpleEffect = React.forwardRef(({}, ref) => {
+  const effect = React.useMemo(() => new CustomTintPurpleEffect(), []);
+  return <primitive ref={ref} object={effect} />;
+});
+
+class CustomSinEffect extends PP.Effect {
+  constructor() {
+    const frag = `
+        void mainUv(inout vec2 uv) {
+          uv = vec2(
+                uv.x,
+                uv.y + abs(sin(uv.x * time)) * .1
+              );
+        }
+    `;
+
+    super("CustomSinEffect", frag, {
+      blendFunction: PP.BlendFunction.NORMAL,
+    });
   }
-);
+
+  // @ts-ignore
+  update(renderer, inputBuffer, deltaTime) {
+    // @ts-ignore
+    // this.uniforms.get("weights").value = _weights2;
+  }
+}
+
+// Effect component
+var MyCustomSinEffect = React.forwardRef(({}, ref) => {
+  const effect = React.useMemo(() => new CustomSinEffect(), []);
+  return <primitive ref={ref} object={effect} />;
+});
 
 var hitSound = new window.Audio(`${baseUrl}/sounds/hit.mp3`);
 
