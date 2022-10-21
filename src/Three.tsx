@@ -1,5 +1,5 @@
-import * as T from 'three';
-import * as React from 'react';
+import * as T from "three";
+import * as React from "react";
 import {
   Canvas,
   LightProps,
@@ -7,7 +7,7 @@ import {
   useFrame,
   useLoader,
   useThree,
-} from '@react-three/fiber';
+} from "@react-three/fiber";
 import {
   OrbitControls,
   PerspectiveCamera,
@@ -15,11 +15,12 @@ import {
   Center,
   Text3D,
   useHelper,
-} from '@react-three/drei/core';
-import { proxy, useSnapshot } from 'valtio';
-import { useControls } from 'leva';
-import { useSpring, config, a } from '@react-spring/three';
-import { useDrag } from '@use-gesture/react';
+  useTexture,
+} from "@react-three/drei/core";
+import { proxy, useSnapshot } from "valtio";
+import { useControls } from "leva";
+import { useSpring, config, a } from "@react-spring/three";
+import { useDrag } from "@use-gesture/react";
 import {
   Debug,
   Physics,
@@ -31,15 +32,35 @@ import {
   useBox,
   BoxProps,
   CollideEvent,
-} from '@react-three/cannon';
-import nice_colors from '../utils/colors';
+} from "@react-three/cannon";
+import nice_colors from "../utils/colors";
+import {
+  EffectComposer,
+  DepthOfField,
+  Bloom,
+  Noise,
+  Vignette,
+  DotScreen,
+  Selection,
+  Select,
+  Glitch,
+  SMAA,
+} from "@react-three/postprocessing";
+
+import * as PP from "postprocessing";
+import {
+  MyCustomEffect,
+  MyCustomTintPurpleEffect,
+  MyCustomSinEffect,
+  MyCustomNormalEffect,
+} from "../effects/primer";
 
 var dpr = { min: 1, max: 2 };
-var baseUrl = 'https://ph4un00b.github.io/data';
+var baseUrl = "https://ph4un00b.github.io/data";
 var global = {
-  bg: 'red',
-  fog: '#262837',
-  mat: '#e83abf',
+  bg: "red",
+  fog: "#262837",
+  mat: "#e83abf",
   font1: `${baseUrl}/typeface/press-start-2p.json`,
 };
 
@@ -49,7 +70,7 @@ export default function () {
   const cam_ = React.useRef(null);
   const { fondo, ambientIntensity, ambient } = useControls({
     ambientIntensity: { value: 0.3, min: 0, max: 1, step: 0.001 },
-    ambient: { value: '#ffffff' },
+    ambient: { value: "#ffffff" },
     fondo: { value: global.fog },
   });
 
@@ -60,8 +81,8 @@ export default function () {
           shadows={true} /** enable shadowMap */
           dpr={[dpr.min, dpr.max]}
           style={{
-            width: cw + 'px',
-            height: ch + 'px',
+            width: cw + "px",
+            height: ch + "px",
             backgroundColor: fondo,
           }}
         >
@@ -87,7 +108,7 @@ export default function () {
              * if your objects are not traveling too fast
              * - NaiveBroadphase
              *  */
-            broadphase={'SAP'}
+            broadphase={"SAP"}
             /** does not update quiet objects */
             allowSleep={true}
           >
@@ -101,7 +122,7 @@ export default function () {
                 </Center>
               </group>
 
-              <Cubo castShadow={true} />
+              <PPEffects />
               <World items={4} />
             </Debug>
           </Physics>
@@ -118,6 +139,78 @@ export default function () {
         </Canvas>
       </section>
     </>
+  );
+}
+
+function PPEffects() {
+  const [{ pp, randomFactors, leverA, leverB, leverC, leverD }, set] =
+    useControls(() => ({
+      pp: {
+        options: [
+          "bloom",
+          "glitch",
+          "custom",
+          "antialias",
+          "dots",
+          "tint",
+          "sin",
+          "normal",
+        ],
+      },
+      randomFactors: [1, 1],
+      leverA: { value: 0.5, min: 0.1, step: 0.1, max: 5.0 },
+      leverB: { value: 0.5, min: 0.1, step: 0.1, max: 5.0 },
+      leverC: { value: 0.5, min: 0.1, step: 0.1, max: 5.0 },
+      leverD: { value: 0.5, min: 0.1, step: 0.1, max: 5.0 },
+    }));
+
+  const { normal } = useTexture({ normal: "/public/NormalMap.png" });
+  return (
+    <Selection>
+      <EffectComposer>
+        {pp == "dots" ? (
+          <DotScreen blendFunction={PP.BlendFunction.NORMAL} />
+        ) : (
+          <></>
+        )}
+        {pp == "glitch" ? (
+          <Glitch active={true} mode={PP.GlitchMode.SPORADIC} />
+        ) : (
+          <></>
+        )}
+        {pp == "custom" ? (
+          <MyCustomEffect wx={leverA} wy={leverB} wz={leverC} />
+        ) : (
+          <></>
+        )}
+        {pp == "antialias" ? <SMAA /> : <></>}
+        {pp == "tint" ? <MyCustomTintPurpleEffect /> : <></>}
+        {pp == "sin" ? <MyCustomSinEffect /> : <></>}
+        {pp == "normal" ? <MyCustomNormalEffect normalMap={normal} /> : <></>}
+        {pp == "bloom" ? (
+          <Bloom
+            luminanceThreshold={leverA}
+            luminanceSmoothing={leverB}
+            mipmapBlur={true}
+            intensity={leverC}
+            radius={leverD}
+            // intensity={1.0} // The bloom intensity.
+            // blurPass={true} // A blur pass.
+            // width={PP.Resizer.AUTO_SIZE} // render width
+            // height={PP.Resizer.AUTO_SIZE} // render height
+            kernelSize={PP.KernelSize.LARGE} // blur kernel size
+            // luminanceThreshold={0.9} // luminance threshold. Raise this value to mask out darker elements in the scene.
+            // luminanceSmoothing={0.025} // smoothness of the luminance threshold. Range is [0, 1]
+          />
+        ) : (
+          <></>
+        )}
+      </EffectComposer>
+
+      <Select enabled={true}>
+        <Cubo castShadow={true} />
+      </Select>
+    </Selection>
   );
 }
 
@@ -148,11 +241,11 @@ function World({ items }: { items: number }) {
   const [preset] = React.useState(Math.floor(Math.random() * 900));
 
   const bouncyMat = {
-    name: 'plastic',
+    name: "plastic",
   } as MaterialOptions;
 
   const groundMat = {
-    name: 'concreto',
+    name: "concreto",
   } as MaterialOptions;
 
   useContactMaterial(groundMat, bouncyMat, {
@@ -171,6 +264,10 @@ function World({ items }: { items: number }) {
     }
     return array;
   }, [items]);
+
+  const { gl } = useThree();
+  // @link https://github.com/pmndrs/react-three-fiber/discussions/2494
+  console.log(gl.capabilities);
 
   return (
     <>
@@ -200,7 +297,7 @@ function Piso({
     <mesh ref={piso} receiveShadow>
       <planeBufferGeometry args={[16, 16]} />
       <meshStandardMaterial
-        color={'#777777'}
+        color={"#777777"}
         roughness={0.4}
         metalness={0.3}
         side={T.DoubleSide}
@@ -307,7 +404,7 @@ function Cubo(props: BoxProps & MeshProps) {
   });
   const { scale } = useSpring({ scale: active ? 4 : 1 });
   const { rotation } = useSpring({ rotation: active ? Math.PI : 0 });
-  const { colorA } = useSpring({ colorA: active ? 'royalblue' : '#e83abf' });
+  const { colorA } = useSpring({ colorA: active ? "royalblue" : "#e83abf" });
   /** interpolate values from common spring */
   // const { spring } = useSpring({
   //   spring: active,
@@ -380,9 +477,8 @@ function twistedMaterial(currentShader: T.Material) {
     shader.uniforms.uResolution = localUniforms.uResolution;
     shader.uniforms.uPointer = localUniforms.uPointer;
 
-
     setBeforeVertex(shader, {
-      from: '#include <common>',
+      from: "#include <common>",
       to: `
         #include <common>
 
@@ -395,15 +491,15 @@ function twistedMaterial(currentShader: T.Material) {
             sin( _angle ), + cos( _angle )
             );
         }
-      `
+      `,
     });
 
     /**
- * aplicando rotación en los normales
- * @link https://thebookofshaders.com/08/?lan=es
- */
+     * aplicando rotación en los normales
+     * @link https://thebookofshaders.com/08/?lan=es
+     */
     setInsideVertexMain(shader, {
-      from: '#include <beginnormal_vertex>',
+      from: "#include <beginnormal_vertex>",
       to: `
       #include <beginnormal_vertex>
       #define FAU_NORMAL
@@ -412,7 +508,7 @@ function twistedMaterial(currentShader: T.Material) {
         mat2 rotateMat = rotate2D( angle );
 
         objectNormal.xz = rotateMat * objectNormal.xz;
-      `
+      `,
     });
 
     /**
@@ -420,7 +516,7 @@ function twistedMaterial(currentShader: T.Material) {
      * @link https://thebookofshaders.com/08/?lan=es
      */
     setInsideVertexMain(shader, {
-      from: '#include <begin_vertex>',
+      from: "#include <begin_vertex>",
       to: `
         #include <begin_vertex>
 
@@ -433,36 +529,42 @@ function twistedMaterial(currentShader: T.Material) {
         #ifdef FAU_NORMAL
           transformed.xz = rotateMat * transformed.xz;
         #endif
-      `
+      `,
     });
   };
 }
 
-function setInsideVertexMain(shader: T.Shader,
-  { from, to }: { from: string, to: string }) {
+function setInsideVertexMain(
+  shader: T.Shader,
+  { from, to }: { from: string; to: string }
+) {
   const newShader = shader.vertexShader.replace(
     /**
      * this is inside void main()
      */
-    from, to
+    from,
+    to
   );
 
   shader.vertexShader = newShader;
 }
 
-function setBeforeVertex(shader: T.Shader,
-  { from, to }: { from: string, to: string }) {
+function setBeforeVertex(
+  shader: T.Shader,
+  { from, to }: { from: string; to: string }
+) {
   /**
- * dir: /src/renderers/shaders
- *
- * @link https://github.com/mrdoob/three.js/blob/master/src/renderers/shaders/ShaderLib/meshphysical.glsl.js
- */
+   * dir: /src/renderers/shaders
+   *
+   * @link https://github.com/mrdoob/three.js/blob/master/src/renderers/shaders/ShaderLib/meshphysical.glsl.js
+   */
 
   const newShaderCommon = shader.vertexShader.replace(
     /**
      * this code is setup before void main()
      */
-    from, to
+    from,
+    to
   );
 
   shader.vertexShader = newShaderCommon;
@@ -536,15 +638,15 @@ function useCanvas() {
   return { cw: snap.w, ch: snap.h } as const;
 }
 
-window.addEventListener('resize', () => {
+window.addEventListener("resize", () => {
   CanvasProxy.w = window.innerWidth;
   CanvasProxy.h = window.innerHeight;
 });
 
-window.addEventListener('dblclick', () => {
+window.addEventListener("dblclick", () => {
   // todo: verify on safari!
   if (!document.fullscreenElement) {
-    document.querySelector('canvas')!.requestFullscreen();
+    document.querySelector("canvas")!.requestFullscreen();
   } else {
     document.exitFullscreen();
   }
