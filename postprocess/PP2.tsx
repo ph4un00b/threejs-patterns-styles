@@ -247,6 +247,8 @@ class CustomTintPurpleEffect extends PP.Effect {
         // prev pass texture in the webgl render target
         // uniform sampler2D tDiffuse;
         // this is equivalent to inputColor below
+        // or
+        // inputBuffer?
 
         void mainImage(const in vec4 inputColor
             , const in vec2 uv
