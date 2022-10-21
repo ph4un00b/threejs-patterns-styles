@@ -16,6 +16,7 @@ import {
   Text3D,
   useHelper,
   useTexture,
+  TorusKnot,
 } from "@react-three/drei/core";
 import { proxy, useSnapshot } from "valtio";
 import { useControls } from "leva";
@@ -123,6 +124,16 @@ export default function () {
               </group>
 
               <PPEffects />
+
+              <TorusKnot  position={[-4,2,0]}>
+                <meshStandardMaterial
+                  color={"white"}
+                  roughness={0.4}
+                  metalness={0.3}
+                  side={T.DoubleSide}
+                />
+              </TorusKnot>
+              
               <World items={4} />
             </Debug>
           </Physics>
@@ -651,4 +662,3 @@ window.addEventListener("dblclick", () => {
     document.exitFullscreen();
   }
 });
-
