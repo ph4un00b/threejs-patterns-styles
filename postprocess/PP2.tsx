@@ -18,7 +18,7 @@ import {
   useTexture,
 } from "@react-three/drei/core";
 import { proxy, useSnapshot } from "valtio";
-import { useControls, set } from "leva";
+import { useControls } from "leva";
 import { useSpring, config, a } from "@react-spring/three";
 import { useDrag } from "@use-gesture/react";
 import {
@@ -48,6 +48,12 @@ import {
 } from "@react-three/postprocessing";
 
 import * as PP from "postprocessing";
+import {
+  MyCustomEffect,
+  MyCustomTintPurpleEffect,
+  MyCustomSinEffect,
+  MyCustomNormalEffect,
+} from "../effects/primer";
 
 var dpr = { min: 1, max: 2 };
 var baseUrl = "https://ph4un00b.github.io/data";
@@ -180,7 +186,7 @@ function PPEffects() {
         {pp == "antialias" ? <SMAA /> : <></>}
         {pp == "tint" ? <MyCustomTintPurpleEffect /> : <></>}
         {pp == "sin" ? <MyCustomSinEffect /> : <></>}
-        {pp == "normal" ?  <MyCustomNormalEffect normalMap={normal} /> : <></>}
+        {pp == "normal" ? <MyCustomNormalEffect normalMap={normal} /> : <></>}
         {pp == "bloom" ? (
           <Bloom
             luminanceThreshold={leverA}
@@ -207,7 +213,6 @@ function PPEffects() {
     </Selection>
   );
 }
-
 
 var hitSound = new window.Audio(`${baseUrl}/sounds/hit.mp3`);
 
