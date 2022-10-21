@@ -153,7 +153,9 @@ export default function () {
             </Debug>
           </Physics>
 
-          <MergedCubes />
+          <MergedGeometries />
+          <InstancedGeometries />
+
           <Stats showPanel={0} />
           {/* <Stats showPanel={1} /> */}
           <Perf />
@@ -175,7 +177,65 @@ export default function () {
   );
 }
 
-function MergedCubes() {
+// const o = new T.Object3D();
+function InstancedGeometries() {
+  const mesh = React.useRef<T.InstancedMesh>(null!);
+
+  React.useLayoutEffect(() => {
+    let i = 0;
+    for (let x = 0; x < 50; x++) {
+      const position = new T.Vector3(
+        (Math.random() - 0.5) * 20,
+        (Math.random() - 0.5) * 20,
+        (Math.random() - 0.5) * 20
+      );
+      const quaternion = new T.Quaternion();
+      quaternion.setFromEuler(
+        new T.Euler(
+          (Math.random() - 0.5) * Math.PI * 2,
+          (Math.random() - 0.5) * Math.PI * 2,
+          0
+        )
+      );
+      const id = i++;
+      // o.updateMatrix()
+      const mat4 = new T.Matrix4();
+      mat4.makeRotationFromQuaternion;
+      // mesh.current.setMatrixAt(id, o.matrix)
+      mat4.setPosition(position);
+      // o.position.set(
+      //   (Math.random() - 0.5) * 20,
+      //   (Math.random() - 0.5) * 20,
+      //   (Math.random() - 0.5) * 20
+      // );
+      mesh.current.setMatrixAt(id, mat4);
+    }
+    mesh.current.instanceMatrix.setUsage(T.DynamicDrawUsage);
+    // mesh.current.instanceMatrix.needsUpdate = true;
+  }, []);
+
+  return (
+    <instancedMesh ref={mesh} args={[undefined, undefined, 50]}>
+      {/* <instancedBufferAttribute
+          attach="instanceMatrix"
+          // count={matrices.length / 16}
+          // array={matrices}
+          // itemSize={16}
+          usage={T.DynamicDrawUsage}
+        /> */}
+      <dodecahedronBufferGeometry args={[1, 0]} />
+      {/**
+       * cheap materials:
+       * - meshBasicMaterial
+       * - meshLambertMaterial
+       * - meshPhongMaterial
+       */}
+      <meshPhongMaterial color="pink" />
+    </instancedMesh>
+  );
+}
+
+function MergedGeometries() {
   const geometry = React.useMemo(() => {
     const geo = Array.from({ length: 50 }, () => {
       // @ts-ignore
