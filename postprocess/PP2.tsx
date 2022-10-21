@@ -146,7 +146,7 @@ export default function () {
                   )}
                   {pp == "antialias" ? <SMAA /> : <></>}
                   {pp == "tint" ? (
-                    <MyCustomTintPurpleEffect wx={0} wy={0} wz={0} />
+                    <MyCustomTintPurpleEffect />
                   ) : (
                     <></>
                   )}
@@ -241,10 +241,8 @@ var MyCustomEffect = React.forwardRef(
   }
 );
 
-let _weights2: any;
-
 class CustomTintPurpleEffect extends PP.Effect {
-  constructor({ weights = [1, 1, 1] }: { weights: T.Vector3Tuple }) {
+  constructor() {
     const frag = `
         // prev pass texture in the webgl render target
         // uniform sampler2D tDiffuse;
@@ -266,11 +264,8 @@ class CustomTintPurpleEffect extends PP.Effect {
     `;
 
     super("CustomTintPurpleEffect", frag, {
-      blendFunction: PP.BlendFunction.NORMAL,
-      uniforms: new Map([["weights", new T.Uniform(weights)]]),
+      blendFunction: PP.BlendFunction.NORMAL
     });
-
-    _weights2 = weights;
   }
 
   // @ts-ignore
@@ -282,10 +277,10 @@ class CustomTintPurpleEffect extends PP.Effect {
 
 // Effect component
 var MyCustomTintPurpleEffect = React.forwardRef(
-  ({ wx, wy, wz }: { wx: number; wy: number; wz: number }, ref) => {
+  ({}, ref) => {
     const effect = React.useMemo(
-      () => new CustomTintPurpleEffect({ weights: [wx, wy, wz] }),
-      [wx, wy, wz]
+      () => new CustomTintPurpleEffect(),
+      []
     );
     return <primitive ref={ref} object={effect} />;
   }
