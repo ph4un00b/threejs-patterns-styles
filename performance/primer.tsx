@@ -17,6 +17,7 @@ import {
   useHelper,
   useTexture,
   TorusKnot,
+  Stats,
 } from "@react-three/drei/core";
 import { proxy, useSnapshot } from "valtio";
 import { useControls } from "leva";
@@ -138,6 +139,8 @@ export default function () {
             </Debug>
           </Physics>
 
+          <Stats showPanel={0} />
+          {/* <Stats showPanel={1} /> */}
           <axesHelper args={[4]} />
           <ambientLight color={ambient} intensity={ambientIntensity} />
           <DirectionalLight
