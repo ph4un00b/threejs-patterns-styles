@@ -82,6 +82,14 @@ export default function () {
     <>
       <section>
         <Canvas
+          /**
+           * Enables PCFsoft shadows. Can accept `gl.shadowMap` 
+           * options for fine-tuning.
+           * @see https://threejs.org/docs/#api/en/renderers/WebGLRenderer.shadowMap
+           *
+           * shadows?: boolean |
+           * Partial<THREE.WebGLShadowMap></THREE.WebGLShadowMap>
+           */
           shadows={true} /** enable shadowMap */
           dpr={[dpr.min, dpr.max]}
           style={{
