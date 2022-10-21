@@ -83,7 +83,7 @@ export default function () {
       <section>
         <Canvas
           /**
-           * Enables PCFsoft shadows. Can accept `gl.shadowMap` 
+           * Enables PCFsoft shadows. Can accept `gl.shadowMap`
            * options for fine-tuning.
            * @see https://threejs.org/docs/#api/en/renderers/WebGLRenderer.shadowMap
            *
@@ -195,6 +195,10 @@ function PPEffects() {
       leverD: { value: 0.5, min: 0.1, step: 0.1, max: 5.0 },
     }));
 
+  /**
+   * you can even optimize with:
+   * @link https://github.com/BinomialLLC/basis_universal
+   */
   const { normal } = useTexture({ normal: "/public/NormalMap.png" });
   return (
     <Selection>
