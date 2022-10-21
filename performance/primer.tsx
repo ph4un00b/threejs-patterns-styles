@@ -612,6 +612,14 @@ function Cubo(props: BoxProps & MeshProps) {
 }
 
 function twistedMaterial(currentShader: T.Material) {
+  /**
+   * try to do computation on the vertex side
+   * since it is lesser vertex
+   * than in fragment side fro perf!
+   * 
+   * then pass the data as varyings!
+   * @param shader 
+   */
   currentShader.onBeforeCompile = function (shader: T.Shader) {
     console.log(shader);
     shader.uniforms.uTime = localUniforms.uTime;
