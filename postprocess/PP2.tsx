@@ -147,11 +147,11 @@ function PPEffects() {
     useControls(() => ({
       pp: {
         options: [
-          "dots",
+          "bloom",
           "glitch",
           "custom",
           "antialias",
-          "bloom",
+          "dots",
           "tint",
           "sin",
           "normal",
