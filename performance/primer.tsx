@@ -281,8 +281,8 @@ function PPEffects() {
     useControls(() => ({
       pp: {
         options: [
-          'bloom',
           'glitch',
+          'bloom',
           'custom',
           'antialias',
           'dots',
