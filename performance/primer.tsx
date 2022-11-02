@@ -1,5 +1,5 @@
-import * as T from "three";
-import * as React from "react";
+import * as T from 'three';
+import * as React from 'react';
 import {
   Canvas,
   LightProps,
@@ -7,7 +7,7 @@ import {
   useFrame,
   useLoader,
   useThree,
-} from "@react-three/fiber";
+} from '@react-three/fiber';
 import {
   OrbitControls,
   PerspectiveCamera,
@@ -18,11 +18,11 @@ import {
   useTexture,
   TorusKnot,
   Stats,
-} from "@react-three/drei/core";
-import { proxy, useSnapshot } from "valtio";
-import { useControls } from "leva";
-import { useSpring, config, a } from "@react-spring/three";
-import { useDrag } from "@use-gesture/react";
+} from '@react-three/drei/core';
+import { proxy, useSnapshot } from 'valtio';
+import { useControls } from 'leva';
+import { useSpring, config, a } from '@react-spring/three';
+import { useDrag } from '@use-gesture/react';
 import {
   Debug,
   Physics,
@@ -34,8 +34,8 @@ import {
   useBox,
   BoxProps,
   CollideEvent,
-} from "@react-three/cannon";
-import nice_colors from "../utils/colors";
+} from '@react-three/cannon';
+import nice_colors from '../utils/colors';
 import {
   EffectComposer,
   DepthOfField,
@@ -47,25 +47,25 @@ import {
   Select,
   Glitch,
   SMAA,
-} from "@react-three/postprocessing";
+} from '@react-three/postprocessing';
 
-import * as PP from "postprocessing";
+import * as PP from 'postprocessing';
 import {
   MyCustomEffect,
   MyCustomTintPurpleEffect,
   MyCustomSinEffect,
   MyCustomNormalEffect,
-} from "../effects/primer";
+} from '../effects/primer';
 
-import { Perf } from "r3f-perf";
-import { mergeBufferGeometries } from "three-stdlib";
+import { Perf } from 'r3f-perf';
+import { mergeBufferGeometries } from 'three-stdlib';
 
 var dpr = { min: 1, max: 2 };
-var baseUrl = "https://ph4un00b.github.io/data";
+var baseUrl = 'https://ph4un00b.github.io/data';
 var global = {
-  bg: "red",
-  fog: "#262837",
-  mat: "#e83abf",
+  bg: 'red',
+  fog: '#262837',
+  mat: '#e83abf',
   font1: `${baseUrl}/typeface/press-start-2p.json`,
 };
 
@@ -79,7 +79,7 @@ export default function () {
   const cam_ = React.useRef(null);
   const { fondo, ambientIntensity, ambient } = useControls({
     ambientIntensity: { value: 0.3, min: 0, max: 1, step: 0.001 },
-    ambient: { value: "#ffffff" },
+    ambient: { value: '#ffffff' },
     fondo: { value: global.fog },
   });
 
@@ -98,8 +98,8 @@ export default function () {
           shadows={true} /** enable shadowMap */
           dpr={[dpr.min, dpr.max]}
           style={{
-            width: cw + "px",
-            height: ch + "px",
+            width: cw + 'px',
+            height: ch + 'px',
             backgroundColor: fondo,
           }}
         >
@@ -125,7 +125,7 @@ export default function () {
              * if your objects are not traveling too fast
              * - NaiveBroadphase
              *  */
-            broadphase={"SAP"}
+            broadphase={'SAP'}
             /** does not update quiet objects */
             allowSleep={true}
           >
@@ -146,7 +146,7 @@ export default function () {
 
               <TorusKnot position={[-4, 2, 0]}>
                 <meshStandardMaterial
-                  color={"white"}
+                  color={'white'}
                   roughness={0.4}
                   metalness={0.3}
                   side={T.DoubleSide}
@@ -162,7 +162,8 @@ export default function () {
 
           <Stats showPanel={0} />
           {/* <Stats showPanel={1} /> */}
-          <Perf />
+          {/* <Perf /> */}
+
           <axesHelper args={[4]} />
           <ambientLight color={ambient} intensity={ambientIntensity} />
           <DirectionalLight
@@ -280,14 +281,14 @@ function PPEffects() {
     useControls(() => ({
       pp: {
         options: [
-          "bloom",
-          "glitch",
-          "custom",
-          "antialias",
-          "dots",
-          "tint",
-          "sin",
-          "normal",
+          'bloom',
+          'glitch',
+          'custom',
+          'antialias',
+          'dots',
+          'tint',
+          'sin',
+          'normal',
         ],
       },
       randomFactors: [1, 1],
@@ -301,30 +302,30 @@ function PPEffects() {
    * you can even optimize with:
    * @link https://github.com/BinomialLLC/basis_universal
    */
-  const { normal } = useTexture({ normal: "/public/NormalMap.png" });
+  const { normal } = useTexture({ normal: '/public/NormalMap.png' });
   return (
     <Selection>
       <EffectComposer>
-        {pp == "dots" ? (
+        {pp == 'dots' ? (
           <DotScreen blendFunction={PP.BlendFunction.NORMAL} />
         ) : (
           <></>
         )}
-        {pp == "glitch" ? (
+        {pp == 'glitch' ? (
           <Glitch active={true} mode={PP.GlitchMode.SPORADIC} />
         ) : (
           <></>
         )}
-        {pp == "custom" ? (
+        {pp == 'custom' ? (
           <MyCustomEffect wx={leverA} wy={leverB} wz={leverC} />
         ) : (
           <></>
         )}
-        {pp == "antialias" ? <SMAA /> : <></>}
-        {pp == "tint" ? <MyCustomTintPurpleEffect /> : <></>}
-        {pp == "sin" ? <MyCustomSinEffect /> : <></>}
-        {pp == "normal" ? <MyCustomNormalEffect normalMap={normal} /> : <></>}
-        {pp == "bloom" ? (
+        {pp == 'antialias' ? <SMAA /> : <></>}
+        {pp == 'tint' ? <MyCustomTintPurpleEffect /> : <></>}
+        {pp == 'sin' ? <MyCustomSinEffect /> : <></>}
+        {pp == 'normal' ? <MyCustomNormalEffect normalMap={normal} /> : <></>}
+        {pp == 'bloom' ? (
           <Bloom
             luminanceThreshold={leverA}
             luminanceSmoothing={leverB}
@@ -381,11 +382,11 @@ function World({ items }: { items: number }) {
   const [preset] = React.useState(Math.floor(Math.random() * 900));
 
   const bouncyMat = {
-    name: "plastic",
+    name: 'plastic',
   } as MaterialOptions;
 
   const groundMat = {
-    name: "concreto",
+    name: 'concreto',
   } as MaterialOptions;
 
   useContactMaterial(groundMat, bouncyMat, {
@@ -441,7 +442,7 @@ function Piso({
     <mesh ref={piso} receiveShadow>
       <planeBufferGeometry args={[16, 16]} />
       <meshStandardMaterial
-        color={"#777777"}
+        color={'#777777'}
         roughness={0.4}
         metalness={0.3}
         side={T.DoubleSide}
@@ -550,7 +551,7 @@ function Cubo(props: BoxProps & MeshProps) {
   });
   const { scale } = useSpring({ scale: active ? 4 : 1 });
   const { rotation } = useSpring({ rotation: active ? Math.PI : 0 });
-  const { colorA } = useSpring({ colorA: active ? "royalblue" : "#e83abf" });
+  const { colorA } = useSpring({ colorA: active ? 'royalblue' : '#e83abf' });
   /** interpolate values from common spring */
   // const { spring } = useSpring({
   //   spring: active,
@@ -635,7 +636,7 @@ function twistedMaterial(currentShader: T.Material) {
     shader.uniforms.uPointer = localUniforms.uPointer;
 
     setBeforeVertex(shader, {
-      from: "#include <common>",
+      from: '#include <common>',
       to: `
         #include <common>
 
@@ -656,7 +657,7 @@ function twistedMaterial(currentShader: T.Material) {
      * @link https://thebookofshaders.com/08/?lan=es
      */
     setInsideVertexMain(shader, {
-      from: "#include <beginnormal_vertex>",
+      from: '#include <beginnormal_vertex>',
       to: `
       #include <beginnormal_vertex>
       #define FAU_NORMAL
@@ -673,7 +674,7 @@ function twistedMaterial(currentShader: T.Material) {
      * @link https://thebookofshaders.com/08/?lan=es
      */
     setInsideVertexMain(shader, {
-      from: "#include <begin_vertex>",
+      from: '#include <begin_vertex>',
       to: `
         #include <begin_vertex>
 
@@ -808,15 +809,15 @@ function useCanvas() {
   return { cw: snap.w, ch: snap.h } as const;
 }
 
-window.addEventListener("resize", () => {
+window.addEventListener('resize', () => {
   CanvasProxy.w = window.innerWidth;
   CanvasProxy.h = window.innerHeight;
 });
 
-window.addEventListener("dblclick", () => {
+window.addEventListener('dblclick', () => {
   // todo: verify on safari!
   if (!document.fullscreenElement) {
-    document.querySelector("canvas")!.requestFullscreen();
+    document.querySelector('canvas')!.requestFullscreen();
   } else {
     document.exitFullscreen();
   }
